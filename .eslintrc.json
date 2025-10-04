@@ -1,0 +1,14 @@
+{
+    "extends": [
+        "eslint:recommended",
+        "plugin:prettier/recommended"
+    ],
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "root": true,
+    "rules": {
+        // ここにプロジェクト固有のESLintルールを追加できます
+    }
+}
