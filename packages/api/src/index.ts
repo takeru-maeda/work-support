@@ -38,9 +38,7 @@ app.use('*', logger());
 
 app.onError(globalErrorHandler);
 
-app.get('/', async (c) => {
-  return c.text('Hello Work Support');
-});
+app.get('/', async (c) => c.text('Hello Work Support'));
 
 app.route('/api/effort', effort);
 app.route('/api/missions', missions);

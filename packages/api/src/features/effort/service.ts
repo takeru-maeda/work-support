@@ -3,6 +3,7 @@ import { ParsedEffort } from './types';
 import { Database } from '../../../../shared/src/types/db';
 import { findOrCreateTask, findProject, insertWorkRecord } from './repository';
 import { Dayjs } from 'dayjs';
+import { AppError } from '../../lib/errors';
 
 export async function saveEffortRecords(
   supabase: SupabaseClient<Database>,
@@ -14,6 +15,9 @@ export async function saveEffortRecords(
   const taskCache: Record<string, number> = {};
 
   const parsedEfforts: ParsedEffort[] = parseEffortText(effortText);
+  if (!parsedEfforts.length) {
+    throw new AppError(400, '工数の値が不正です。登録件数が0件でした。');
+  }
 
   for (const effort of parsedEfforts) {
     const projectId: number = (projectCache[effort.project_name] ??=

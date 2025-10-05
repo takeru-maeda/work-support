@@ -1,6 +1,19 @@
-# Work Support API Documentation
+# API設計
 
-## Endpoints
+## 一覧
+
+| Method | Endpoint | 認証 | 説明 |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/effort` | 固定APIキー | **工数登録**: 外部からのHTTPリクエストを受信し、工数を登録する。 |
+| `GET` | `/api/reports/weekly` | JWT | **週報生成**: 指定された日付 (`?date=YYYY-MM-DD`) が属する週の月曜〜金曜の週報データを生成して返す。 |
+| `GET` | `/api/missions` | JWT | **ミッション取得**: 現在のミッションを取得する。 |
+| `PUT` | `/api/missions` | JWT | **ミッション更新**: ミッションを更新する。 |
+| `GET` | `/api/goals` | JWT | **目標取得**: `end_date`が最も未来日に設定されている期間の目標群を取得する。 |
+| `POST` | `/api/goals` | JWT | **目標作成**: 新しい目標を作成する。 |
+| `PUT` | `/api/goals/:id` | JWT | **目標更新**: 指定したIDの目標を更新する。 |
+| `DELETE`| `/api/goals/:id` | JWT | **目標削除**: 指定したIDの目標を削除する。 |
+
+## エンドポイント詳細
 
 ### POST /api/effort
 
