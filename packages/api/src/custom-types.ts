@@ -1,11 +1,11 @@
-import { User } from '@supabase/supabase-js';
-import { Tables } from '../../shared/src/types/db';
+import { User } from "@supabase/supabase-js";
+import { Tables } from "../../shared/src/schemas/db";
 
 export interface HonoEnv {
   Variables: {
     user?: User; // SupabaseのUser型
     start: number; // 処理開始時間
-    accessLog: Tables<'access_logs'>; // 今のリクエストのアクセスログ
+    accessLog: Tables<"access_logs">; // 今のリクエストのアクセスログ
   };
   Bindings: {
     SUPABASE_URL: string;

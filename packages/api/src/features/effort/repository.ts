@@ -1,8 +1,8 @@
-import { TablesInsert, Database } from '../../../../shared/src/types/db';
-import { AppError } from '../../lib/errors';
-import { SupabaseClient } from '@supabase/supabase-js';
-import { ParsedEffort } from './types';
-import { Dayjs } from 'dayjs';
+import { TablesInsert, Database } from "../../../../shared/src/schemas/db";
+import { AppError } from "../../lib/errors";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { ParsedEffort } from "./types";
+import { Dayjs } from "dayjs";
 
 export async function findProject(
   supabase: SupabaseClient<Database>,
@@ -10,10 +10,10 @@ export async function findProject(
   effort: ParsedEffort,
 ): Promise<number> {
   const { data: pj, error } = await supabase
-    .from('projects')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('name', effort.project_name)
+    .from("projects")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("name", effort.project_name)
     .maybeSingle();
 
   if (error) {
@@ -22,12 +22,12 @@ export async function findProject(
 
   if (!pj) {
     const { data: newPj, error: insertError } = await supabase
-      .from('projects')
+      .from("projects")
       .insert({
         user_id: userId,
         name: effort.project_name,
       })
-      .select('id')
+      .select("id")
       .single();
 
     if (insertError) {
@@ -46,10 +46,10 @@ export async function findOrCreateTask(
   taskName: string,
 ): Promise<number> {
   let { data: task, error } = await supabase
-    .from('tasks')
-    .select('id')
-    .eq('project_id', projectId)
-    .eq('name', taskName)
+    .from("tasks")
+    .select("id")
+    .eq("project_id", projectId)
+    .eq("name", taskName)
     .maybeSingle();
 
   if (error) {
@@ -58,12 +58,12 @@ export async function findOrCreateTask(
 
   if (!task) {
     const { data: newTask, error: insertError } = await supabase
-      .from('tasks')
+      .from("tasks")
       .insert({
         project_id: projectId,
         name: taskName,
       })
-      .select('id')
+      .select("id")
       .single();
 
     if (insertError) {
@@ -83,7 +83,7 @@ export async function insertWorkRecord(
   workDate: Date | Dayjs,
   effort: ParsedEffort,
 ): Promise<void> {
-  const workRecord: TablesInsert<'work_records'> = {
+  const workRecord: TablesInsert<"work_records"> = {
     user_id: userId,
     task_id: taskId,
     work_date: workDate.toISOString(),
@@ -91,7 +91,7 @@ export async function insertWorkRecord(
     estimated_hours: effort.estimated_hours,
   };
 
-  const { error } = await supabase.from('work_records').insert(workRecord);
+  const { error } = await supabase.from("work_records").insert(workRecord);
 
   if (error) {
     const message = `Failed to save work record* ${error.message}`;

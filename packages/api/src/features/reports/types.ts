@@ -1,18 +1,11 @@
-import { z } from 'zod';
-import { Tables } from '../../../../shared/src/types/db';
+import { Tables } from "shared";
 
-export const WeeklyReportQuerySchema = z.object({
-  date: z.iso.date(),
-});
-
-export const WeeklyReportResponseSchema = z.object({
-  mission: z.string().nullable(),
-  weeklyReport: z.string(),
-});
-
-export type WeeklyReportQuery = z.infer<typeof WeeklyReportQuerySchema>;
-
-export type WeeklyReportResponse = z.infer<typeof WeeklyReportResponseSchema>;
+export {
+  WeeklyReportQuery,
+  WeeklyReportQuerySchema,
+  WeeklyReportResponse,
+  WeeklyReportResponseSchema,
+} from "../../../../shared/src/schemas/reports";
 
 export interface Effort {
   work_date: string;
@@ -25,7 +18,7 @@ export interface Effort {
   };
 }
 
-export interface GoalWithProgressDiff extends Tables<'goals'> {
+export interface GoalWithProgressDiff extends Tables<"goals"> {
   progressDiff: number;
 }
 

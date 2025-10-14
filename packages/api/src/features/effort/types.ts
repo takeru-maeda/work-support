@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const EffortRequestSchema = z.object({
   date: z.iso.date(),

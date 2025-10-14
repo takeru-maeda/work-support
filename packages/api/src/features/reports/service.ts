@@ -1,19 +1,19 @@
-import { SupabaseClient } from '@supabase/supabase-js';
-import { Database, Tables } from '../../../../shared/src/types/db';
+import { SupabaseClient } from "@supabase/supabase-js";
+import { Database, Tables } from "../../../../shared/src/schemas/db";
 import {
   getGoalsForReport,
   getGoalProgressHistories,
   getMissionForReport,
   getWorkRecordsForReport,
-} from './repository';
-import dayjs, { Dayjs } from 'dayjs';
+} from "./repository";
+import dayjs, { Dayjs } from "dayjs";
 import {
   Effort,
   GoalSummary,
   GoalWithProgressDiff,
   WeeklyReportData,
   WeeklyReportResponse,
-} from './types';
+} from "./types";
 
 /**
  * 週報の雛形を生成します
@@ -57,7 +57,7 @@ const getWeeklyReportData = async (
   targetDate: Date,
 ): Promise<WeeklyReportData> => {
   const { startDate, endDate } = getWeekRange(targetDate);
-  const sunday: Date = dayjs(startDate).add(6, 'day').toDate();
+  const sunday: Date = dayjs(startDate).add(6, "day").toDate();
 
   const [mission, workRecords, goals] = await Promise.all([
     getMissionForReport(supabase, userId),
@@ -65,7 +65,7 @@ const getWeeklyReportData = async (
     getGoalsForReport(supabase, userId, startDate, endDate),
   ]);
 
-  const startOfWeekGoals: Tables<'goals'>[] = await getStartOfWeekGoals(
+  const startOfWeekGoals: Tables<"goals">[] = await getStartOfWeekGoals(
     supabase,
     goals,
     startDate,
@@ -78,7 +78,7 @@ const getWeeklyReportData = async (
   );
 
   const goalsWithDiff: GoalWithProgressDiff[] = goals.map((goal) => {
-    const startGoal: Tables<'goals'> | undefined = startOfWeekGoals.find(
+    const startGoal: Tables<"goals"> | undefined = startOfWeekGoals.find(
       (g) => g.id === goal.id,
     );
     const progressDiff: number = goal.progress - (startGoal?.progress ?? 0);
@@ -127,16 +127,16 @@ function getWeekRange(date: Date): { startDate: Date; endDate: Date } {
  */
 async function getStartOfWeekGoals(
   supabase: SupabaseClient<Database>,
-  goals: Tables<'goals'>[],
+  goals: Tables<"goals">[],
   startDate: Date,
   sunday: Date,
-): Promise<Tables<'goals'>[]> {
+): Promise<Tables<"goals">[]> {
   const goalIds: number[] = goals.map((g) => g.id);
-  const histories: Tables<'goal_progress_histories'>[] =
+  const histories: Tables<"goal_progress_histories">[] =
     await getGoalProgressHistories(supabase, goalIds, sunday);
 
   return goals.map((goal) => {
-    const beforeHistories: Tables<'goal_progress_histories'>[] = histories
+    const beforeHistories: Tables<"goal_progress_histories">[] = histories
       .filter(
         (h) =>
           h.goal_id === goal.id &&
@@ -157,8 +157,8 @@ async function getStartOfWeekGoals(
  * @returns 目標進捗サマリー
  */
 function calculateGoalSummary(
-  endOfWeekGoals: Tables<'goals'>[],
-  startOfWeekGoals: Tables<'goals'>[],
+  endOfWeekGoals: Tables<"goals">[],
+  startOfWeekGoals: Tables<"goals">[],
 ): GoalSummary | null {
   if (!endOfWeekGoals || endOfWeekGoals.length === 0) return null;
 
@@ -203,7 +203,7 @@ function calculateGoalSummary(
  * @param goals 目標
  * @returns ウェイトを加算しない進捗率と加重進捗率
  */
-function calculateWeightedSummary(goals: Tables<'goals'>[]): {
+function calculateWeightedSummary(goals: Tables<"goals">[]): {
   simpleAverageProgress: number;
   weightedAchievementRate: number;
 } | null {
@@ -241,8 +241,8 @@ function calculateExpectedProgress(dayRange: {
   const startDate: Dayjs = dayjs(dayRange.startDate);
   const endDate: Dayjs = dayjs(dayRange.endDate);
 
-  const totalDuration: number = Math.max(1, endDate.diff(startDate, 'day'));
-  const elapsedDuration: number = Math.max(0, dayjs().diff(startDate, 'day'));
+  const totalDuration: number = Math.max(1, endDate.diff(startDate, "day"));
+  const elapsedDuration: number = Math.max(0, dayjs().diff(startDate, "day"));
 
   return Math.min(100, (elapsedDuration / totalDuration) * 100);
 }
@@ -273,7 +273,7 @@ const formatWeeklyReport = (
   reportSections.push(learnStatus);
   if (goalStatus) reportSections.push(goalStatus);
 
-  return reportSections.join('\n\n\n');
+  return reportSections.join("\n\n\n");
 };
 
 /**
@@ -300,24 +300,24 @@ const formatDailyWorkStatus = (
   let totalHours = 0;
 
   for (const record of workRecords) {
-    const date: string = dayjs(record.work_date).format('YYYY-MM-DD');
+    const date: string = dayjs(record.work_date).format("YYYY-MM-DD");
     dailyHours[date] = (dailyHours[date] || 0) + record.hours;
     totalHours += record.hours;
   }
 
-  const weekDays = ['日', '月', '火', '水', '木', '金', '土'];
-  let dailyStatus = '<日別業務状況>\n';
+  const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
+  let dailyStatus = "<日別業務状況>\n";
   let workDayCount = 0;
 
   for (let i = 0; i < 5; i++) {
-    const currentDate = dayjs(startDate).add(i, 'day');
-    const dateKey = currentDate.format('YYYY-MM-DD');
+    const currentDate = dayjs(startDate).add(i, "day");
+    const dateKey = currentDate.format("YYYY-MM-DD");
     const dayOfWeek = weekDays[currentDate.day()];
     const hours = dailyHours[dateKey] || 0;
     if (hours > 0) {
       workDayCount++;
     }
-    dailyStatus += `${currentDate.format('MM/DD')}(${dayOfWeek})：在宅 ${hours}h\n`;
+    dailyStatus += `${currentDate.format("MM/DD")}(${dayOfWeek})：在宅 ${hours}h\n`;
   }
 
   const averageHours: number = workDayCount > 0 ? totalHours / workDayCount : 0;
@@ -345,7 +345,7 @@ const formatDailyWorkStatus = (
  * @returns 案件別業務状況
  */
 const formatProjectWorkStatus = (workRecords: Effort[]): string => {
-  if (workRecords.length === 0) return '';
+  if (workRecords.length === 0) return "";
 
   const projectTasks: {
     [project: string]: {
@@ -365,7 +365,7 @@ const formatProjectWorkStatus = (workRecords: Effort[]): string => {
       (projectTasks[projectName].tasks[taskName] || 0) + record.hours;
   }
 
-  let projectStatus = '<案件別業務状況>\n';
+  let projectStatus = "<案件別業務状況>\n";
   const projectNames: string[] = Object.keys(projectTasks).sort((a, b) =>
     a.localeCompare(b),
   );
@@ -380,7 +380,7 @@ const formatProjectWorkStatus = (workRecords: Effort[]): string => {
       const taskHours = projectData.tasks[taskName];
       projectStatus += `>・${taskName}：${formatNumber(taskHours, 2)}h\n`;
     }
-    projectStatus += '\n';
+    projectStatus += "\n";
   }
 
   return projectStatus.trim();
@@ -396,9 +396,9 @@ const formatProjectWorkStatus = (workRecords: Effort[]): string => {
  * @returns 学習状況のフォーマット
  */
 const getLearnStatusFormat = (): string => {
-  let learnStatus = '<学習状況(Udemy)>\n';
-  learnStatus += '■\n';
-  learnStatus += '>進捗率：% (+%)';
+  let learnStatus = "<学習状況(Udemy)>\n";
+  learnStatus += "■\n";
+  learnStatus += ">進捗率：% (+%)";
   return learnStatus;
 };
 
@@ -431,29 +431,29 @@ const formatGoalStatus = (
   goals: GoalWithProgressDiff[],
   goalSummary: GoalSummary | null,
 ): string => {
-  let goalStatus = '<目標進捗状況>\n';
+  let goalStatus = "<目標進捗状況>\n";
 
   if (!goalSummary || goals.length === 0) {
-    goalStatus += '検討中';
+    goalStatus += "検討中";
     return goalStatus.trim();
   }
 
   const isCompleted = goalSummary.simpleAverageProgress === 100;
 
-  goalStatus += '=============================\n';
-  goalStatus += `全体${isCompleted ? '【達成】' : ''}\n`;
+  goalStatus += "=============================\n";
+  goalStatus += `全体${isCompleted ? "【達成】" : ""}\n`;
   goalStatus += `>進捗率：${formatNumber(goalSummary.simpleAverageProgress)}%${getDiffFormat(goalSummary.simpleAverageProgressDiff)}\n`;
   goalStatus += `>加重達成率：${formatNumber(goalSummary.weightedAchievementRate)}%${getDiffFormat(goalSummary.weightedAchievementRateDiff)}\n`;
   goalStatus += `>期待値：${formatNumber(goalSummary.expectedValue)}%${getUpDownFormat(goalSummary.differenceFromExpected)}\n`;
-  goalStatus += '=============================\n\n';
+  goalStatus += "=============================\n\n";
 
   for (const goal of goals.toSorted((a, b) => b.weight - a.weight)) {
     goalStatus += `■${goal.title}[${goal.weight}]\n`;
     goalStatus += `>進捗率：${goal.progress}%${getDiffFormat(goal.progressDiff)}`;
     if (goal.progress === 100) {
-      goalStatus += '【達成】';
+      goalStatus += "【達成】";
     }
-    goalStatus += '\n\n';
+    goalStatus += "\n\n";
   }
 
   return goalStatus.trim();
@@ -469,7 +469,7 @@ const getDiffFormat = (diff: number): string => {
   if (diff > 0) {
     return `(+${formatNumber(diff)}%)`;
   }
-  return '';
+  return "";
 };
 
 /**

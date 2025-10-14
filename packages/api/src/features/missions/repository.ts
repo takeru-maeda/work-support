@@ -1,19 +1,19 @@
-import { SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from "@supabase/supabase-js";
 import {
   Database,
   Tables,
   TablesInsert,
-} from '../../../../shared/src/types/db';
-import { AppError } from '../../lib/errors';
+} from "../../../../shared/src/schemas/db";
+import { AppError } from "../../lib/errors";
 
 export const getMission = async (
   supabase: SupabaseClient<Database>,
   userId: string,
-): Promise<Tables<'missions'> | null> => {
+): Promise<Tables<"missions"> | null> => {
   const { data, error } = await supabase
-    .from('missions')
-    .select('*')
-    .eq('user_id', userId)
+    .from("missions")
+    .select("*")
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (error) {
@@ -26,17 +26,17 @@ export const upsertMission = async (
   supabase: SupabaseClient<Database>,
   userId: string,
   content: string,
-): Promise<Tables<'missions'>> => {
-  const body: TablesInsert<'missions'> = {
+): Promise<Tables<"missions">> => {
+  const body: TablesInsert<"missions"> = {
     user_id: userId,
     content: content,
     updated_at: new Date().toISOString(),
   };
   const { data: updated, error: updateError } = await supabase
-    .from('missions')
+    .from("missions")
     .update(body)
-    .eq('user_id', userId)
-    .select('*')
+    .eq("user_id", userId)
+    .select("*")
     .maybeSingle();
 
   if (updateError) {
@@ -47,9 +47,9 @@ export const upsertMission = async (
   if (updated) return updated;
 
   const { data: inserted, error: insertError } = await supabase
-    .from('missions')
+    .from("missions")
     .insert(body)
-    .select('*')
+    .select("*")
     .single();
 
   if (insertError) {

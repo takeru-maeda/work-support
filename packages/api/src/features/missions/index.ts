@@ -1,33 +1,33 @@
-import { Hono } from 'hono';
-import { SupabaseClient, User } from '@supabase/supabase-js';
+import { Hono } from "hono";
+import { SupabaseClient, User } from "@supabase/supabase-js";
 
-import { HonoEnv } from '../../custom-types';
-import { jwtAuthMiddleware } from '../../middleware/auth';
-import { createSupabaseClient } from '../../lib/supabase';
-import { getMissionService, upsertMissionService } from './service';
+import { HonoEnv } from "../../custom-types";
+import { jwtAuthMiddleware } from "../../middleware/auth";
+import { createSupabaseClient } from "../../lib/supabase";
+import { getMissionService, upsertMissionService } from "./service";
 import {
   GetMissionResponseSchema,
   MissionUpdateRequest,
   UpdateMissionRequestSchema,
   UpdateMissionResponseSchema,
-} from './types';
-import { AppError } from '../../lib/errors';
-import { Database, Tables } from '../../../../shared/src/types/db';
-import { describeRoute, resolver, validator } from 'hono-openapi';
+} from "./types";
+import { AppError } from "../../lib/errors";
+import { Database, Tables } from "../../../../shared/src/schemas/db";
+import { describeRoute, resolver, validator } from "hono-openapi";
 
 const missions = new Hono<HonoEnv>();
 
-missions.use('*', jwtAuthMiddleware);
+missions.use("*", jwtAuthMiddleware);
 
 missions.get(
-  '/',
+  "/",
   describeRoute({
-    description: 'ミッションを取得します',
+    description: "ミッションを取得します",
     responses: {
       200: {
-        description: 'Mission data fetch successfully',
+        description: "Mission data fetch successfully",
         content: {
-          'application/json': {
+          "application/json": {
             schema: resolver(GetMissionResponseSchema),
           },
         },
@@ -35,12 +35,12 @@ missions.get(
     },
   }),
   async (c) => {
-    const user: User | undefined = c.get('user');
-    if (!user) throw new AppError(401, 'Unauthorized');
+    const user: User | undefined = c.get("user");
+    if (!user) throw new AppError(401, "Unauthorized");
 
     const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
 
-    const mission: Tables<'missions'> | null = await getMissionService(
+    const mission: Tables<"missions"> | null = await getMissionService(
       supabase,
       user.id,
     );
@@ -49,29 +49,29 @@ missions.get(
 );
 
 missions.put(
-  '/',
+  "/",
   describeRoute({
-    description: 'ミッションを更新します',
+    description: "ミッションを更新します",
     responses: {
       200: {
-        description: 'Mission data update successfully',
+        description: "Mission data update successfully",
         content: {
-          'application/json': {
+          "application/json": {
             schema: resolver(UpdateMissionResponseSchema),
           },
         },
       },
     },
   }),
-  validator('json', UpdateMissionRequestSchema),
+  validator("json", UpdateMissionRequestSchema),
   async (c) => {
-    const user: User | undefined = c.get('user');
-    if (!user) throw new AppError(401, 'Unauthorized');
+    const user: User | undefined = c.get("user");
+    if (!user) throw new AppError(401, "Unauthorized");
 
-    const param: MissionUpdateRequest = c.req.valid('json');
+    const param: MissionUpdateRequest = c.req.valid("json");
     const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
 
-    const updatedMission: Tables<'missions'> = await upsertMissionService(
+    const updatedMission: Tables<"missions"> = await upsertMissionService(
       supabase,
       user.id,
       param.content,

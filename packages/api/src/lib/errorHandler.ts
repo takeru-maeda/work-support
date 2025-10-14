@@ -1,20 +1,20 @@
-import { Context } from 'hono';
-import { AppError } from './errors';
-import { Database, Tables, TablesInsert } from '../../../shared/src/types/db';
-import { HonoEnv } from '../custom-types';
-import { ContentfulStatusCode } from 'hono/utils/http-status';
-import { createSupabaseClient } from './supabase';
-import { SupabaseClient } from '@supabase/supabase-js';
-import { updateAccessLog } from '../middleware/logger';
+import { Context } from "hono";
+import { AppError } from "./errors";
+import { Database, Tables, TablesInsert } from "../../../shared/src/schemas/db";
+import { HonoEnv } from "../custom-types";
+import { ContentfulStatusCode } from "hono/utils/http-status";
+import { createSupabaseClient } from "./supabase";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { updateAccessLog } from "../middleware/logger";
 
 export const globalErrorHandler = async (err: Error, c: Context<HonoEnv>) => {
-  const accessLog: Tables<'access_logs'> = c.get('accessLog');
+  const accessLog: Tables<"access_logs"> = c.get("accessLog");
   const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
 
   let statusCode: ContentfulStatusCode = 500;
-  let message: string = 'Internal Server Error';
+  let message: string = "Internal Server Error";
   let dbMessage: string = message;
-  let logLevel: 'ERROR' | 'CRITICAL' = 'ERROR';
+  let logLevel: "ERROR" | "CRITICAL" = "ERROR";
 
   if (err instanceof AppError) {
     statusCode = err.statusCode;
@@ -23,7 +23,7 @@ export const globalErrorHandler = async (err: Error, c: Context<HonoEnv>) => {
     dbMessage = err.internalError ? err.internalError.message : message;
   }
 
-  const errorLog: TablesInsert<'error_logs'> = {
+  const errorLog: TablesInsert<"error_logs"> = {
     access_log_id: accessLog.id,
     level: logLevel,
     message: dbMessage,
@@ -31,7 +31,7 @@ export const globalErrorHandler = async (err: Error, c: Context<HonoEnv>) => {
   };
 
   const handleErrorOnBackground: Promise<void> = (async () => {
-    await supabase.from('error_logs').insert(errorLog);
+    await supabase.from("error_logs").insert(errorLog);
     await updateAccessLog(c);
   })();
 
