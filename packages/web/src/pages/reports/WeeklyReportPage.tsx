@@ -1,5 +1,5 @@
-import { MissionEditor } from "@/features/mission/components/MissionEditor";
-import { WeeklyReport } from "@/features/reports/components/WeeklyReport";
+import { MissionEditor } from "@/features/reports/components/mission/MissionEditor";
+import { WeeklyReport } from "@/features/reports/components/weekly-report";
 import { PageLayout } from "@/components/layout/PageLayout";
 
 export default function WeeklyReportPage() {

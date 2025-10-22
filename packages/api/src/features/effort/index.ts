@@ -10,7 +10,7 @@ import { HonoEnv } from "../../custom-types";
 import { SupabaseClient, User } from "@supabase/supabase-js";
 import { createSupabaseClient } from "../../lib/supabase";
 import { AppError } from "../../lib/errors";
-import { Database } from "../../../../shared/src/schemas/db";
+import { Database } from "../../../../shared/src/types/db";
 import { saveEffortRecords } from "./service";
 import { describeRoute, resolver, validator } from "hono-openapi";
 

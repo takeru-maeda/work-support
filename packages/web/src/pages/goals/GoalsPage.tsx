@@ -1,6 +1,6 @@
 import { PageLayout } from "@/components/layout/PageLayout";
-import { GoalsTable } from "@/features/goals/components/GoalsTable";
-import { PastGoalsTable } from "@/features/goals/components/PastGoalsTable";
+import { GoalsTable } from "@/features/goals/components/current";
+import { PastGoalsTable } from "@/features/goals/components/past";
 
 export default function GoalsPage() {
   return (

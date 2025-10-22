@@ -1,5 +1,5 @@
 import { User } from "@supabase/supabase-js";
-import { Tables } from "../../shared/src/schemas/db";
+import { Tables } from "../../shared/src/types/db";
 
 export interface HonoEnv {
   Variables: {

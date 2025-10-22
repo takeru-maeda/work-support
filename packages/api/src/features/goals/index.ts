@@ -14,7 +14,7 @@ import {
   UpdateGoalRequestSchema,
 } from "./types";
 import { AppError } from "../../lib/errors";
-import { Tables } from "../../../../shared/src/schemas/db";
+import { Tables } from "../../../../shared/src/types/db";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import {
   createGoalService,

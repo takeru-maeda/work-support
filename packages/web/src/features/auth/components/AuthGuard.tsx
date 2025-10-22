@@ -49,13 +49,8 @@ export function AuthGuard({ children }: Readonly<AuthGuardProps>) {
     };
   }, [clearUser, navigate, setUser]);
 
-  if (checking) {
-    return <LoadingSkeleton />;
-  }
-
-  if (!user) {
-    return null;
-  }
+  if (checking) return <LoadingSkeleton />;
+  if (!user) return null;
 
   return <>{children}</>;
 }

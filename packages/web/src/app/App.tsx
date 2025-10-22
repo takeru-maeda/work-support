@@ -1,10 +1,11 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { Toaster } from "sonner";
 
 import { ThemeProvider } from "@/app/providers/ThemeProvider";
-import { Toaster } from "@/components/ui/toaster";
-import { ROUTES } from "@/config/routes";
 import { AuthenticatedLayout } from "@/components/layout/AuthenticatedLayout";
+import { ROUTES } from "@/config/routes";
 import LoginPage from "@/pages/auth/LoginPage";
+import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 import SignupPage from "@/pages/auth/SignupPage";
 import EffortPage from "@/pages/effort/EffortPage";
 import AddGoalsPage from "@/pages/goals/AddGoalsPage";
@@ -12,13 +13,16 @@ import GoalsPage from "@/pages/goals/GoalsPage";
 import HomePage from "@/pages/home/HomePage";
 import ProfilePage from "@/pages/profile/ProfilePage";
 import WeeklyReportPage from "@/pages/reports/WeeklyReportPage";
-import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
+import { useThemeStore, type Theme } from "@/store/theme";
 
 function App() {
+  const theme: Theme = useThemeStore((s) => s.theme);
+
   return (
     <ThemeProvider defaultTheme="light">
       <div className="min-h-screen bg-background text-foreground">
         <div className="pt-16">
+          <Toaster position="top-center" theme={theme} />
           <Routes>
             <Route element={<AuthenticatedLayout />}>
               <Route path={ROUTES.home} element={<HomePage />} />
@@ -37,9 +41,9 @@ function App() {
               path={ROUTES.resetPassword}
               element={<ResetPasswordPage />}
             />
+            <Route path="*" element={<Navigate to={ROUTES.home} replace />} />
           </Routes>
         </div>
-        <Toaster />
       </div>
     </ThemeProvider>
   );

@@ -4,7 +4,7 @@ import {
   Tables,
   TablesInsert,
   TablesUpdate,
-} from "../../../../shared/src/schemas/db";
+} from "../../../../shared/src/types/db";
 import { GoalCreateRequest, GoalUpdateRequest } from "./types";
 import { AppError } from "../../lib/errors";
 

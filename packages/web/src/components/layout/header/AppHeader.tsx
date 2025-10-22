@@ -4,15 +4,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { ROUTES } from "@/config/routes";
 import { AppHeaderHomeLink } from "@/components/layout/header/AppHeaderHomeLink";
-import {
-  AppHeaderUserMenu,
-  type UserProfile,
-} from "@/components/layout/header/AppHeaderUserMenu";
+import { AppHeaderUserMenu } from "@/components/layout/header/AppHeaderUserMenu";
 import { AppHeaderDesktopNav } from "@/components/layout/header/AppHeaderDesktopNav";
 import { AppHeaderMobileNav } from "@/components/layout/header/AppHeaderMobileNav";
 import type { AppHeaderNavLink } from "@/types/navigation";
-import { logout, type AuthUser } from "@/lib/auth";
+import { logout, type AuthUser, type LogoutResult } from "@/lib/auth";
 import { useUserStore } from "@/store/user";
+import type { UserProfile } from "@/types/userProfile";
 
 const navLinks: AppHeaderNavLink[] = [
   { href: ROUTES.home, label: "ホーム" },
@@ -34,7 +32,7 @@ export function AppHeader() {
   };
 
   const handleLogout = async () => {
-    const result = await logout();
+    const result: LogoutResult = await logout();
 
     if (result.success) {
       clearUser();

@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Database, Tables } from "../../../../shared/src/schemas/db";
+import { Database, Tables } from "../../../../shared/src/types/db";
 import { AppError } from "../../lib/errors";
 import { Effort } from "./types";
 

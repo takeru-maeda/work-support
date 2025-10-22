@@ -1,6 +1,6 @@
 import { Context } from "hono";
 import { AppError } from "./errors";
-import { Database, Tables, TablesInsert } from "../../../shared/src/schemas/db";
+import { Database, Tables, TablesInsert } from "../../../shared/src/types/db";
 import { HonoEnv } from "../custom-types";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 import { createSupabaseClient } from "./supabase";
@@ -28,6 +28,7 @@ export const globalErrorHandler = async (err: Error, c: Context<HonoEnv>) => {
     level: logLevel,
     message: dbMessage,
     stack_trace: err.stack,
+    source: c.req.path === "/api/logs/error" ? "UI" : "API",
   };
 
   const handleErrorOnBackground: Promise<void> = (async () => {

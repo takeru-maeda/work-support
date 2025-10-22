@@ -3,6 +3,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import prettierConfig from 'eslint-config-prettier'; // Prettier連携用
 import { defineConfig, globalIgnores } from 'eslint/config';
+import eslintPluginImport from 'eslint-plugin-import';
 
 export default defineConfig([
   // モノレポ全体の無視設定
@@ -24,14 +25,46 @@ export default defineConfig([
       },
       parser: tseslint.parser,
       parserOptions: {
-        project: true, // tsconfig.jsonを自動で探索
+        project: [
+          './tsconfig.base.json',
+          './packages/api/tsconfig.json',
+          './packages/web/tsconfig.json',
+        ],
       },
     },
     rules: {
       'prettier/prettier': 'error', // PrettierのルールをESLintエラーとして報告
+      'import/order': [
+        'error',
+        {
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            'parent',
+            'sibling',
+            'index',
+            'object',
+            'type',
+          ],
+          pathGroups: [
+            {
+              pattern: '@/**',
+              group: 'internal',
+            },
+          ],
+          pathGroupsExcludedImportTypes: ['builtin', 'external'],
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: true,
+          },
+          'newlines-between': 'always',
+        },
+      ],
     },
     plugins: {
       prettier: (await import('eslint-plugin-prettier')).default,
+      import: eslintPluginImport,
     },
   },
 

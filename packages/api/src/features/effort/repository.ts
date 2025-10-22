@@ -1,4 +1,4 @@
-import { TablesInsert, Database } from "../../../../shared/src/schemas/db";
+import { TablesInsert, Database } from "../../../../shared/src/types/db";
 import { AppError } from "../../lib/errors";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { ParsedEffort } from "./types";

@@ -1,4 +1,8 @@
-import type { User as SupabaseUser, UserMetadata } from "@supabase/supabase-js";
+import type {
+  Session,
+  User as SupabaseUser,
+  UserMetadata,
+} from "@supabase/supabase-js";
 
 import { ROUTES } from "@/config/routes";
 import { supabase } from "@/lib/supabase";
@@ -11,6 +15,13 @@ export interface AuthUser {
 }
 
 export interface AuthResult {
+  success: boolean;
+  user: AuthUser | null;
+  session: Session | null;
+  error?: string;
+}
+
+export interface UserUpdateResult {
   success: boolean;
   user: AuthUser | null;
   error?: string;
@@ -31,6 +42,14 @@ export interface UpdateProfileParams {
   avatarUrl?: string;
 }
 
+/**
+ * ユーザーを新規登録します。
+ *
+ * @param name 登録するユーザー名
+ * @param email 登録するメールアドレス
+ * @param password 設定するパスワード
+ * @returns 認証結果
+ */
 export async function signup(
   name: string,
   email: string,
@@ -50,13 +69,21 @@ export async function signup(
     return {
       success: false,
       user: null,
+      session: null,
       error: error.message,
     };
   }
 
-  return { success: true, user: toAuthUser(data.user) };
+  return { success: true, user: toAuthUser(data.user), session: data.session };
 }
 
+/**
+ * メールアドレスでログインします。
+ *
+ * @param email ログインするメールアドレス
+ * @param password ログインに使用するパスワード
+ * @returns 認証結果
+ */
 export async function login(
   email: string,
   password: string,
@@ -70,13 +97,19 @@ export async function login(
     return {
       success: false,
       user: null,
+      session: null,
       error: error.message,
     };
   }
 
-  return { success: true, user: toAuthUser(data.user) };
+  return { success: true, user: toAuthUser(data.user), session: data.session };
 }
 
+/**
+ * 現在のセッションを終了します。
+ *
+ * @returns ログアウト結果
+ */
 export async function logout(): Promise<LogoutResult> {
   const { error } = await supabase.auth.signOut();
 
@@ -90,21 +123,38 @@ export async function logout(): Promise<LogoutResult> {
   return { success: true };
 }
 
+/**
+ * 現在のユーザー情報を取得します。
+ *
+ * @returns 認証済みユーザー
+ */
 export async function getCurrentUser(): Promise<AuthUser | null> {
   const { data, error } = await supabase.auth.getUser();
+
   if (error) return null;
 
   return toAuthUser(data.user);
 }
 
+/**
+ * 認証状態を確認します。
+ *
+ * @returns 認証済みであれば true
+ */
 export async function isAuthenticated(): Promise<boolean> {
   const { data } = await supabase.auth.getSession();
   return Boolean(data.session);
 }
 
+/**
+ * プロフィール情報を更新します。
+ *
+ * @param updates 更新する項目
+ * @returns 更新結果
+ */
 export async function updateProfile(
   updates: UpdateProfileParams,
-): Promise<AuthResult> {
+): Promise<UserUpdateResult> {
   const payload: Record<string, string> = {};
 
   if (typeof updates.name === "string") {
@@ -135,17 +185,24 @@ export async function updateProfile(
   return { success: true, user: toAuthUser(data.user) };
 }
 
-export async function requestPasswordReset(email: string): Promise<BasicResult> {
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const redirectTo = origin ? `${origin}${ROUTES.resetPassword}` : undefined;
+/**
+ * パスワードリセットメールを送信します。
+ *
+ * @param email 送信先メールアドレス
+ * @returns 実行結果
+ */
+export async function requestPasswordReset(
+  email: string,
+): Promise<BasicResult> {
+  const origin: string =
+    typeof window !== "undefined" ? window.location.origin : "";
+  const redirectTo: string | undefined = origin
+    ? `${origin}${ROUTES.resetPassword}`
+    : undefined;
 
   const { error } = await supabase.auth.resetPasswordForEmail(
     email,
-    redirectTo
-      ? {
-          redirectTo,
-        }
-      : undefined,
+    redirectTo ? { redirectTo } : undefined,
   );
 
   if (error) {
@@ -155,7 +212,15 @@ export async function requestPasswordReset(email: string): Promise<BasicResult> 
   return { success: true };
 }
 
-export async function updatePassword(password: string): Promise<AuthResult> {
+/**
+ * パスワードを更新します。
+ *
+ * @param password 新しいパスワード
+ * @returns 更新結果
+ */
+export async function updatePassword(
+  password: string,
+): Promise<UserUpdateResult> {
   const { data, error } = await supabase.auth.updateUser({ password });
 
   if (error) {
@@ -172,6 +237,23 @@ export async function updatePassword(password: string): Promise<AuthResult> {
   };
 }
 
+export async function getAccessToken(): Promise<string | null> {
+  const { data, error } = await supabase.auth.getSession();
+
+  if (error) {
+    console.error("Failed to retrieve session", error);
+    return null;
+  }
+
+  return data.session?.access_token ?? null;
+}
+
+/**
+ * Supabase のユーザーデータをアプリ用の形に変換します。
+ *
+ * @param user Supabase のユーザー情報
+ * @returns 変換後のユーザー情報
+ */
 function toAuthUser(user: SupabaseUser | null): AuthUser | null {
   if (!user) return null;
 

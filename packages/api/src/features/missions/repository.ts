@@ -3,7 +3,7 @@ import {
   Database,
   Tables,
   TablesInsert,
-} from "../../../../shared/src/schemas/db";
+} from "../../../../shared/src/types/db";
 import { AppError } from "../../lib/errors";
 
 export const getMission = async (

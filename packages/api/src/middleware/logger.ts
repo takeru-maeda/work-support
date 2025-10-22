@@ -4,7 +4,7 @@ import {
   Tables,
   TablesInsert,
   TablesUpdate,
-} from "../../../shared/src/schemas/db";
+} from "../../../shared/src/types/db";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseClient } from "../lib/supabase";
 import { Context } from "hono";

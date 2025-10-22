@@ -5,7 +5,7 @@ import z from "zod";
 import { AuthError, SupabaseClient, User } from "@supabase/supabase-js";
 import { HonoEnv } from "../custom-types";
 import { AppError } from "../lib/errors";
-import { Database } from "../../../shared/src/schemas/db";
+import { Database } from "../../../shared/src/types/db";
 
 export const jwtAuthMiddleware = createMiddleware(async (c, next) => {
   const authHeader: string | undefined = c.req.header("Authorization");

@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ROUTES } from "@/config/routes";
 import { signup } from "@/lib/auth";
-import { AuthPageContainer } from "./components/AuthPageContainer";
-import { AuthBrand } from "./components/AuthBrand";
+import { AuthBrand } from "@/features/auth/components/AuthBrand";
+import { AuthErrorAlert } from "@/features/auth/components/AuthErrorAlert";
+import { AuthPageContainer } from "@/features/auth/components/AuthPageContainer";
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -52,11 +53,7 @@ export default function SignupPage() {
       <AuthBrand title="新規登録" subtitle="アカウントを作成してください" />
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {error && (
-          <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-950/20 rounded-md">
-            {error}
-          </div>
-        )}
+        <AuthErrorAlert message={error} />
 
         <div className="space-y-2">
           <Label htmlFor="name">名前</Label>

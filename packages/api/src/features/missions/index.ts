@@ -12,7 +12,7 @@ import {
   UpdateMissionResponseSchema,
 } from "./types";
 import { AppError } from "../../lib/errors";
-import { Database, Tables } from "../../../../shared/src/schemas/db";
+import { Database, Tables } from "../../../../shared/src/types/db";
 import { describeRoute, resolver, validator } from "hono-openapi";
 
 const missions = new Hono<HonoEnv>();

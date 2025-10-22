@@ -11,7 +11,7 @@ import {
   WeeklyReportResponseSchema,
 } from "./types";
 import { AppError } from "../../lib/errors";
-import { Database } from "../../../../shared/src/schemas/db";
+import { Database } from "../../../../shared/src/types/db";
 import { generateFormattedReport } from "./service";
 import { describeRoute, resolver, validator } from "hono-openapi";
 

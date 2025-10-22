@@ -47,27 +47,42 @@ export type Database = {
       error_logs: {
         Row: {
           access_log_id: number;
+          app_version: string | null;
+          client_context: Json | null;
           id: number;
           level: Database["public"]["Enums"]["log_level"];
           message: string;
+          page_url: string | null;
+          source: Database["public"]["Enums"]["log_source"];
           stack_trace: string | null;
           timestamp: string;
+          user_agent: string | null;
         };
         Insert: {
           access_log_id: number;
+          app_version?: string | null;
+          client_context?: Json | null;
           id?: never;
           level: Database["public"]["Enums"]["log_level"];
           message: string;
+          page_url?: string | null;
+          source?: Database["public"]["Enums"]["log_source"];
           stack_trace?: string | null;
           timestamp?: string;
+          user_agent?: string | null;
         };
         Update: {
           access_log_id?: number;
+          app_version?: string | null;
+          client_context?: Json | null;
           id?: never;
           level?: Database["public"]["Enums"]["log_level"];
           message?: string;
+          page_url?: string | null;
+          source?: Database["public"]["Enums"]["log_source"];
           stack_trace?: string | null;
           timestamp?: string;
+          user_agent?: string | null;
         };
         Relationships: [
           {
@@ -110,6 +125,7 @@ export type Database = {
       };
       goals: {
         Row: {
+          content: string | null;
           created_at: string;
           end_date: string;
           id: number;
@@ -121,6 +137,7 @@ export type Database = {
           weight: number;
         };
         Insert: {
+          content?: string | null;
           created_at?: string;
           end_date: string;
           id?: never;
@@ -132,6 +149,7 @@ export type Database = {
           weight: number;
         };
         Update: {
+          content?: string | null;
           created_at?: string;
           end_date?: string;
           id?: never;
@@ -294,6 +312,7 @@ export type Database = {
     };
     Enums: {
       log_level: "DEBUG" | "INFO" | "WARNING" | "ERROR" | "CRITICAL";
+      log_source: "API" | "UI";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -425,6 +444,7 @@ export const Constants = {
   public: {
     Enums: {
       log_level: ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+      log_source: ["API", "UI"],
     },
   },
 } as const;

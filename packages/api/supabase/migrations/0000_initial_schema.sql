@@ -1,8 +1,9 @@
 CREATE TYPE log_level AS ENUM ('DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL');
+CREATE TYPE log_source AS ENUM ('API', 'UI');
 
 CREATE TABLE projects (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    user_id UUID REFERENCES auth.users(id) NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     name TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE(user_id, name)
@@ -10,7 +11,7 @@ CREATE TABLE projects (
 
 CREATE TABLE tasks (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    project_id BIGINT REFERENCES projects(id) NOT NULL,
+    project_id BIGINT REFERENCES projects(id) ON DELETE CASCADE NOT NULL,
     name TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE(project_id, name)
@@ -18,8 +19,8 @@ CREATE TABLE tasks (
 
 CREATE TABLE work_records (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    user_id UUID REFERENCES auth.users(id) NOT NULL,
-    task_id BIGINT REFERENCES tasks(id) NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    task_id BIGINT REFERENCES tasks(id) ON DELETE CASCADE NOT NULL,
     work_date DATE NOT NULL,
     hours NUMERIC(4,2) NOT NULL,
     estimated_hours NUMERIC(4,2),
@@ -28,15 +29,16 @@ CREATE TABLE work_records (
 
 CREATE TABLE missions (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    user_id UUID REFERENCES auth.users(id) NOT NULL UNIQUE,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
     content TEXT,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE goals (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    user_id UUID REFERENCES auth.users(id) NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     title TEXT NOT NULL,
+    content TEXT,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     weight NUMERIC(5, 2) NOT NULL CHECK (weight >= 0 AND weight <= 100),
@@ -54,7 +56,7 @@ CREATE TABLE goal_progress_histories (
 
 CREATE TABLE access_logs (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    user_id UUID REFERENCES auth.users(id),
+    user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
     ip_address INET,
     path TEXT NOT NULL,
     status_code INT,
@@ -64,7 +66,7 @@ CREATE TABLE access_logs (
 
 CREATE TABLE info_logs (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    access_log_id BIGINT REFERENCES access_logs(id) NOT NULL,
+    access_log_id BIGINT REFERENCES access_logs(id) ON DELETE CASCADE NOT NULL,
     level log_level NOT NULL,
     message TEXT NOT NULL,
     timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -72,11 +74,23 @@ CREATE TABLE info_logs (
 
 CREATE TABLE error_logs (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    access_log_id BIGINT REFERENCES access_logs(id) NOT NULL,
+    access_log_id BIGINT REFERENCES access_logs(id) ON DELETE CASCADE NOT NULL,
     level log_level NOT NULL,
     message TEXT NOT NULL,
     stack_trace TEXT,
+    source log_source NOT NULL DEFAULT 'API',
+    user_agent TEXT,
+    page_url TEXT,
+    app_version TEXT,
+    client_context JSONB,
     timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE user_settings (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
+    notify_effort_email BOOLEAN NOT NULL DEFAULT TRUE,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX projects_user_id_idx ON projects (user_id);
@@ -90,3 +104,4 @@ CREATE INDEX access_logs_path_idx ON access_logs (path);
 CREATE INDEX access_logs_status_code_idx ON access_logs (status_code);
 CREATE INDEX info_logs_access_log_id_idx ON info_logs (access_log_id);
 CREATE INDEX error_logs_access_log_id_idx ON error_logs (access_log_id);
+CREATE UNIQUE INDEX user_settings_user_id_idx ON user_settings (user_id);

@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getInitials } from "@/lib/getInitials";
+import { getInitials } from "@/lib/utils";
 import type { UserProfile } from "@/types/userProfile";
 
 interface AppHeaderUserMenuProps {

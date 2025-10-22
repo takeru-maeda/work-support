@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { ParsedEffort } from "./types";
-import { Database } from "../../../../shared/src/schemas/db";
+import { Database } from "../../../../shared/src/types/db";
 import { findOrCreateTask, findProject, insertWorkRecord } from "./repository";
 import { Dayjs } from "dayjs";
 import { AppError } from "../../lib/errors";
