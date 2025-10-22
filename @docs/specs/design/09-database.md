@@ -106,7 +106,7 @@ Supabaseの認証機能が提供する `auth.users` テーブルをそのまま�
 | `id` | BIGINT | PK | N | Y | 識別子 | |
 | `user_id` | UUID | FK | N | N | `auth.users.id` への参照 (削除時はCASCADE) | |
 | `title` | TEXT | | N | N | 目標のタイトル | |
-| `content` | TEXT | | Y | N | 目標の詳細内容 | |
+| `content` | TEXT | | N | N | 目標の詳細内容 | |
 | `start_date` | DATE | | N | N | 目標の開始日 | |
 | `end_date` | DATE | | N | N | 目標の終了日 | |
 | `weight` | NUMERIC(5, 2) | | N | N | 重み (0-100) | `CHECK (weight >= 0 AND weight <= 100)` |

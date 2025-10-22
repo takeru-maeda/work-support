@@ -18,7 +18,7 @@ export type Database = {
         Row: {
           duration_ms: number | null;
           id: number;
-          ip_address: unknown | null;
+          ip_address: unknown;
           path: string;
           received_at: string;
           status_code: number | null;
@@ -27,7 +27,7 @@ export type Database = {
         Insert: {
           duration_ms?: number | null;
           id?: never;
-          ip_address?: unknown | null;
+          ip_address?: unknown;
           path: string;
           received_at?: string;
           status_code?: number | null;
@@ -36,7 +36,7 @@ export type Database = {
         Update: {
           duration_ms?: number | null;
           id?: never;
-          ip_address?: unknown | null;
+          ip_address?: unknown;
           path?: string;
           received_at?: string;
           status_code?: number | null;
@@ -125,7 +125,7 @@ export type Database = {
       };
       goals: {
         Row: {
-          content: string | null;
+          content: string;
           created_at: string;
           end_date: string;
           id: number;
@@ -137,7 +137,7 @@ export type Database = {
           weight: number;
         };
         Insert: {
-          content?: string | null;
+          content: string;
           created_at?: string;
           end_date: string;
           id?: never;
@@ -149,7 +149,7 @@ export type Database = {
           weight: number;
         };
         Update: {
-          content?: string | null;
+          content?: string;
           created_at?: string;
           end_date?: string;
           id?: never;
@@ -264,6 +264,54 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      user_settings: {
+        Row: {
+          id: number;
+          notify_effort_email: boolean;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          id?: never;
+          notify_effort_email?: boolean;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          id?: never;
+          notify_effort_email?: boolean;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      work_entry_drafts: {
+        Row: {
+          client_updated_at: string;
+          entries: Json;
+          id: number;
+          memo: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          client_updated_at: string;
+          entries: Json;
+          id?: never;
+          memo?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          client_updated_at?: string;
+          entries?: Json;
+          id?: never;
+          memo?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
       };
       work_records: {
         Row: {

@@ -11,6 +11,7 @@
   - 入力内容はローカルストレージに自動保存し、送信後にリセットする。
   - 入力の度に `PUT /api/effort/draft` へドラフトを同期し、画面初期化時は `GET /api/effort/draft` を通じて `work_entry_drafts` から復元する。
   - 案件・タスク候補は `GET /api/projects` / `GET /api/tasks` を利用してユーザー専用マスターを取得する。
+  - 画面遷移時に `GET /api/projects`、`GET /api/tasks`、`GET /api/effort/draft` を並列で呼び出し、取得した案件・タスクをコンボボックスへ表示する。ドラフトが存在する場合はフォームへ初期反映する。
   - メール通知の有効/無効はユーザー設定（`user_settings.notify_effort_email`）に基づき、UI ではトグルを表示して変更できる。
   - 実績工数 (`hours`) は必須入力とし、空の場合は送信できない。
 - **目標管理画面 (`/goals`)**

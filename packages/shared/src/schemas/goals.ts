@@ -8,6 +8,7 @@ export const GoalSchema = z.object({
   end_date: z.iso.date(),
   progress: z.number(),
   weight: z.number(),
+  content: z.string(),
   created_at: z.iso.datetime({ offset: true }),
   updated_at: z.iso.datetime({ offset: true }),
 });
@@ -21,6 +22,7 @@ export const CreateGoalRequestSchema = z.object({
   start_date: z.iso.date(),
   end_date: z.iso.date(),
   weight: z.number().min(0).max(100),
+  content: z.string(),
 });
 
 export const CreateGoalResponseSchema = z.object({
@@ -33,6 +35,7 @@ export const UpdateGoalRequestSchema = z.object({
   end_date: z.iso.date().optional(),
   weight: z.number().min(0).max(100).optional(),
   progress: z.number().min(0).max(100).optional(),
+  content: z.string().optional(),
 });
 
 export const UpdateGoalResponseSchema = z.object({

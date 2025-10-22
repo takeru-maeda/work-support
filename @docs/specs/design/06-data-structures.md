@@ -41,6 +41,8 @@ export const EffortEntriesRequestSchema = z.object({
 });
 
 export type EffortEntriesRequest = z.infer<typeof EffortEntriesRequestSchema>;
+
+> **Note:** 保存済みの案件・タスクは `projectId` / `taskId` のみ指定し、`projectName` / `taskName` は `null` とする。新規案件・タスクは ID を `null` にし、名称フィールドへ値を設定する。
 ```
 
 ## 工数ドラフト保存ペイロード

@@ -19,12 +19,12 @@
 - [x] `projects` テーブルを定義する
 - [x] `tasks` テーブルを定義する
 - [x] `work_records` テーブルを定義する
-- [ ] `work_entry_drafts` テーブルを定義する
-- [ ] `work_entry_drafts` に `client_updated_at` カラムを追加する
-- [ ] `goals` テーブルに `content` カラムを追加する
-- [ ] `log_source` ENUM を追加し、`error_logs` の `source` カラムに適用する
-- [ ] `error_logs` テーブルに `source` / `user_agent` / `page_url` / `app_version` / `client_context` を追加する
-- [ ] `user_settings` テーブルを追加し、工数登録メール通知フラグなどの設定を保持する
+- [x] `work_entry_drafts` テーブルを定義する
+- [x] `work_entry_drafts` に `client_updated_at` カラムを追加する
+- [x] `goals` テーブルに `content` カラムを追加する
+- [x] `log_source` ENUM を追加し、`error_logs` の `source` カラムに適用する
+- [x] `error_logs` テーブルに `source` / `user_agent` / `page_url` / `app_version` / `client_context` を追加する
+- [x] `user_settings` テーブルを追加し、工数登録メール通知フラグなどの設定を保持する
 - [x] `missions` テーブルを定義する
 - [x] `goals` テーブルを定義する
 - [x] `goal_progress_histories` テーブルを定義する
@@ -32,7 +32,7 @@
 - [x] `info_logs` テーブルを定義する
 - [x] `error_logs` テーブルを定義する
 - [x] 各テーブルに必要なインデックスを設定する
-- [ ] `work_entry_drafts` に `user_id` ユニークインデックスを設定する
+- [x] `work_entry_drafts` に `user_id` ユニークインデックスを設定する
 
 ## 3.  API実装 (バックエンド / `packages/api`)
 
@@ -53,9 +53,9 @@
 - [ ] 工数ドラフト保存APIを実装する (`PUT /api/effort/draft`, `DELETE /api/effort/draft`)
 - [ ] 工数ドラフト取得APIを実装する (`GET /api/effort/draft`)
 - [ ] 工数ドラフト更新時の `clientUpdatedAt` に基づく同時実行制御を実装する
-- [ ] `POST /api/effort/entries` に `notify` フラグと完了メール送信処理を追加する
+- [ ] 工数登録完了時に `user_settings.notify_effort_email` を参照して完了メールを送信する処理を実装する
 - [ ] GAS 向けメール送信ユーティリティ（API キー検証含む）を実装する
-- [ ] ユーザー設定からメール通知フラグを取得し、`notify` のデフォルトとして利用する
+- [ ] 工数登録完了メールの本文生成ロジック（差分・集計を含む）を実装する
 - [ ] `POST /api/user-settings` を実装し、新規ユーザー作成直後に通知設定レコードを登録できるようにする
 
 ### 3.3. ミッション管理機能 (`/api/missions`)
@@ -103,7 +103,7 @@
 - [ ] `GET /api/goals/history` との連携を実装する
 - [ ] エラーログ送信モジュールを実装し、UI 全体から `POST /api/logs/error` を呼び出せるようにする
 - [ ] 未捕捉エラーを捕捉してエラーログ送信・ユーザー通知を行う共通フローを整備する
-- [ ] 工数登録画面から完了メール送信フラグを指定できる UI と通知結果のフィードバックを実装する
+- [ ] 工数登録画面から完了メール通知の現在値を表示し、通知結果のフィードバックを実装する
 - [ ] ユーザー設定画面（またはプロフィール）に工数メール通知トグルを追加し、`user_settings` と同期する
 
 ### 4.4. 週報出力画面 (`/report`)
@@ -111,6 +111,15 @@
 - [x] 整形された週報の表示エリアUIを実装する
 - [ ] `GET /api/reports/weekly` を呼び出すロジックを実装する
 
-### 4.5. 工数登録画面拡張
-- [ ] 工数ドラフト保存・削除APIと連携し、自動保存・復元を実装する
-- [ ] 案件・タスクマスター取得APIを利用して候補の同期を実装する
+### 4.5. 認証関連画面
+- [x] ログイン画面のUIおよび Supabase サインイン処理を実装する (`/login`)
+- [x] サインアップ画面のUIおよび Supabase サインアップ処理を実装する (`/signup`)
+- [x] パスワードリセット画面のUIとリセットメール送信／新パスワード入力フローを実装する
+- [x] プロフィール画面で名前・プロフィール画像の更新処理を実装する (`/profile`)
+- [ ] 設定画面を実装し、工数メール通知トグルを `user_settings` と同期する (`/settings`)
+
+### 4.6. 工数登録画面 (`/effort`)
+- [ ] 実績工数 (`hours`) の必須入力バリデーションを実装する
+- [ ] 完了メール送信結果を UI にフィードバックする（成功/失敗トーストなど）
+- [ ] 工数入力内容から差分・集計を表示し、メール本文と同じ形式で確認できるようにする
+- [ ] 画面遷移時に `GET /api/projects` / `GET /api/tasks` / `GET /api/effort/draft` を呼び出し、ドラフト初期表示と候補の初期化を実装する

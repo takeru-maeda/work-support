@@ -27,6 +27,15 @@ CREATE TABLE work_records (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE work_entry_drafts (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
+    entries JSONB NOT NULL,
+    memo TEXT,
+    client_updated_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE missions (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
@@ -38,7 +47,7 @@ CREATE TABLE goals (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     title TEXT NOT NULL,
-    content TEXT,
+    content TEXT NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     weight NUMERIC(5, 2) NOT NULL CHECK (weight >= 0 AND weight <= 100),
@@ -96,6 +105,7 @@ CREATE TABLE user_settings (
 CREATE INDEX projects_user_id_idx ON projects (user_id);
 CREATE INDEX tasks_project_id_idx ON tasks (project_id);
 CREATE INDEX work_records_user_id_work_date_idx ON work_records (user_id, work_date);
+CREATE UNIQUE INDEX work_entry_drafts_user_id_idx ON work_entry_drafts (user_id);
 CREATE INDEX goals_user_id_idx ON goals (user_id);
 CREATE INDEX goal_progress_histories_goal_id_recorded_at_idx ON goal_progress_histories (goal_id, recorded_at);
 CREATE INDEX access_logs_user_id_idx ON access_logs (user_id);

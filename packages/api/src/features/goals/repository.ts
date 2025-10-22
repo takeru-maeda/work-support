@@ -41,6 +41,7 @@ export const createGoal = async (
     end_date: goal.end_date,
     weight: goal.weight,
     progress: 0, // 新規作成時は必ず0%
+    content: goal.content,
     user_id: userId,
   };
   const { data, error } = await supabase
@@ -67,6 +68,7 @@ export const updateGoal = async (
     end_date: goal.end_date,
     weight: goal.weight,
     progress: goal.progress,
+    content: goal.content,
   };
   const { data, error } = await supabase
     .from("goals")

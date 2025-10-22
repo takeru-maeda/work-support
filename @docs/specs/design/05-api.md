@@ -168,6 +168,7 @@
 ```
 
 > **Note:** `project_id` / `task_id` 優先で保存し、IDが指定されない場合は `project_name` / `task_name` を元に生成または紐付けする。
+> **Note:** 保存済みの案件・タスクは `project_id` / `task_id` を指定し、名称フィールドは `null` とする。新規案件・タスクを登録する場合は ID を `null` とし、`project_name` / `task_name` に値を指定する。
 
 **Responses:**
 
@@ -227,7 +228,7 @@
 ```json
 {
   "title": "string",
-  "content": "string | null",
+  "content": "string",
   "start_date": "string (date)",
   "end_date": "string (date)",
   "weight": "number"
@@ -244,7 +245,7 @@
       "id": "number",
       "user_id": "string (uuid)",
       "title": "string",
-      "content": "string | null",
+      "content": "string",
       "start_date": "string (date)",
       "end_date": "string (date)",
       "progress": "number",
