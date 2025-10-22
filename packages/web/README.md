@@ -1,73 +1,74 @@
-# React + TypeScript + Vite
+# Work Support Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+フロントエンドは React + Vite を基盤とした SPA として構築され、業務支援アプリ「仕事サポートアプリ」の UI レイヤーを担います。工数登録・目標管理・週報出力など、仕様は `@docs/specs` のドキュメントを参照して仕様駆動で実装します。
 
-Currently, two official plugins are available:
+## 主な画面
+- `/` ホーム：工数登録・目標管理・週報出力へのハブ。
+- `/effort` 工数登録：案件/タスク選択、見積・実績入力、ドラフト同期、完了メール設定を提供。
+- `/goals` 目標管理：最新期間の目標編集、内容ダイアログ、削除確認、過去目標検索を実装。
+- `/weekly-report` 週報出力：対象週の工数サマリー・ミッション・目標進捗を整形して表示。
+- `/login` / `/signup` / `/reset-password` 認証関連：Supabase 認証フローを提供。
+- `/profile` / `/settings`：プロフィール更新と通知設定の同期を扱う。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+詳細な画面要件は `@docs/specs/design/03-frontend.md`、API 仕様は `@docs/specs/design/05-api.md` を参照してください。
 
-## React Compiler
+## 技術スタック
+- React + TypeScript + Vite
+- Zustand（認証/テーマなど共有状態）、SWR（サーバー状態）
+- shadcn/ui + Tailwind CSS（UI コンポーネント）
+- Axios（API クライアント）
+- Vitest（テスト）
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+API と型スキーマはバックエンド（Cloudflare Workers + Hono）および共有パッケージと連携します。
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## ディレクトリ構成（BalletProof 設計）
+```
+packages/web/src/
+├── app/           // エントリポイント、プロバイダ、ルーター
+├── pages/         // ルート単位のページコンポーネント
+├── features/      // 機能境界ごとの UI / hooks / services
+├── components/    // 再利用可能な UI（layout/shared/ui）
+├── hooks/         // 共通カスタムフック
+├── lib/           // API クライアント、日付処理など共有ロジック
+├── services/      // API 通信やストレージ I/O の抽象化
+├── store/         // Zustand ストア
+├── styles/        // Tailwind 設定とグローバル CSS
+├── config/        // ルーティングや環境変数設定
+└── types/         // 型定義（shared パッケージの zod スキーマを参照）
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## セットアップ
+1. ルートディレクトリで依存関係をインストールします。
+   ```bash
+   pnpm install
+   ```
+2. フロントエンド開発サーバーを起動します。
+   ```bash
+   pnpm dev:web
+   ```
+3. 環境変数は `VITE_` プレフィックスを付けて `packages/web/.env` などに設定してください。（例：`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`）
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## API との連携
+- 全 API は JWT 認証が必要です。Supabase のアクセストークンを `Authorization: Bearer <jwt>` で送信します。
+- 工数・目標・週報などの API コントラクトは `@docs/specs/design/05-api.md` に定義されている OpenAPI 相当の仕様に従います。
+- 共有の Zod スキーマ/型は `packages/shared` からインポートして、フロントとバックで型整合性を保ちます。
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 実装方針とガイドライン
+- 仕様駆動開発：実装前に `@docs/specs` の要件・設計を必ず確認し、完了後は `@docs/specs/tasks.md` の該当タスクを更新します。
+- TypeScript ルール：全ての変数・関数に型注釈を付与し、文末にはセミコロンを必ず記述します。型のみのインポートは `import type` を使用します。
+- JSDoc：敬体の概要行と必要なタグを `@docs/guides/jsdoc-guidelines.md` に従って記述します。
+- エラーハンドリング：未捕捉例外は共通のエラーロガーを通じて `POST /api/logs/error` に送信し、UI で適切に通知します。
+- 認証後の初期化時には `GET /api/projects` / `GET /api/tasks` / `GET /api/effort/draft` など複数 API を並列に呼び出し、ドラフトの同期と候補リストを整えます。
+
+## テスト
+- テストフレームワークは Vitest を使用します。ファイル名は `*.test.ts(x)` に統一し、仕様の主要分岐をカバーしてください。
+- API モックやフックテストは `@testing-library/react` などを組み合わせて実施します。
+
+## 参考ドキュメント
+- プロジェクト全体の概要：`GEMINI.md`
+- 要件定義：`@docs/specs/requirements.md`
+- 詳細設計インデックス：`@docs/specs/design/00-index.md`
+- フロントエンド設計詳細：`@docs/specs/design/03-frontend.md`
+- データ構造：`@docs/specs/design/06-data-structures.md`
+
+ドキュメントと実装の差異が見つかった場合は、仕様を更新した上で README とコードを同期させてください。

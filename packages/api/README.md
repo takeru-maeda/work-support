@@ -1,73 +1,113 @@
 # Work Support API
 
-このパッケージは、仕事サポートアプリのバックエンドAPIです。Cloudflare Workers上で動作するHono.jsアプリケーションとして構築されています。
+仕事サポートアプリのバックエンドは Cloudflare Workers 上で動作する Hono.js アプリケーションです。工数登録・目標管理・週報出力などフロントエンドが利用する API を提供し、仕様は `@docs/specs` に定義された設計を唯一の参照源とします。
+
+## 技術スタック
+- Hono.js (Cloudflare Workers)
+- Supabase (PostgreSQL + 認証)
+- hono-openapi / Zod（リクエスト検証と OpenAPI 自動生成）
+- Resend / Google Apps Script 連携（メール送信ユーティリティ、実装中）
+- Vitest（テスト）
 
 ## アーキテクチャ
-
-`packages/api` は、機能ごとに責務を分割する **フィーチャーベース（Vertical Slice）アーキテクチャ** を採用しています。これにより、コードの凝集性を高め、拡張性とメンテナンス性を向上させています。
-
-各フィーチャーは、主に以下のファイルで構成されています。
-
-- **`index.ts` (ルーティング層):** HTTPリクエストの受付、リクエストの検証、認証ミドルウェアの適用を行います。
-- **`service.ts` (ビジネスロジック層):** アプリケーション固有のユースケースやビジネスルールを実装します。
-- **`repository.ts` (データアクセス層):** データベース (Supabase) との通信を抽象化します。
-
-詳細はプロジェクトルートの`@docs/design.md`を参照してください。
-
-## APIエンドポイント
-
-提供している主要なエンドポイントは以下の通りです。
-
-- `POST /api/effort`: 工数を登録します。
-- `GET /api/missions`: ミッションを取得します。
-- `PUT /api/missions`: ミッションを更新します。
-- `GET /api/goals`: 最新の目標リストを取得します。
-- `POST /api/goals`: 新しい目標を作成します。
-- `PUT /api/goals/{id}`: 目標を更新します。
-- `DELETE /api/goals/{id}`: 目標を削除します。
-- `GET /api/reports/weekly`: 週報を生成します。
-
-各エンドポイントの詳細なリクエスト/レスポンス仕様については、後述のOpenAPIドキュメントを参照してください。
-
-## 開発
-
-### 1. 環境変数の設定
-
-開発を開始する前に、`packages/api`ディレクトリのルートに`.dev.vars`ファイルを作成し、必要な環境変数を設定してください。
+フィーチャーベース（Vertical Slice）でモジュール化しています。`packages/api/src` の主な構成は以下の通りです。
 
 ```
-SUPABASE_ID=<your-supabase-project-id>
-SUPABASE_URL=https://<your-project-id>.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=<your-supabase-service-role-key>
-API_KEY=<your-secret-api-key>
-RESEND_API_KEY=<your-resend-api-key>
-APP_EMAIL=<your-app-email>
-PROD_FRONTEND_URL=<your-production-frontend-url>
-DEV_FRONTEND_URL=<your-development-frontend-url>
+packages/api/src/
+├── index.ts           // Hono アプリのエントリポイント
+├── custom-types.ts    // Hono の型拡張
+├── lib/               // Supabase クライアント、メール送信などのユーティリティ
+├── middleware/        // jwtAuthMiddleware, apiKeyAuthMiddleware, accessLogMiddleware 等
+└── features/
+    ├── effort/        // 工数登録・ドラフト API
+    ├── goals/         // 目標管理 API
+    ├── missions/      // ミッション管理 API
+    ├── reports/       // 週報生成 API
+    └── logs/          // UI 由来エラーログ API
 ```
 
-### 2. 開発サーバーの起動
+- `index.ts`: ルーティングのエントリーポイント。CORS、認証、エラーハンドラを組み合わせて各フィーチャーのルーターをマウントします。
+- `features/**/index.ts`: HTTP ルート定義・Zod バリデーションを担当。
+- `features/**/service.ts`: ビジネスロジック（ユースケース）を実装。
+- `features/**/repository.ts`: Supabase への永続化ロジックを提供。
+- `middleware/logger.ts`: アクセスログ／エラーログを `access_logs`・`info_logs`・`error_logs` へ記録。
 
-プロジェクトのルートディレクトリで以下のコマンドを実行すると、開発サーバーが起動します。
+詳細は `@docs/specs/design/02-backend.md` と `@docs/specs/design/08-logic.md` を参照してください。
 
-```bash
-pnpm dev:api
-```
+## 認証とセキュリティ
+- フロントエンドからのリクエストは `jwtAuthMiddleware` を通じ、Supabase の JWT を検証してユーザーを特定します。
+- Google Apps Script など外部システムからの工数登録は固定 API キー (`Authorization: Bearer <API_KEY>`) による `apiKeyAuthMiddleware` で保護します。
+- すべてのルートで CORS 設定を適切に行い、許可されたオリジンのみアクセスできるようにします。
 
-これにより、`wrangler dev`が実行され、ローカルでAPIの動作確認ができます。
+## 主なエンドポイント
+| Method | Path | 認証 | 概要 |
+| --- | --- | --- | --- |
+| `POST` | `/api/effort` | APIキー | Google フォーム経由のテキスト工数登録 |
+| `POST` | `/api/effort/entries` | JWT | Web UI から送信される構造化工数の登録 |
+| `GET/PUT/DELETE` | `/api/effort/draft` | JWT | 工数ドラフトの取得／保存／削除 |
+| `GET/POST/PUT/DELETE` | `/api/goals` | JWT | 目標の取得・作成・更新・削除 |
+| `GET` | `/api/goals/history` | JWT | 過去目標の検索 |
+| `GET` | `/api/goals/progress/previous-week` | JWT | 前週末の進捗取得 |
+| `GET/PUT` | `/api/missions` | JWT | ミッションの取得・更新 |
+| `GET` | `/api/reports/weekly` | JWT | 週報雛形の生成 |
+| `POST` | `/api/user-settings` | JWT | ユーザー通知設定の初期化 |
+| `GET` | `/api/projects`, `/api/tasks` | JWT | 案件・タスクマスターの取得 |
+| `POST` | `/api/logs/error` | JWT | UI 由来のエラーログ保存 |
 
-## APIドキュメント (OpenAPI)
+リクエスト／レスポンススキーマは `@docs/specs/design/05-api.md` および `packages/shared` の Zod 定義に準拠します。
 
-このAPIは`hono-openapi`を利用して、OpenAPI仕様に基づいたドキュメントを自動生成します。
-開発サーバーを起動後、以下のエンドポイントにアクセスすることで仕様を確認できます。
+## 環境構築
+1. ルートで依存関係をインストールします。
+   ```bash
+   pnpm install
+   ```
+2. `packages/api/.dev.vars` を作成し、必要な環境変数を設定します。
+   ```
+   SUPABASE_URL=https://<project>.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=<service_role_key>
+   API_KEY=<fixed_api_key_for_gas>
+   RESEND_API_KEY=<email_provider_key>
+   APP_EMAIL=<sender_email>
+   PROD_FRONTEND_URL=<https://your-frontend.vercel.app>
+   DEV_FRONTEND_URL=http://localhost:5173
+   ```
+   Supabase 認証管理に必要な ID や認証情報は `@docs/specs/design/07-operations.md` を参照してください。
+3. 開発サーバーを起動します。
+   ```bash
+   pnpm dev:api
+   ```
+   `wrangler dev` により `http://localhost:8787` で Workers をエミュレートできます。
 
-- **Swagger UI:** [`/ui`](http://localhost:8787/ui)
-- **OpenAPI Spec (JSON):** [`/openapi`](http://localhost:8787/openapi)
+## OpenAPI / ドキュメント
+- Swagger UI: `http://localhost:8787/ui`
+- OpenAPI JSON: `http://localhost:8787/openapi`
 
-## 利用可能なスクリプト
+`hono-openapi` がルート定義の Zod スキーマから仕様を生成します。ドキュメントの更新が必要な場合は、ルートの `docsRoute` 設定を調整してください。
 
-`packages/api/package.json`で定義されている主要なスクリプトは以下の通りです。
+## ログとオペレーション
+- リクエストごとに `accessLogMiddleware` が `access_logs` に記録し、コンテキストに `access_log_id` を渡します。
+- アプリ内で `AppError` などのカスタムエラーを投げると、グローバルエラーハンドラが `error_logs` に記録し、UI から送信されたログは `source = 'UI'` として保存されます。
+- クリティカルなエラー時はメール通知を行う設計です。詳細は `@docs/specs/design/07-operations.md` を参照してください。
 
-- `pnpm dev`: 開発サーバーを起動します (`wrangler dev`)。
-- `pnpm deploy`: Cloudflare Workersにアプリケーションをデプロイします (`wrangler deploy --minify`)。
-- `pnpm test`: `vitest`による単体テストを実行します。
+## テスト
+- Vitest を使用します。テストファイルは `*.test.ts` に統一し、Hono のテストクライアント (`app.request`) を用いてルートごとの振る舞いを検証します。
+  ```bash
+  pnpm --filter api test
+  ```
+- 継続的な実装では仕様の主要フロー（工数ドラフトの同時実行制御、目標進捗計算など）をユニットテストでカバーしてください。
+
+## 実装ガイドライン
+- 仕様駆動開発：実装前に `@docs/specs` を確認し、タスク完了時は `@docs/specs/tasks.md` を更新します。
+- TypeScript：全ての変数・関数に型注釈を付与し、文末にセミコロンを付けます。型のみのインポートは `import type` を使用してください。
+- JSDoc：`@docs/guides/jsdoc-guidelines.md` に従い、敬体の概要と必要なタグを記述します。
+- 予期せぬ変更やドラフト更新の競合は `client_updated_at` を用いた整合性制御で解決します。
+
+## 参考ドキュメント
+- プロジェクト概要: `GEMINI.md`
+- 要件定義: `@docs/specs/requirements.md`
+- バックエンド設計: `@docs/specs/design/02-backend.md`
+- API 詳細: `@docs/specs/design/05-api.md`
+- データベース設計: `@docs/specs/design/09-database.md`
+- ロジック詳細: `@docs/specs/design/08-logic.md`
+
+仕様やデータモデルに変更を加える際は、該当ドキュメントとこの README を同時に更新して整合性を保ってください。
