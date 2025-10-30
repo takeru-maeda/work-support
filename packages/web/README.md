@@ -59,7 +59,7 @@ packages/web/src/
 - TypeScript ルール：全ての変数・関数に型注釈を付与し、文末にはセミコロンを必ず記述します。型のみのインポートは `import type` を使用します。
 - JSDoc：敬体の概要行と必要なタグを `@docs/guides/jsdoc-guidelines.md` に従って記述します。
 - エラーハンドリング：未捕捉例外は共通のエラーロガーを通じて `POST /api/logs/error` に送信し、UI で適切に通知します。
-- 認証後の初期化時には `GET /api/projects` / `GET /api/tasks` / `GET /api/effort/draft` など複数 API を並列に呼び出し、ドラフトの同期と候補リストを整えます。
+- 認証後の初期化時には `GET /api/projects`（案件とタスクの取得）や `GET /api/effort/draft` など複数 API を並列に呼び出し、ドラフトの同期と候補リストを整えます。
 
 ## テスト
 - テストフレームワークは Vitest を使用します。ファイル名は `*.test.ts(x)` に統一し、仕様の主要分岐をカバーしてください。

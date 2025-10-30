@@ -78,8 +78,14 @@
 - [x] 週報データ生成ロジックを実装する (`features/reports/reports.service.ts`)
 
 ### 3.6. マスターデータ取得API
-- [ ] ユーザーの案件一覧取得APIを実装する (`GET /api/projects`)
-- [ ] ユーザーのタスク一覧取得APIを実装する (`GET /api/tasks`)
+- [ ] ユーザーの案件・タスク取得APIを実装する (`GET /api/projects`)
+
+### 3.7. ユーザー設定API
+- [ ] ユーザー設定取得APIを実装する (`GET /api/user-settings`)
+- [ ] ユーザー設定更新APIを実装する (`PUT /api/user-settings`)
+
+### 3.8. 工数レポートAPI
+- [ ] 工数一覧取得APIを実装する (`GET /api/reports/work-records`)
 
 ## 4. 🖥️ UI実装 (フロントエンド / `packages/web`)
 
@@ -123,4 +129,4 @@
 - [ ] 実績工数 (`hours`) の必須入力バリデーションを実装する
 - [ ] 完了メール送信結果を UI にフィードバックする（成功/失敗トーストなど）
 - [ ] 工数入力内容から差分・集計を表示し、メール本文と同じ形式で確認できるようにする
-- [ ] 画面遷移時に `GET /api/projects` / `GET /api/tasks` / `GET /api/effort/draft` を呼び出し、ドラフト初期表示と候補の初期化を実装する
+- [ ] 画面遷移時に `GET /api/projects`（案件・タスク取得）と `GET /api/effort/draft` を呼び出し、ドラフト初期表示と候補の初期化を実装する

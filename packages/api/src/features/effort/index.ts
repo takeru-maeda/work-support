@@ -6,8 +6,8 @@ import {
   EffortResponse,
   EffortResponseSchema,
 } from "./types";
-import { HonoEnv } from "../../custom-types";
-import { SupabaseClient, User } from "@supabase/supabase-js";
+import { AuthenticatedUser, HonoEnv } from "../../custom-types";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseClient } from "../../lib/supabase";
 import { AppError } from "../../lib/errors";
 import { Database } from "../../../../shared/src/types/db";
@@ -36,13 +36,11 @@ effort.post(
   validator("json", EffortRequestSchema),
   async (c) => {
     const { date, effort } = c.req.valid("json");
-    const user: User | undefined = c.get("user");
+    const user: AuthenticatedUser | undefined = c.get("user");
     if (!user) throw new AppError(401, "Unauthorized");
 
-    const userId = user.id;
-
     const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
-    await saveEffortRecords(supabase, userId, new Date(date), effort);
+    await saveEffortRecords(supabase, user.id, new Date(date), effort);
 
     const response: EffortResponse = {
       message: "Effort data processed and saved successfully",

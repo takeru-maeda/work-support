@@ -1,7 +1,7 @@
 import { Hono } from "hono";
-import { SupabaseClient, User } from "@supabase/supabase-js";
+import { SupabaseClient } from "@supabase/supabase-js";
 
-import { HonoEnv } from "../../custom-types";
+import { AuthenticatedUser, HonoEnv } from "../../custom-types";
 import { jwtAuthMiddleware } from "../../middleware/auth";
 import { createSupabaseClient } from "../../lib/supabase";
 import {
@@ -43,7 +43,7 @@ goals.get(
     },
   }),
   async (c) => {
-    const user: User | undefined = c.get("user");
+    const user: AuthenticatedUser | undefined = c.get("user");
     if (!user) throw new AppError(401, "Unauthorized");
 
     const supabase: SupabaseClient = createSupabaseClient(c.env);
@@ -72,7 +72,7 @@ goals.post(
   }),
   validator("json", CreateGoalRequestSchema),
   async (c) => {
-    const user: User | undefined = c.get("user");
+    const user: AuthenticatedUser | undefined = c.get("user");
     if (!user) throw new AppError(401, "Unauthorized");
 
     const goal: GoalCreateRequest = c.req.valid("json");
@@ -106,10 +106,10 @@ goals.put(
   }),
   validator("json", UpdateGoalRequestSchema),
   async (c) => {
-    const user: User | undefined = c.get("user");
+    const user: AuthenticatedUser | undefined = c.get("user");
     if (!user) throw new AppError(401, "Unauthorized");
 
-    const goalId: number = parseInt(c.req.param("id"), 10);
+    const goalId: number = Number.parseInt(c.req.param("id"), 10);
     const goal: GoalUpdateRequest = c.req.valid("json");
     const supabase: SupabaseClient = createSupabaseClient(c.env);
     const updatedGoal: Tables<"goals"> = await updateGoalService(
@@ -136,10 +136,10 @@ goals.delete(
     },
   }),
   async (c) => {
-    const user: User | undefined = c.get("user");
+    const user: AuthenticatedUser | undefined = c.get("user");
     if (!user) throw new AppError(401, "Unauthorized");
 
-    const goalId: number = parseInt(c.req.param("id"), 10);
+    const goalId: number = Number.parseInt(c.req.param("id"), 10);
     const supabase: SupabaseClient = createSupabaseClient(c.env);
     await deleteGoalService(supabase, user.id, goalId);
     return c.body(null, 204);

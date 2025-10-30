@@ -3,9 +3,10 @@ import { createSupabaseClient } from "../lib/supabase";
 import { EffortRequest, EffortRequestSchema } from "../features/effort/types";
 import z from "zod";
 import { AuthError, SupabaseClient, User } from "@supabase/supabase-js";
-import { HonoEnv } from "../custom-types";
+import { AuthenticatedUser, HonoEnv } from "../custom-types";
 import { AppError } from "../lib/errors";
 import { Database } from "../../../shared/src/types/db";
+import { jwtVerify, type JWTPayload } from "jose";
 
 export const jwtAuthMiddleware = createMiddleware(async (c, next) => {
   const authHeader: string | undefined = c.req.header("Authorization");
@@ -14,12 +15,20 @@ export const jwtAuthMiddleware = createMiddleware(async (c, next) => {
   }
 
   const token: string = authHeader.split(" ")[1];
-  const supabase: SupabaseClient = createSupabaseClient(c.env);
-  const { data, error } = await supabase.auth.getUser(token);
+  const secretKey: Uint8Array = new TextEncoder().encode(
+    c.env.SUPABASE_JWT_SECRET,
+  );
 
-  if (error) throw new AppError(401, "Unauthorized", error);
+  let payload: JWTPayload;
+  try {
+    const verified = await jwtVerify(token, secretKey);
+    payload = verified.payload;
+  } catch (error) {
+    throw new AppError(401, "Unauthorized", error as Error);
+  }
 
-  c.set("user", data.user);
+  const user: AuthenticatedUser = buildAuthenticatedUserFromPayload(payload);
+  c.set("user", user);
   await next();
 });
 
@@ -60,7 +69,7 @@ export const apiKeyAuthMiddleware = createMiddleware(async (c, next) => {
 const findUserByEmail = async (
   email: string,
   env: HonoEnv["Bindings"],
-): Promise<{ user?: User; error?: AuthError }> => {
+): Promise<{ user?: AuthenticatedUser; error?: AuthError }> => {
   const lowerEmail: string = email.toLowerCase();
   const supabase: SupabaseClient<Database> = createSupabaseClient(env);
 
@@ -77,9 +86,37 @@ const findUserByEmail = async (
     const found: User | undefined = data.users.find(
       (u) => u.email?.toLowerCase() === lowerEmail,
     );
-    if (found) return { user: found };
+    if (found) {
+      return {
+        user: {
+          id: found.id,
+          email: found.email ?? null,
+        },
+      };
+    }
     if (data.users.length < perPage) break;
     page += 1;
   }
   return {};
+};
+
+const buildAuthenticatedUserFromPayload = (
+  payload: JWTPayload,
+): AuthenticatedUser => {
+  const userId: string | undefined = payload.sub;
+  if (!userId) {
+    throw new AppError(401, "Unauthorized");
+  }
+
+  const email =
+    typeof payload.email === "string"
+      ? payload.email
+      : Array.isArray(payload.email) && payload.email.length > 0
+        ? String(payload.email[0])
+        : null;
+
+  return {
+    id: userId,
+    email,
+  };
 };

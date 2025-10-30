@@ -1,9 +1,12 @@
+import type { JSX } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 
 import { ThemeProvider } from "@/app/providers/ThemeProvider";
 import { AuthenticatedLayout } from "@/components/layout/AuthenticatedLayout";
 import { ROUTES } from "@/config/routes";
+import EffortsPage from "@/pages/efforts/EffortsPage";
+import EffortsNewPage from "@/pages/efforts/EffortsNewPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 import SignupPage from "@/pages/auth/SignupPage";
@@ -12,12 +15,10 @@ import GoalsPage from "@/pages/goals/GoalsPage";
 import HomePage from "@/pages/home/HomePage";
 import ProfilePage from "@/pages/profile/ProfilePage";
 import WeeklyReportPage from "@/pages/reports/WeeklyReportPage";
-import { useThemeStore, type Theme } from "@/store/theme";
 import SettingsPage from "@/pages/settings/SettingsPage";
-import EffortsPage from "@/pages/efforts/EffortsPage";
-import EffortsNewPage from "@/pages/efforts/EffortsNewPage";
+import { useThemeStore, type Theme } from "@/store/theme";
 
-function App() {
+const App = (): JSX.Element => {
   const theme: Theme = useThemeStore((s) => s.theme);
 
   return (
@@ -51,6 +52,6 @@ function App() {
       </div>
     </ThemeProvider>
   );
-}
+};
 
 export default App;

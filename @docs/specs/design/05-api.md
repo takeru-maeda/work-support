@@ -5,22 +5,25 @@
 | Method | Endpoint | 認証 | 説明 |
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/effort` | 固定APIキー | **工数登録**: 外部からのHTTPリクエストを受信し、工数を登録する。 |
+| `POST` | `/api/effort/entries` | JWT | **工数登録（構造化）**: Web UIから送信された構造化データを保存する。 |
 | `GET` | `/api/effort/draft` | JWT | **工数ドラフト取得**: 保存済みの工数ドラフトを取得する。 |
 | `PUT` | `/api/effort/draft` | JWT | **工数ドラフト保存**: 入力途中の工数内容を一時保存する。 |
 | `DELETE` | `/api/effort/draft` | JWT | **工数ドラフト削除**: 送信完了後に一時保存された工数内容を削除する。 |
-| `POST` | `/api/effort/entries` | JWT | **工数登録（構造化）**: Web UIから送信された構造化データを保存する。 |
+| `GET` | `/api/projects` | JWT | **案件・タスク取得**: ユーザーに紐づく案件と関連タスクを取得する。 |
 | `GET` | `/api/goals/current` | JWT | **目標取得**: `end_date`が最も未来日に設定されている期間の目標群を取得する。 |
-| `GET` | `/api/goals/history` | JWT | **過去目標取得**: 条件に応じてユーザーの過去目標を検索する。 |
-| `GET` | `/api/goals/progress/previous-week` | JWT | **前週進捗取得**: 前週末時点の最新進捗率を取得する。 |
 | `POST` | `/api/goals` | JWT | **目標作成**: 新しい目標を作成する。 |
 | `PUT` | `/api/goals/:id` | JWT | **目標更新**: 指定したIDの目標を更新する。 |
 | `DELETE`| `/api/goals/:id` | JWT | **目標削除**: 指定したIDの目標を削除する。 |
+| `GET` | `/api/goals/history` | JWT | **過去目標取得**: 条件に応じてユーザーの過去目標を検索する。 |
+| `GET` | `/api/goals/progress/previous-week` | JWT | **前週進捗取得**: 前週末時点の最新進捗率を取得する。 |
 | `GET` | `/api/missions` | JWT | **ミッション取得**: 現在のミッションを取得する。 |
 | `PUT` | `/api/missions` | JWT | **ミッション更新**: ミッションを更新する。 |
-| `POST` | `/api/user-settings` | JWT | **ユーザー設定作成**: 新規ユーザーの通知設定を登録する。 |
-| `GET` | `/api/projects` | JWT | **案件取得**: ユーザーに紐づく案件マスターを取得する。 |
+| `GET` | `/api/reports/work-records` | JWT | **工数一覧取得**: 工数一覧画面向けに工数データを取得する。日付・案件・タスクによる絞り込み、および日付・案件・タスク・見積・実績・差分での並び替えに対応する。 |
 | `GET` | `/api/reports/weekly` | JWT | **週報生成**: 指定された日付 (`?date=YYYY-MM-DD`) が属する週の月曜〜金曜の週報データを生成して返す。 |
-| `GET` | `/api/tasks` | JWT | **タスク取得**: ユーザーに紐づくタスクマスターを取得する。 |
+| `GET` | `/api/user-settings` | JWT | **ユーザー設定取得**: 認証ユーザーの設定を取得する。 |
+| `POST` | `/api/user-settings` | JWT | **ユーザー設定作成**: 新規ユーザーの通知設定を登録する。 |
+| `PUT` | `/api/user-settings` | JWT | **ユーザー設定更新**: ユーザー設定の値を更新する。 |
+| `POST` | `/api/logs/error` | JWT | **エラーログ作成**: UI や API から送信されたエラー情報を保存する。 |
 
 ## エンドポイント詳細
 
@@ -45,6 +48,51 @@
   ```json
   {
     "message": "string"
+  }
+  ```
+
+---
+
+### POST /api/effort/entries
+
+**Description:** Web UIから送信された工数エントリを保存します
+
+**Request Body:**
+
+```json
+{
+  "date": "string (date)",
+  "entries": [
+    {
+      "project_id": "number | null",
+      "project_name": "string | null",
+      "task_id": "number | null",
+      "task_name": "string | null",
+      "estimated_hours": "number | null",
+      "hours": "number | null"
+    }
+  ]
+}
+```
+
+> **Note:** `project_id` / `task_id` 優先で保存し、IDが指定されない場合は `project_name` / `task_name` を元に生成または紐付けする。
+> **Note:** 保存済みの案件・タスクは `project_id` / `task_id` を指定し、名称フィールドは `null` とする。新規案件・タスクを登録する場合は ID を `null` にし、`project_name` / `task_name` に値を指定する。
+
+**Responses:**
+
+- **201:** Effort entries saved successfully
+
+  ```json
+  {
+    "saved": [
+      {
+        "entry_id": "number",
+        "project_id": "number",
+        "task_id": "number",
+        "hours": "number",
+        "estimated_hours": "number | null"
+      }
+    ]
   }
   ```
 
@@ -145,44 +193,28 @@
 
 ---
 
-### POST /api/effort/entries
+### GET /api/projects
 
-**Description:** Web UIから送信された工数エントリを保存します
-
-**Request Body:**
-
-```json
-{
-  "date": "string (date)",
-  "entries": [
-    {
-      "project_id": "number | null",
-      "project_name": "string | null",
-      "task_id": "number | null",
-      "task_name": "string | null",
-      "estimated_hours": "number | null",
-      "hours": "number | null"
-    }
-  ]
-}
-```
-
-> **Note:** `project_id` / `task_id` 優先で保存し、IDが指定されない場合は `project_name` / `task_name` を元に生成または紐付けする。
-> **Note:** 保存済みの案件・タスクは `project_id` / `task_id` を指定し、名称フィールドは `null` とする。新規案件・タスクを登録する場合は ID を `null` とし、`project_name` / `task_name` に値を指定する。
+**Description:** ユーザーに紐づく案件と関連タスクを取得します
 
 **Responses:**
 
-- **201:** Effort entries saved successfully
+- **200:** Projects and tasks fetch successfully
 
   ```json
   {
-    "saved": [
+    "projects": [
       {
-        "entry_id": "number",
-        "project_id": "number",
-        "task_id": "number",
-        "hours": "number",
-        "estimated_hours": "number | null"
+        "id": "number",
+        "name": "string",
+        "created_at": "string (date-time)",
+        "tasks": [
+          {
+            "id": "number",
+            "name": "string",
+            "created_at": "string (date-time)"
+          }
+        ]
       }
     ]
   }
@@ -358,6 +390,9 @@
       "pageSize": "number",
       "total": "number",
       "totalPages": "number"
+    },
+    "aggregations": {
+      "totalCount": "number"
     }
   }
   ```
@@ -483,6 +518,49 @@
 
 ---
 
+### GET /api/reports/weekly
+
+**Description:** 週報の雛形を生成します
+
+**Query Parameters:**
+
+- `date` (string (date), required)
+
+**Responses:**
+
+- **200:** Weekly report generate successfully
+
+  ```json
+  {
+    "mission": "string | null",
+    "weeklyReport": "string"
+  }
+  ```
+
+---
+
+### GET /api/user-settings
+
+**Description:** 認証済みユーザーの通知設定を取得します
+
+**Responses:**
+
+- **200:** User settings fetch successfully
+
+  ```json
+  {
+    "user_settings": {
+      "id": "number",
+      "notify_effort_email": "boolean",
+      "updated_at": "string (date-time)"
+    }
+  }
+  ```
+
+- **404:** User settings not found
+
+---
+
 ### POST /api/user-settings
 
 **Description:** 認証済みユーザーの通知設定を初期化します（サインアップ直後に呼び出す）
@@ -505,67 +583,79 @@
 
 ---
 
-### GET /api/projects
+### PUT /api/user-settings
 
-**Description:** ユーザーに紐づく案件を取得します
+**Description:** 認証済みユーザーの通知設定を更新します
+
+**Request Body:**
+
+```json
+{
+  "notifyEffortEmail": "boolean"
+}
+```
 
 **Responses:**
 
-- **200:** Projects fetch successfully
+- **200:** User settings updated successfully
 
   ```json
   {
-    "projects": [
-      {
-        "id": "number",
-        "name": "string",
-        "created_at": "string (date-time)"
-      }
-    ]
+    "user_settings": {
+      "id": "number",
+      "notify_effort_email": "boolean",
+      "updated_at": "string (date-time)"
+    }
   }
   ```
 
 ---
 
-### GET /api/reports/weekly
+### GET /api/reports/work-records
 
-**Description:** 週報の雛形を生成します
+**Description:** 工数一覧画面向けに工数データを取得します。
+`work_record_diffs` ビューを基に、日付・案件・タスクで絞り込み、日付・案件・タスク・見積・実績・差分での並び替えが可能です。
 
 **Query Parameters:**
 
-- `date` (string (date), required)
+- `date` (string (date), optional) — 絞り込み対象の日付。指定すると該当日付の工数のみを返す。
+- `project` (string, optional) — 案件名（部分一致）。
+- `task` (string, optional) — タスク名（部分一致）。
+- `sort` (string, optional) — 並び順を指定。以下の値を想定：
+  - `date`, `-date`
+  - `project`, `-project`
+  - `task`, `-task`
+  - `estimated_hours`, `-estimated_hours`
+  - `hours`, `-hours`
+  - `diff`, `-diff`
+- `page` (number, optional, default: `1`) — ページ番号（1始まり）。
+- `pageSize` (number, optional, default: `20`, max: `100`) — 1ページ当たり件数。
 
 **Responses:**
 
-- **200:** Weekly report generate successfully
+- **200:** Work records fetch successfully
 
   ```json
   {
-    "mission": "string | null",
-    "weeklyReport": "string"
-  }
-  ```
-
----
-
-### GET /api/tasks
-
-**Description:** ユーザーに紐づくタスクを取得します
-
-**Responses:**
-
-- **200:** Tasks fetch successfully
-
-  ```json
-  {
-    "tasks": [
+    "items": [
       {
         "id": "number",
-        "project_id": "number",
-        "project_name": "string",
-        "name": "string",
-        "created_at": "string (date-time)"
+        "date": "string (date)",
+        "project": "string",
+        "task": "string",
+        "estimated_hours": "number | null",
+        "hours": "number",
+        "diff": "number"
       }
-    ]
+    ],
+    "meta": {
+      "page": "number",
+      "pageSize": "number",
+      "total": "number",
+      "totalPages": "number"
+    },
+    "aggregations": {
+      "totalCount": "number"
+    }
   }
   ```

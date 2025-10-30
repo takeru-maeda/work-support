@@ -1,7 +1,7 @@
 import { Hono } from "hono";
-import { SupabaseClient, User } from "@supabase/supabase-js";
+import { SupabaseClient } from "@supabase/supabase-js";
 
-import { HonoEnv } from "../../custom-types";
+import { AuthenticatedUser, HonoEnv } from "../../custom-types";
 import { jwtAuthMiddleware } from "../../middleware/auth";
 import { createSupabaseClient } from "../../lib/supabase";
 import {
@@ -36,7 +36,7 @@ reports.get(
   }),
   validator("query", WeeklyReportQuerySchema),
   async (c) => {
-    const user: User | undefined = c.get("user");
+    const user: AuthenticatedUser | undefined = c.get("user");
     if (!user) throw new AppError(401, "Unauthorized");
 
     const param: WeeklyReportQuery = c.req.valid("query");

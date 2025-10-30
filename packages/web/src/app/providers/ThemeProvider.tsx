@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import { useEffect, useRef } from "react";
 
 import { themeStorageKey, useThemeStore, type Theme } from "@/store/theme";
@@ -8,10 +8,10 @@ interface ThemeProviderProps {
   defaultTheme?: Theme;
 }
 
-export function ThemeProvider({
+export const ThemeProvider = ({
   children,
   defaultTheme = "light",
-}: Readonly<ThemeProviderProps>) {
+}: Readonly<ThemeProviderProps>): JSX.Element => {
   const theme: Theme = useThemeStore((s) => s.theme);
   const hydratedRef = useRef<boolean>(false);
 
@@ -46,4 +46,4 @@ export function ThemeProvider({
   }, [theme]);
 
   return <>{children}</>;
-}
+};
