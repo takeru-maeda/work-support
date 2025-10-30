@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { CardContent } from "@/components/ui/card";
 import { Check, Copy } from "lucide-react";
 
 interface WeeklyReportPreviewProps {
@@ -14,7 +13,7 @@ export function WeeklyReportPreview({
   onCopy,
 }: Readonly<WeeklyReportPreviewProps>) {
   return (
-    <CardContent className="space-y-4">
+    <div className="space-y-4">
       <div className="relative">
         <div className="absolute right-2 top-2 z-10">
           <Button
@@ -42,6 +41,6 @@ export function WeeklyReportPreview({
           </pre>
         </div>
       </div>
-    </CardContent>
+    </div>
   );
 }

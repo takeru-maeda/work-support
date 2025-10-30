@@ -1,7 +1,10 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { EffortEntry, EffortFormData } from "@/features/effort/types";
+import type {
+  EffortEntry,
+  EffortFormData,
+} from "@/features/effort-entry/types";
 
 const STORAGE_KEY = "work-support-effort";
 

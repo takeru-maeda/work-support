@@ -3,17 +3,16 @@ import { GoalsDataTable } from "@/features/goals/components/current/GoalsDataTab
 import { GoalsWeightWarning } from "@/features/goals/components/current/GoalsWeightWarning";
 import { GoalContentDialog } from "@/features/goals/components/current/GoalContentDialog";
 import { useGoalsTableManager } from "@/features/goals/hooks/useGoalsTableManager";
+import GoalsEmptyPanel from "./GoalsEmptyPanel";
+import CardContainer from "@/components/shared/CardContainer";
 
 export function GoalsTable() {
   const {
     period,
-    setPeriodStart,
-    setPeriodEnd,
     sortedGoals,
     sortField,
     sortDirection,
     handleSort,
-    addGoal,
     removeGoal,
     updateGoalName,
     updateGoalWeight,
@@ -36,38 +35,40 @@ export function GoalsTable() {
 
   return (
     <>
-      <div className="w-full max-w-full overflow-hidden rounded-lg border border-border text-card-foreground shadow-sm">
-        <GoalsOverviewPanel
-          periodStart={period.start}
-          periodEnd={period.end}
-          onPeriodStartChange={setPeriodStart}
-          onPeriodEndChange={setPeriodEnd}
-          onAddGoal={onNavigateToAdd}
-          overallProgress={overallProgress}
-          weightedProgressSum={weightedProgressSum}
-          overallProgressDiff={overallProgressDiff}
-          weightedProgressDiff={weightedProgressDiff}
-        />
-
-        <div className="space-y-4 p-4 pt-0 sm:px-6">
-          <GoalsDataTable
-            goals={sortedGoals}
-            sortField={sortField}
-            sortDirection={sortDirection}
-            onSort={handleSort}
-            onNameChange={updateGoalName}
-            onWeightChange={updateGoalWeight}
-            onProgressChange={updateGoalProgress}
-            onRemove={removeGoal}
-            onViewContent={openContentDialog}
+      {sortedGoals.length > 0 ? (
+        <CardContainer>
+          <GoalsOverviewPanel
+            periodStart={period.start}
+            periodEnd={period.end}
+            onAddGoal={onNavigateToAdd}
+            overallProgress={overallProgress}
+            weightedProgressSum={weightedProgressSum}
+            overallProgressDiff={overallProgressDiff}
+            weightedProgressDiff={weightedProgressDiff}
           />
 
-          <GoalsWeightWarning
-            totalWeight={totalWeight}
-            isBalanced={isWeightBalanced}
-          />
-        </div>
-      </div>
+          <div className="space-y-4 pt-4 mb-1">
+            <GoalsDataTable
+              goals={sortedGoals}
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={handleSort}
+              onNameChange={updateGoalName}
+              onWeightChange={updateGoalWeight}
+              onProgressChange={updateGoalProgress}
+              onRemove={removeGoal}
+              onViewContent={openContentDialog}
+            />
+
+            <GoalsWeightWarning
+              totalWeight={totalWeight}
+              isBalanced={isWeightBalanced}
+            />
+          </div>
+        </CardContainer>
+      ) : (
+        <GoalsEmptyPanel onNavigateToAdd={onNavigateToAdd} />
+      )}
 
       <GoalContentDialog
         open={isContentDialogOpen}

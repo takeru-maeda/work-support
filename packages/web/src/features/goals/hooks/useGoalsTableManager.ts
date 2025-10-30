@@ -60,8 +60,6 @@ const HISTORICAL_DATA: HistoricalData[] = [
 
 interface UseGoalsTableManagerResult {
   period: { start?: Date; end?: Date };
-  setPeriodStart: (date?: Date) => void;
-  setPeriodEnd: (date?: Date) => void;
   goals: Goal[];
   sortedGoals: Goal[];
   totalWeight: number;
@@ -72,7 +70,6 @@ interface UseGoalsTableManagerResult {
   sortField: GoalSortField;
   sortDirection: SortDirection;
   handleSort: (field: GoalSortField) => void;
-  addGoal: () => void;
   removeGoal: (id: string) => void;
   updateGoalName: (id: string, name: string) => void;
   updateGoalWeight: (id: string, weight: number) => void;
@@ -125,7 +122,8 @@ export function useGoalsTableManager(): UseGoalsTableManagerResult {
   );
 
   const weightedProgressSum = useMemo(
-    () => goals.reduce((sum, goal) => sum + (goal.progress * goal.weight) / 100, 0),
+    () =>
+      goals.reduce((sum, goal) => sum + (goal.progress * goal.weight) / 100, 0),
     [goals],
   );
 
@@ -166,39 +164,31 @@ export function useGoalsTableManager(): UseGoalsTableManagerResult {
   const overallProgressDiff = overallProgress - previousWeekData.overall;
   const weightedProgressDiff = weightedProgressSum - previousWeekData.weighted;
 
-  const handleSort = useCallback((field: GoalSortField) => {
-    if (sortField === field) {
-      if (sortDirection === "asc") {
-        setSortDirection("desc");
-      } else if (sortDirection === "desc") {
-        setSortField(null);
-        setSortDirection(null);
+  const handleSort = useCallback(
+    (field: GoalSortField) => {
+      if (sortField === field) {
+        if (sortDirection === "asc") {
+          setSortDirection("desc");
+        } else if (sortDirection === "desc") {
+          setSortField(null);
+          setSortDirection(null);
+        }
+      } else {
+        setSortField(field);
+        setSortDirection("asc");
       }
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
-    }
-  }, [sortField, sortDirection]);
-
-  const addGoal = useCallback(() => {
-    setGoals((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        name: "",
-        weight: 0,
-        progress: 0,
-        content: "",
-      },
-    ]);
-  }, []);
+    },
+    [sortField, sortDirection],
+  );
 
   const removeGoal = useCallback((id: string) => {
     setGoals((prev) => prev.filter((goal) => goal.id !== id));
   }, []);
 
   const updateGoalName = useCallback((id: string, name: string) => {
-    setGoals((prev) => prev.map((goal) => (goal.id === id ? { ...goal, name } : goal)));
+    setGoals((prev) =>
+      prev.map((goal) => (goal.id === id ? { ...goal, name } : goal)),
+    );
   }, []);
 
   const updateGoalWeight = useCallback((id: string, weight: number) => {
@@ -217,14 +207,6 @@ export function useGoalsTableManager(): UseGoalsTableManagerResult {
           : goal,
       ),
     );
-  }, []);
-
-  const setPeriodStart = useCallback((date?: Date) => {
-    setPeriod((prev) => ({ ...prev, start: date }));
-  }, []);
-
-  const setPeriodEnd = useCallback((date?: Date) => {
-    setPeriod((prev) => ({ ...prev, end: date }));
   }, []);
 
   const openContentDialog = useCallback((goal: Goal) => {
@@ -260,8 +242,6 @@ export function useGoalsTableManager(): UseGoalsTableManagerResult {
 
   return {
     period,
-    setPeriodStart,
-    setPeriodEnd,
     goals,
     sortedGoals,
     totalWeight,
@@ -272,7 +252,6 @@ export function useGoalsTableManager(): UseGoalsTableManagerResult {
     sortField,
     sortDirection,
     handleSort,
-    addGoal,
     removeGoal,
     updateGoalName,
     updateGoalWeight,

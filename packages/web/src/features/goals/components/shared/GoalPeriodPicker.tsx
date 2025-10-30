@@ -17,19 +17,26 @@ export function GoalPeriodPicker({
   className,
 }: Readonly<GoalPeriodPickerProps>) {
   return (
-    <div className={cn("flex flex-wrap items-center gap-2 text-sm", className)}>
-      <span className="text-muted-foreground">期間:</span>
-      <DatePicker
-        date={periodStart}
-        onDateChange={onPeriodStartChange}
-        placeholder="開始日"
-      />
-      <span className="text-muted-foreground">-</span>
-      <DatePicker
-        date={periodEnd}
-        onDateChange={onPeriodEndChange}
-        placeholder="終了日"
-      />
+    <div
+      className={cn(
+        "flex flex-col sm:flex-row items-center gap-2 text-sm",
+        className,
+      )}
+    >
+      <span className="text-muted-foreground mr-auto sm:mr-0">期間:</span>
+      <div className="flex items-center gap-2 mr-auto sm:mr-0">
+        <DatePicker
+          date={periodStart}
+          onDateChange={onPeriodStartChange}
+          placeholder="開始日"
+        />
+        <span className="text-muted-foreground">-</span>
+        <DatePicker
+          date={periodEnd}
+          onDateChange={onPeriodEndChange}
+          placeholder="終了日"
+        />
+      </div>
     </div>
   );
 }

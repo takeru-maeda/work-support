@@ -5,7 +5,7 @@
 - **ホーム画面 (`/`)**
   - アプリ全体のハブとして、主要機能（工数登録・目標管理・週報出力）へのカード型リンクを配置する。
   - 固定ヘッダーに現在ログイン中ユーザーのメニュー、テーマ切り替え、グローバルナビゲーションを持つ。
-- **工数登録画面 (`/effort`)**
+- **工数登録画面 (`/efforts/new`)**
   - 日付選択、工数エントリ一覧、サマリー（案件別集計）を表示する。
   - 工数エントリはドラッグ＆ドロップで並び替え、既存案件・タスク候補から選択、見積／実績工数入力、メモ入力を行う。
   - 入力内容はローカルストレージに自動保存し、送信後にリセットする。
@@ -14,8 +14,10 @@
   - 画面遷移時に `GET /api/projects`、`GET /api/tasks`、`GET /api/effort/draft` を並列で呼び出し、取得した案件・タスクをコンボボックスへ表示する。ドラフトが存在する場合はフォームへ初期反映する。
   - メール通知の有効/無効はユーザー設定（`user_settings.notify_effort_email`）に基づき、UI ではトグルを表示して変更できる。
   - 実績工数 (`hours`) は必須入力とし、空の場合は送信できない。
+- **工数一覧画面 (`/efforts`)**
+  - 登録済み工数を一覧で表示し、必要に応じて並び替えや絞り込み機能を提供する。
 - **目標管理画面 (`/goals`)**
-  - 最新期間の目標一覧をテーブル表示し、各行の更新ボタンから目標（タイトル）、ウェイト、進捗率を一括更新できる。ウェイト合計が100%でない場合は更新ボタンを非活性とする。
+  - 最新期間の目標一覧をテーブル表示し、各行の更新ボタンから目標（タイトル）、ウェイト、進捗率を一括更新できる。ウェイト合計が100%でない場合は更新ボタンを非活性とする。初期表示は `GET /api/goals/current` のレスポンスを使用する。
   - 内容（詳細記述）は行内リンクから開くダイアログで編集し、保存時に `PUT /api/goals/:id` へ内容を送信する。
   - 期間フィールドは表示のみとし、UIから編集不可とする。
   - 削除ボタン押下時は確認ダイアログを表示し、目標タイトルと一致するテキストが入力された場合のみ最終削除操作（`DELETE /api/goals/:id`）を許可する。
@@ -56,9 +58,9 @@
 
 ## アーキテクチャ
 
-フロントエンドは Vite + React Router で構成する SPA とし、UI は shadcn/ui をベースに**BalletProof（Bulletproof React を基にした本プロジェクト向け拡張）構成**で再利用性と可読性を確保する。BalletProof では「アプリ全体の骨格」「機能ごとの境界」「共有資産」をレイヤー分割し、関心の分離を徹底する。
+フロントエンドは Vite + React Router で構成する SPA とし、UI は shadcn/ui をベースに**Balletproof（Bulletproof React を基にした本プロジェクト向け拡張）構成**で再利用性と可読性を確保する。Balletproof では「アプリ全体の骨格」「機能ごとの境界」「共有資産」をレイヤー分割し、関心の分離を徹底する。
 
-### BalletProof ディレクトリ構成（計画） `packages/web/src`
+### Balletproof ディレクトリ構成（計画） `packages/web/src`
 
 ```
 packages/web/src/
@@ -69,8 +71,9 @@ packages/web/src/
 ├── pages/                # ルーティング単位のページ（React Router の element 実体）
 │   ├── home/
 │   │   └── HomePage.tsx
-│   ├── effort/
-│   │   └── EffortPage.tsx
+│   ├── efforts/
+│   │   ├── EffortsPage.tsx
+│   │   └── EffortsNewPage.tsx
 │   ├── goals/
 │   │   └── GoalsPage.tsx
 │   ├── weekly-report/
@@ -108,7 +111,7 @@ packages/web/src/
 ## 主要な技術要素の役割
 
 - **ルーティング (`React Router`)**:
-  - `/`, `/effort`, `/goals`, `/weekly-report`, `/profile`, `/login`, `/signup` などのパスを `Routes` で管理する。
+  - `/`, `/efforts`, `/efforts/new`, `/goals`, `/weekly-report`, `/profile`, `/login`, `/signup` などのパスを `Routes` で管理する。
   - `AuthGuard` コンポーネントを利用して、認証が必要なルートで未ログイン時に `/login` へ遷移させる。
 - **コンポーネント (`React`, `shadcn/ui`)**:
   - `components/ui` には `shadcn/ui` から導入した再利用可能な最小単位のコンポーネントを配置する。

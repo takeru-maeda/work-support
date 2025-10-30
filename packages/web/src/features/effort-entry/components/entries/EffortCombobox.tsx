@@ -67,7 +67,7 @@ export function EffortCombobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
+      <PopoverContent className="w-auto p-0" align="start">
         <Command>
           <CommandInput
             placeholder={`${placeholder}を検索または入力...`}
@@ -75,7 +75,7 @@ export function EffortCombobox({
             onValueChange={handleInputChange}
           />
           <CommandList>
-            <CommandEmpty>
+            <CommandEmpty className="py-0">
               <div className="p-2">
                 <Button
                   variant="ghost"
@@ -96,7 +96,7 @@ export function EffortCombobox({
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "mr-1 h-4 w-4",
                       value === item ? "opacity-100" : "opacity-0",
                     )}
                   />

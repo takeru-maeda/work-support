@@ -45,7 +45,8 @@ packages/api/src/
 | `POST` | `/api/effort` | APIキー | Google フォーム経由のテキスト工数登録 |
 | `POST` | `/api/effort/entries` | JWT | Web UI から送信される構造化工数の登録 |
 | `GET/PUT/DELETE` | `/api/effort/draft` | JWT | 工数ドラフトの取得／保存／削除 |
-| `GET/POST/PUT/DELETE` | `/api/goals` | JWT | 目標の取得・作成・更新・削除 |
+| `GET` | `/api/goals/current` | JWT | 最新期間の目標取得 |
+| `POST/PUT/DELETE` | `/api/goals` | JWT | 目標の作成・更新・削除 |
 | `GET` | `/api/goals/history` | JWT | 過去目標の検索 |
 | `GET` | `/api/goals/progress/previous-week` | JWT | 前週末の進捗取得 |
 | `GET/PUT` | `/api/missions` | JWT | ミッションの取得・更新 |

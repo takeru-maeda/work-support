@@ -353,7 +353,47 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      work_record_diffs: {
+        Row: {
+          created_at: string | null;
+          estimated_hours: number | null;
+          hours: number | null;
+          hours_diff: number | null;
+          id: number | null;
+          task_id: number | null;
+          user_id: string | null;
+          work_date: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          estimated_hours?: number | null;
+          hours?: number | null;
+          hours_diff?: never;
+          id?: number | null;
+          task_id?: number | null;
+          user_id?: string | null;
+          work_date?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          estimated_hours?: number | null;
+          hours?: number | null;
+          hours_diff?: never;
+          id?: number | null;
+          task_id?: number | null;
+          user_id?: string | null;
+          work_date?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "work_records_task_id_fkey";
+            columns: ["task_id"];
+            isOneToOne: false;
+            referencedRelation: "tasks";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Functions: {
       [_ in never]: never;

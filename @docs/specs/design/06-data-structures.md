@@ -80,6 +80,7 @@ export const EmailResponseSchema = z.object({
 
 export type EmailRequest = z.infer<typeof EmailRequestSchema>;
 export type EmailResponse = z.infer<typeof EmailResponseSchema>;
+```
 
 ## ユーザー設定スキーマ
 
@@ -99,7 +100,6 @@ export type CreateUserSettingsRequest = z.infer<
   typeof CreateUserSettingsRequestSchema
 >;
 export type UserSettings = z.infer<typeof UserSettingsSchema>;
-```
 ```
 
 ## 目標データペイロード

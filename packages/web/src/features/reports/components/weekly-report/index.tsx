@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Card, CardHeader } from "@/components/ui/card";
 import { format, startOfWeek, endOfWeek } from "date-fns";
 import { ja } from "date-fns/locale";
 
@@ -7,6 +6,7 @@ import { WeeklyReportControls } from "@/features/reports/components/weekly-repor
 import { WeeklyReportPreview } from "@/features/reports/components/weekly-report/WeeklyReportPreview";
 import { SectionHeader } from "@/components/sections/SectionHeader";
 import { FileText } from "lucide-react";
+import CardContainer from "@/components/shared/CardContainer";
 
 export function WeeklyReport() {
   const [date, setDate] = useState<Date>(new Date());
@@ -58,22 +58,20 @@ export function WeeklyReport() {
   };
 
   return (
-    <Card className="border-border bg-card">
-      <CardHeader>
-        <SectionHeader
-          icon={FileText}
-          iconClassName="bg-chart-3/10 text-chart-3"
-          title="週報出力"
-          description="週報の雛形を出力します"
-        />
-        <WeeklyReportControls
-          date={date}
-          weekStart={weekStart}
-          weekEnd={weekEnd}
-          onDateChange={(next) => setDate(next)}
-          onOutput={handleOutput}
-        />
-      </CardHeader>
+    <CardContainer className="space-y-4">
+      <SectionHeader
+        icon={FileText}
+        iconClassName="bg-chart-3/10 text-chart-3"
+        title="週報出力"
+        description="週報の雛形を出力します"
+      />
+      <WeeklyReportControls
+        date={date}
+        weekStart={weekStart}
+        weekEnd={weekEnd}
+        onDateChange={(next) => setDate(next)}
+        onOutput={handleOutput}
+      />
 
       {showReport && (
         <WeeklyReportPreview
@@ -82,6 +80,6 @@ export function WeeklyReport() {
           onCopy={handleCopy}
         />
       )}
-    </Card>
+    </CardContainer>
   );
 }

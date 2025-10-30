@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/config/routes";
 import { getCurrentUser, type AuthUser } from "@/lib/auth";
 import { useUserStore } from "@/store/user";
-import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
+import { PageSkeleton } from "@/components/skeleton/PageSkeleton";
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -49,7 +49,7 @@ export function AuthGuard({ children }: Readonly<AuthGuardProps>) {
     };
   }, [clearUser, navigate, setUser]);
 
-  if (checking) return <LoadingSkeleton />;
+  if (checking) return <PageSkeleton />;
   if (!user) return null;
 
   return <>{children}</>;

@@ -73,6 +73,27 @@ Supabaseの認証機能が提供する `auth.users` テーブルをそのまま�
 | `estimated_hours` | NUMERIC(4,2) | | Y | N | 見積工数（時間） |
 | `created_at` | TIMESTAMPTZ | | N | N | 作成日時 |
 
+#### ビュー: `work_record_diffs`
+
+保存済み工数と見積との差分を検索・ソートしやすくするための派生ビュー。
+
+```sql
+CREATE VIEW work_record_diffs AS
+SELECT
+  id,
+  user_id,
+  task_id,
+  work_date,
+  hours,
+  estimated_hours,
+  hours - COALESCE(estimated_hours, 0) AS hours_diff,
+  created_at
+FROM work_records;
+```
+
+- `hours_diff` は実績 (`hours`) と見積 (`estimated_hours`) の差分（実績 - 見積）を表す。
+- ビューに対して `hours_diff` を用いた並び替えや範囲検索を行い、必要に応じて関数インデックスを追加する。
+
 ### `work_entry_drafts` (工数ドラフト)
 
 工数入力画面で送信前の内容をユーザー単位で一時的に保存する。

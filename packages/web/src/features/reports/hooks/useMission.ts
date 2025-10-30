@@ -10,15 +10,19 @@ import {
   type MissionGetResponse,
 } from "@shared/schemas/missions";
 import type { Mission } from "../types";
+import { useUserStore } from "@/store/user";
+import type { AuthUser } from "@/lib/auth";
 
 export function useMission() {
   const fetcher = useCallback(async () => {
     const response = await apiClient.get(API_ENDPOINTS.missions);
     return GetMissionResponseSchema.parse(response.data);
   }, []);
+  const user: AuthUser | null = useUserStore.getState().user;
+  if (!user) throw new Error("User not authenticated");
 
   const { data, error, isLoading, mutate, isValidating } =
-    useSWR<MissionGetResponse>(API_ENDPOINTS.missions, fetcher);
+    useSWR<MissionGetResponse>(`${API_ENDPOINTS.missions}_${user.id}`, fetcher);
 
   const mission: Mission | null = data?.mission ?? null;
 

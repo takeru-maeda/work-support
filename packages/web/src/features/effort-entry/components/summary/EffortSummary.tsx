@@ -1,7 +1,8 @@
+import CardContainer from "@/components/shared/CardContainer";
 import { Label } from "@/components/ui/label";
 
-import { DifferenceBadge } from "@/features/effort/components/entries/DifferenceBadge";
-import type { ProjectBreakdownItem } from "../../types";
+import { DifferenceBadge } from "@/features/effort-entry/components/entries/DifferenceBadge";
+import type { ProjectBreakdownItem } from "@/features/effort-entry/types";
 
 interface EffortSummaryProps {
   projectBreakdown: ProjectBreakdownItem[];
@@ -17,7 +18,7 @@ export function EffortSummary({
   const totalDifference = totalActual - totalEstimated;
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4 text-card-foreground shadow-sm">
+    <CardContainer>
       <div className="space-y-6">
         {projectBreakdown.length > 0 && (
           <div className="space-y-4">
@@ -35,7 +36,7 @@ export function EffortSummary({
                   </div>
                   <div className="flex gap-3 sm:contents">
                     <div className="flex flex-1 items-center gap-2 sm:flex-none">
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-xs sm:text-sm text-muted-foreground">
                         見積:
                       </span>
                       <span className="font-semibold">
@@ -43,7 +44,7 @@ export function EffortSummary({
                       </span>
                     </div>
                     <div className="flex flex-1 items-center gap-2 sm:flex-none">
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-xs sm:text-sm text-muted-foreground">
                         実績:
                       </span>
                       <span className="font-semibold">
@@ -51,7 +52,7 @@ export function EffortSummary({
                       </span>
                     </div>
                     <div className="flex flex-1 items-center gap-2 sm:flex-none">
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-xs sm:text-sm text-muted-foreground">
                         差分:
                       </span>
                       <span className="font-semibold">
@@ -74,17 +75,21 @@ export function EffortSummary({
           </h3>
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label className="text-muted-foreground">見積もり合計</Label>
-              <p className="text-2xl font-bold">{totalEstimated.toFixed(1)}h</p>
+              <Label className="text-muted-foreground">見積合計</Label>
+              <p className="text-xl sm:text-2xl font-bold">
+                {totalEstimated.toFixed(1)}h
+              </p>
             </div>
             <div className="space-y-2">
               <Label className="text-muted-foreground">実績合計</Label>
-              <p className="text-2xl font-bold">{totalActual.toFixed(1)}h</p>
+              <p className="text-xl sm:text-2xl font-bold">
+                {totalActual.toFixed(1)}h
+              </p>
             </div>
             <div className="space-y-2">
               <Label className="text-muted-foreground">差分</Label>
               <div className="flex items-center gap-2">
-                <p className="text-2xl font-bold">
+                <p className="text-xl sm:text-2xl font-bold">
                   {totalDifference.toFixed(1)}h
                 </p>
                 <DifferenceBadge difference={totalDifference} />
@@ -93,6 +98,6 @@ export function EffortSummary({
           </div>
         </div>
       </div>
-    </div>
+    </CardContainer>
   );
 }

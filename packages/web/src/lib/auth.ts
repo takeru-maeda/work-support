@@ -194,8 +194,7 @@ export async function updateProfile(
 export async function requestPasswordReset(
   email: string,
 ): Promise<BasicResult> {
-  const origin: string =
-    typeof window !== "undefined" ? window.location.origin : "";
+  const origin: string = globalThis.window?.location.origin ?? "";
   const redirectTo: string | undefined = origin
     ? `${origin}${ROUTES.resetPassword}`
     : undefined;

@@ -1,12 +1,10 @@
-"use client";
-
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 
-import { EffortEntries } from "@/features/effort/components/entries";
-import { EffortSummary } from "@/features/effort/components/summary/EffortSummary";
-import { useEffortFormManager } from "@/features/effort/hooks/useEffortFormManager";
+import { EffortEntries } from "@/features/effort-entry/components/entries";
+import { EffortSummary } from "@/features/effort-entry/components/summary/EffortSummary";
+import { useEffortFormManager } from "@/features/effort-entry/hooks/useEffortFormManager";
 
 export function EffortForm() {
   const {
@@ -37,18 +35,16 @@ export function EffortForm() {
 
       <section className="space-y-2">
         <h2 className="text-xl font-semibold">工数入力</h2>
-        <div className="rounded-lg border border-border bg-card p-4 text-card-foreground shadow-sm">
-          <EffortEntries
-            entries={formData.entries}
-            draggedIndex={draggedIndex}
-            onAdd={addEntry}
-            onUpdate={updateEntry}
-            onRemove={removeEntry}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-          />
-        </div>
+        <EffortEntries
+          entries={formData.entries}
+          draggedIndex={draggedIndex}
+          onAdd={addEntry}
+          onUpdate={updateEntry}
+          onRemove={removeEntry}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        />
       </section>
 
       {hasEntries && (
@@ -69,7 +65,7 @@ export function EffortForm() {
           value={formData.memo}
           onChange={(event) => setMemo(event.target.value)}
           rows={6}
-          className="resize-y"
+          className="resize-y text-sm h-auto"
         />
       </section>
 

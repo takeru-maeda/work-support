@@ -32,17 +32,21 @@ export function GoalProgressCard({
         <div className={`rounded-md p-1.5 ${iconClassName}`}>
           <Icon className="h-4 w-4" />
         </div>
-        <span className="text-sm font-medium text-muted-foreground">{title}</span>
+        <span className="text-sm font-medium text-muted-foreground">
+          {title}
+        </span>
       </div>
       <div className="space-y-3">
-        <div className="flex items-baseline gap-2">
-          <div className="text-3xl font-bold text-foreground tabular-nums sm:text-4xl">
+        <div className="flex items-baseline gap-1 sm:gap-2">
+          <div className="text-2xl font-bold text-foreground tabular-nums sm:text-4xl">
             {value.toFixed(1)}
-            <span className="ml-1 text-2xl text-muted-foreground sm:text-3xl">
+            <span className="ml-1 text-lg text-muted-foreground sm:text-3xl">
               %
             </span>
           </div>
-          <span className={`text-sm font-semibold ${getProgressDiffClass(diff)}`}>
+          <span
+            className={`text-xs sm:text-lg font-semibold ${getProgressDiffClass(diff)}`}
+          >
             {formatProgressDiff(diff)}
           </span>
         </div>

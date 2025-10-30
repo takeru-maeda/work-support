@@ -9,7 +9,7 @@
 | `PUT` | `/api/effort/draft` | JWT | **工数ドラフト保存**: 入力途中の工数内容を一時保存する。 |
 | `DELETE` | `/api/effort/draft` | JWT | **工数ドラフト削除**: 送信完了後に一時保存された工数内容を削除する。 |
 | `POST` | `/api/effort/entries` | JWT | **工数登録（構造化）**: Web UIから送信された構造化データを保存する。 |
-| `GET` | `/api/goals` | JWT | **目標取得**: `end_date`が最も未来日に設定されている期間の目標群を取得する。 |
+| `GET` | `/api/goals/current` | JWT | **目標取得**: `end_date`が最も未来日に設定されている期間の目標群を取得する。 |
 | `GET` | `/api/goals/history` | JWT | **過去目標取得**: 条件に応じてユーザーの過去目標を検索する。 |
 | `GET` | `/api/goals/progress/previous-week` | JWT | **前週進捗取得**: 前週末時点の最新進捗率を取得する。 |
 | `POST` | `/api/goals` | JWT | **目標作成**: 新しい目標を作成する。 |
@@ -190,7 +190,7 @@
 
 ---
 
-### GET /api/goals
+### GET /api/goals/current
 
 **Description:** 最新の目標のリストを取得します
 

@@ -19,6 +19,7 @@
 - [x] `projects` テーブルを定義する
 - [x] `tasks` テーブルを定義する
 - [x] `work_records` テーブルを定義する
+- [x] `work_records` の差分ビュー `work_record_diffs` を追加する
 - [x] `work_entry_drafts` テーブルを定義する
 - [x] `work_entry_drafts` に `client_updated_at` カラムを追加する
 - [x] `goals` テーブルに `content` カラムを追加する
@@ -62,9 +63,9 @@
 - [x] ルートを定義する (`features/missions/index.ts`)
 - [x] ミッションの取得・更新ロジックを実装する (`features/missions/service.ts`, `repository.ts`)
 
-### 3.4. 目標管理機能 (`/api/goals`)
+### 3.4. 目標管理機能 (`/api/goals`, `/api/goals/current`)
 - [x] ルートを定義する (`features/goals/index.ts`)
-- [x] 最新期間の目標取得、およびCRUDロジックを実装する (`features/goals/service.ts`, `repository.ts`)
+- [x] 最新期間の目標取得（`GET /api/goals/current`）およびCRUDロジックを実装する (`features/goals/service.ts`, `repository.ts`)
 - [ ] 目標作成・更新APIで `content` を取り扱う
 - [ ] 前週進捗取得APIを実装する (`GET /api/goals/progress/previous-week`)
 - [ ] 過去目標検索APIを実装する（キーワード・期間・進捗率フィルタ、複数ソートに対応）(`GET /api/goals/history`)
@@ -118,7 +119,7 @@
 - [x] プロフィール画面で名前・プロフィール画像の更新処理を実装する (`/profile`)
 - [ ] 設定画面を実装し、工数メール通知トグルを `user_settings` と同期する (`/settings`)
 
-### 4.6. 工数登録画面 (`/effort`)
+### 4.6. 工数登録画面 (`/efforts/new`)
 - [ ] 実績工数 (`hours`) の必須入力バリデーションを実装する
 - [ ] 完了メール送信結果を UI にフィードバックする（成功/失敗トーストなど）
 - [ ] 工数入力内容から差分・集計を表示し、メール本文と同じ形式で確認できるようにする

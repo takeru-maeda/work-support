@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-import type { EffortEntry } from "@/features/effort/types";
-import { DifferenceBadge } from "@/features/effort/components/entries/DifferenceBadge";
-import { ProjectCombobox } from "@/features/effort/components/entries/ProjectCombobox";
-import { TaskCombobox } from "@/features/effort/components/entries/TaskCombobox";
+import type { EffortEntry } from "@/features/effort-entry/types";
+import { DifferenceBadge } from "@/features/effort-entry/components/entries/DifferenceBadge";
+import { ProjectCombobox } from "@/features/effort-entry/components/entries/ProjectCombobox";
+import { TaskCombobox } from "@/features/effort-entry/components/entries/TaskCombobox";
 
 interface EffortRowProps {
   entry: EffortEntry;
@@ -55,12 +55,12 @@ export function EffortRow({
         isDragging && "opacity-50",
       )}
     >
-      <div className="flex items-start gap-2">
-        <div className="flex-shrink-0 pt-2">
-          <GripVertical className="h-5 w-5 text-muted-foreground" />
+      <div className="flex items-start gap-1 sm:gap-2">
+        <div className="flex-shrink-0 pt-2 hidden sm:block">
+          <GripVertical className="size-4 sm:size-5 text-muted-foreground" />
         </div>
-        <div className="flex-1 space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="flex-1 space-y-2 sm:space-y-4">
+          <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2">
             <ProjectCombobox
               value={entry.project}
               onChange={(value) => onUpdate(entry.id, "project", value)}
@@ -71,7 +71,7 @@ export function EffortRow({
             />
           </div>
 
-          <div className="grid items-end gap-4 grid-cols-2 sm:grid-cols-4">
+          <div className="grid items-end gap-2 sm:gap-4 grid-cols-2 sm:grid-cols-4">
             <Input
               type="number"
               min="0"
@@ -85,6 +85,7 @@ export function EffortRow({
                 )
               }
               placeholder="見積工数(h)"
+              className="text-sm"
             />
 
             <Input
@@ -100,6 +101,7 @@ export function EffortRow({
                 )
               }
               placeholder="実績工数(h)"
+              className="text-sm"
             />
 
             <div className="flex items-center gap-2 h-10">

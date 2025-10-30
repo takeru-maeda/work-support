@@ -28,7 +28,7 @@ const goals = new Hono<HonoEnv>();
 goals.use("*", jwtAuthMiddleware);
 
 goals.get(
-  "/",
+  "/current",
   describeRoute({
     description: "最新の目標のリストを取得します",
     responses: {

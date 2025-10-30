@@ -1,25 +1,38 @@
 import { User } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import CardContainer from "@/components/shared/CardContainer";
+import { FormActions } from "@/components/form/FormActions";
+import { Button } from "@/components/ui/button";
+import { SectionHeader } from "@/components/sections/SectionHeader";
 
 interface ProfileNameSectionProps {
-  isEditing: boolean;
   name: string;
+  isEditing: boolean;
+  saving: boolean;
   onChange: (value: string) => void;
+  onSave: () => Promise<void>;
+  onCancel: () => void;
+  beginEditing: () => void;
 }
 
 export function ProfileNameSection({
-  isEditing,
   name,
+  isEditing,
+  saving,
   onChange,
+  onSave,
+  onCancel,
+  beginEditing,
 }: Readonly<ProfileNameSectionProps>) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor="name" className="flex items-center gap-2">
-        <User className="h-4 w-4" />
-        ユーザー名
-      </Label>
+    <CardContainer className="space-y-4">
+      <SectionHeader
+        icon={User}
+        iconClassName="bg-chart-2/10 text-chart-2"
+        title="ユーザー名"
+        titleClassName="text-md"
+      />
       {isEditing ? (
         <Input
           id="name"
@@ -30,6 +43,21 @@ export function ProfileNameSection({
       ) : (
         <p className="text-foreground">{name || "未設定"}</p>
       )}
-    </div>
+
+      <div className="flex gap-2 justify-end">
+        {isEditing ? (
+          <FormActions
+            saveLabel={saving ? "保存中..." : "保存"}
+            onCancel={onCancel}
+            onSave={onSave}
+            saveDisabled={saving}
+          />
+        ) : (
+          <Button onClick={beginEditing} disabled={saving}>
+            編集
+          </Button>
+        )}
+      </div>
+    </CardContainer>
   );
 }

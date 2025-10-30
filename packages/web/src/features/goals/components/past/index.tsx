@@ -1,13 +1,27 @@
 import { useMemo, useState } from "react";
 import { PastGoalContentDialog } from "@/features/goals/components/past/PastGoalContentDialog";
 import { PastGoalsDataTable } from "@/features/goals/components/past/PastGoalsDataTable";
-import { PastGoalsPagination } from "@/features/goals/components/past/PastGoalsPagination";
-import { PastGoalsTableHeader } from "@/features/goals/components/past/PastGoalsTableHeader";
 import type {
   PastGoal,
   SortDirection,
   SortField,
 } from "@/features/goals/types";
+import { PastGoalsFilter } from "@/features/goals/components/past/PastGoalsFilter";
+import { TableFooter } from "@/components/table-footer/TableFooter";
+import CardContainer from "@/components/shared/CardContainer";
+import { SectionHeader } from "@/components/sections/SectionHeader";
+import { History } from "lucide-react";
+
+const toDateFromPeriodSegment = (
+  segment: string | undefined,
+): Date | undefined => {
+  if (!segment) {
+    return undefined;
+  }
+  const normalized = segment.trim().replace(/\//g, "-");
+  const parsed = new Date(normalized);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+};
 
 const INITIAL_GOALS: PastGoal[] = [
   {
@@ -83,6 +97,30 @@ export function PastGoalsTable() {
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [selectedGoal, setSelectedGoal] = useState<PastGoal | null>(null);
   const [isContentDialogOpen, setIsContentDialogOpen] = useState(false);
+  const [filterTitle, setFilterTitle] = useState<string>("");
+  const [filterStartDate, setFilterStartDate] = useState<Date | undefined>(
+    undefined,
+  );
+  const [filterEndDate, setFilterEndDate] = useState<Date | undefined>(
+    undefined,
+  );
+  const [filterProgressMin, setFilterProgressMin] = useState<number | null>(
+    null,
+  );
+  const [filterProgressMax, setFilterProgressMax] = useState<number | null>(
+    null,
+  );
+  const [tempFilterTitle, setTempFilterTitle] = useState<string>("");
+  const [tempFilterStartDate, setTempFilterStartDate] = useState<
+    Date | undefined
+  >(undefined);
+  const [tempFilterEndDate, setTempFilterEndDate] = useState<Date | undefined>(
+    undefined,
+  );
+  const [tempFilterProgressMin, setTempFilterProgressMin] =
+    useState<string>("");
+  const [tempFilterProgressMax, setTempFilterProgressMax] =
+    useState<string>("");
 
   const handleSort = (field: SortField) => {
     if (sortBy === field) {
@@ -98,10 +136,51 @@ export function PastGoalsTable() {
     }
   };
 
-  const sortedGoals = useMemo(() => {
-    if (!sortBy || !sortDirection) return pastGoals;
+  const filteredGoals = useMemo(() => {
+    return pastGoals.filter((goal) => {
+      const titleMatch = filterTitle
+        ? goal.name.toLowerCase().includes(filterTitle.toLowerCase())
+        : true;
 
-    return [...pastGoals].sort((a, b) => {
+      const [periodStartRaw, periodEndRaw] = goal.period.split("-");
+      const periodStart = toDateFromPeriodSegment(periodStartRaw);
+      const periodEnd =
+        toDateFromPeriodSegment(periodEndRaw) ?? periodStart ?? undefined;
+
+      const startDateMatch = filterStartDate
+        ? (periodEnd ?? periodStart ?? new Date(0)) >= filterStartDate
+        : true;
+      const endDateMatch = filterEndDate
+        ? (periodStart ?? periodEnd ?? new Date(8640000000000000)) <=
+          filterEndDate
+        : true;
+
+      const progressMinMatch =
+        !filterProgressMin || goal.progress >= filterProgressMin;
+      const progressMaxMatch =
+        !filterProgressMax || goal.progress <= filterProgressMax;
+
+      return (
+        titleMatch &&
+        startDateMatch &&
+        endDateMatch &&
+        progressMinMatch &&
+        progressMaxMatch
+      );
+    });
+  }, [
+    pastGoals,
+    filterTitle,
+    filterStartDate,
+    filterEndDate,
+    filterProgressMin,
+    filterProgressMax,
+  ]);
+
+  const sortedGoals = useMemo(() => {
+    if (!sortBy || !sortDirection) return filteredGoals;
+
+    return [...filteredGoals].sort((a, b) => {
       const aValue = a[sortBy];
       const bValue = b[sortBy];
 
@@ -117,14 +196,14 @@ export function PastGoalsTable() {
 
       return 0;
     });
-  }, [pastGoals, sortBy, sortDirection]);
+  }, [filteredGoals, sortBy, sortDirection]);
 
-  const totalPages = Math.ceil(sortedGoals.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(sortedGoals.length / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentGoals = sortedGoals.slice(startIndex, startIndex + itemsPerPage);
 
-  const handleItemsPerPageChange = (value: string) => {
-    setItemsPerPage(Number(value));
+  const handleItemsPerPageChange = (value: number) => {
+    setItemsPerPage(value);
     setCurrentPage(1);
   };
 
@@ -133,12 +212,67 @@ export function PastGoalsTable() {
     setIsContentDialogOpen(true);
   };
 
+  const toProgressFilterValue = (value: string): number | null => {
+    if (value.trim() === "") {
+      return null;
+    }
+    const parsed = Number(value);
+    if (Number.isNaN(parsed)) {
+      return null;
+    }
+    const clamped = Math.min(Math.max(parsed, 0), 100);
+    return clamped;
+  };
+
+  const handleApplyFilter = () => {
+    setFilterTitle(tempFilterTitle.trim());
+    setFilterStartDate(tempFilterStartDate);
+    setFilterEndDate(tempFilterEndDate);
+    setFilterProgressMin(toProgressFilterValue(tempFilterProgressMin));
+    setFilterProgressMax(toProgressFilterValue(tempFilterProgressMax));
+    setCurrentPage(1);
+  };
+
+  const handleClearFilter = () => {
+    setTempFilterTitle("");
+    setTempFilterStartDate(undefined);
+    setTempFilterEndDate(undefined);
+    setTempFilterProgressMin("");
+    setTempFilterProgressMax("");
+    setFilterTitle("");
+    setFilterStartDate(undefined);
+    setFilterEndDate(undefined);
+    setFilterProgressMin(null);
+    setFilterProgressMax(null);
+    setCurrentPage(1);
+  };
+
   return (
     <>
-      <div className="w-full max-w-full overflow-hidden rounded-lg border border-border text-card-foreground shadow-sm">
-        <PastGoalsTableHeader />
+      <CardContainer className="space-y-4">
+        <SectionHeader
+          icon={History}
+          iconClassName="bg-muted"
+          title="過去の目標"
+          description="完了した目標の履歴"
+        />
 
-        <div className="space-y-4 p-4 pt-0 sm:px-6">
+        <PastGoalsFilter
+          titleValue={tempFilterTitle}
+          onTitleChange={(value) => setTempFilterTitle(value)}
+          startDate={tempFilterStartDate}
+          onStartDateChange={setTempFilterStartDate}
+          endDate={tempFilterEndDate}
+          onEndDateChange={setTempFilterEndDate}
+          progressMinValue={tempFilterProgressMin}
+          onProgressMinChange={(value) => setTempFilterProgressMin(value)}
+          progressMaxValue={tempFilterProgressMax}
+          onProgressMaxChange={(value) => setTempFilterProgressMax(value)}
+          onApply={handleApplyFilter}
+          onClear={handleClearFilter}
+        />
+
+        <div className="space-y-2 mb-2">
           <PastGoalsDataTable
             goals={currentGoals}
             sortBy={sortBy}
@@ -147,7 +281,8 @@ export function PastGoalsTable() {
             onViewContent={handleOpenContent}
           />
 
-          <PastGoalsPagination
+          <TableFooter
+            itemCount={sortedGoals.length}
             currentPage={currentPage}
             totalPages={totalPages}
             itemsPerPage={itemsPerPage}
@@ -155,7 +290,7 @@ export function PastGoalsTable() {
             onItemsPerPageChange={handleItemsPerPageChange}
           />
         </div>
-      </div>
+      </CardContainer>
 
       <PastGoalContentDialog
         open={isContentDialogOpen}

@@ -1,4 +1,4 @@
-import { Clock, FileText, Target } from "lucide-react";
+import { Clock, FileText, List, Target } from "lucide-react";
 
 import { ROUTES } from "@/config/routes";
 import type { AuthUser } from "@/lib/auth";
@@ -20,12 +20,18 @@ export default function HomePage() {
           </p>
         </header>
 
-        <div className="mx-auto grid max-w-5xl gap-3 sm:gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
+        <div className="mx-auto grid max-w-5xl gap-3 sm:gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-4">
           <HomeFeatureCard
-            to={ROUTES.effort}
+            to={ROUTES.effortsNew}
             icon={Clock}
             title="工数登録"
-            description="日々の作業時間を記録・管理"
+            description="日々の作業内容と時間を記録"
+          />
+          <HomeFeatureCard
+            to={ROUTES.efforts}
+            icon={List}
+            title="工数一覧"
+            description="登録された工数データの確認"
           />
           <HomeFeatureCard
             to={ROUTES.goals}

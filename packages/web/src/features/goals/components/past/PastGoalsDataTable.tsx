@@ -14,6 +14,8 @@ import type {
   SortDirection,
   SortField,
 } from "@/features/goals/types";
+import { TableResizeHandle } from "@/components/resizable/TableResizeHandle";
+import { useTableResize } from "@/hooks/useTableResize";
 
 interface PastGoalsDataTableProps {
   goals: PastGoal[];
@@ -36,9 +38,18 @@ export function PastGoalsDataTable({
     return <ArrowDown className="h-4 w-4" />;
   };
 
+  const { tableHeight, isResizing, handleResizeStart } = useTableResize({
+    initialHeight: 240,
+    minHeight: 240,
+    maxHeight: 720,
+  });
+
   return (
     <div className="rounded-lg border border-border overflow-hidden">
-      <div className="overflow-x-auto">
+      <div
+        className="overflow-x-auto overflow-y-auto"
+        style={{ height: `${tableHeight}px` }}
+      >
         <Table className="min-w-[500px]">
           <TableHeader className="sticky top-0 z-10 bg-muted/50">
             <TableRow>
@@ -119,6 +130,10 @@ export function PastGoalsDataTable({
           </TableBody>
         </Table>
       </div>
+      <TableResizeHandle
+        onResizeStart={handleResizeStart}
+        isActive={isResizing}
+      />
     </div>
   );
 }

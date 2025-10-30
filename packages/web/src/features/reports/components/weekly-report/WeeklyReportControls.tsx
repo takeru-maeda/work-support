@@ -9,6 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 interface WeeklyReportControlsProps {
   date: Date;
@@ -17,6 +18,7 @@ interface WeeklyReportControlsProps {
   loading?: boolean;
   onDateChange: (date: Date) => void;
   onOutput: () => void;
+  className?: string;
 }
 
 export function WeeklyReportControls({
@@ -25,23 +27,25 @@ export function WeeklyReportControls({
   weekEnd,
   onDateChange,
   onOutput,
+  className,
 }: Readonly<WeeklyReportControlsProps>) {
   return (
-    <div className="flex gap-3 pt-4">
+    <div className={cn("flex gap-3", className)}>
       <Popover>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             className="flex-1 justify-start bg-background text-left font-normal"
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {format(weekStart, "M月d日", { locale: ja })} - {" "}
-            {format(weekEnd, "M月d日, yyyy年", { locale: ja })}
+            <CalendarIcon className="mr-1 h-4 w-4" />
+            {format(weekStart, "yyyy/MM/dd", { locale: ja })} -{" "}
+            {format(weekEnd, "yyyy/MM/dd", { locale: ja })}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
+            captionLayout="dropdown-months"
             selected={date}
             onSelect={(selected) => selected && onDateChange(selected)}
           />

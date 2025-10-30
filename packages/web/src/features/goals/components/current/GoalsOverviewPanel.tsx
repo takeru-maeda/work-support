@@ -3,13 +3,10 @@ import { Target, Award, Plus, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionHeader } from "@/components/sections/SectionHeader";
 import { GoalProgressCard } from "@/features/goals/components/shared/GoalProgressCard";
-import { GoalPeriodPicker } from "@/features/goals/components/shared/GoalPeriodPicker";
 
 interface GoalsOverviewPanelProps {
   periodStart?: Date;
   periodEnd?: Date;
-  onPeriodStartChange: (date?: Date) => void;
-  onPeriodEndChange: (date?: Date) => void;
   onAddGoal: () => void;
   overallProgress: number;
   weightedProgressSum: number;
@@ -20,8 +17,6 @@ interface GoalsOverviewPanelProps {
 export function GoalsOverviewPanel({
   periodStart,
   periodEnd,
-  onPeriodStartChange,
-  onPeriodEndChange,
   onAddGoal,
   overallProgress,
   weightedProgressSum,
@@ -29,13 +24,13 @@ export function GoalsOverviewPanel({
   weightedProgressDiff,
 }: Readonly<GoalsOverviewPanelProps>) {
   return (
-    <div className="space-y-4 p-4 sm:p-6">
+    <div className="space-y-4 ">
       <div className="flex items-start justify-between gap-4">
         <SectionHeader
           icon={TrendingUp}
           iconClassName="bg-chart-2/10 text-chart-2"
           title="目標進捗"
-          description="重み付けされた目標と達成状況を追跡"
+          description="進行中の目標の追跡と更新"
         />
 
         <Button onClick={onAddGoal} size="sm" className="shrink-0 gap-2">
@@ -45,12 +40,13 @@ export function GoalsOverviewPanel({
         </Button>
       </div>
 
-      <GoalPeriodPicker
-        periodStart={periodStart}
-        periodEnd={periodEnd}
-        onPeriodStartChange={onPeriodStartChange}
-        onPeriodEndChange={onPeriodEndChange}
-      />
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <span className="text-muted-foreground">期間:</span>
+        <span>
+          {periodStart?.toLocaleDateString()} -{" "}
+          {periodEnd?.toLocaleDateString()}
+        </span>
+      </div>
 
       <div className="grid gap-4 grid-cols-2">
         <GoalProgressCard

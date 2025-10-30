@@ -6,11 +6,13 @@ import { PageContainer } from "@/components/shared/PageContainer";
 import { PageHeader } from "../shared/PageHeader";
 import { Button } from "../ui/button";
 import { ArrowLeft } from "lucide-react";
+import LoadingSpinner from "../spinner/LoadingSpinner";
 
 interface PageLayoutProps {
   children: ReactNode;
   pageTitle: string;
   pageDescription: string;
+  loading?: boolean;
   onBack?: () => void;
   className?: string;
   containerClassName?: string;
@@ -20,6 +22,7 @@ export function PageLayout({
   children,
   pageTitle,
   pageDescription,
+  loading = false,
   onBack,
   className,
   containerClassName,
@@ -39,7 +42,10 @@ export function PageLayout({
               戻る
             </Button>
           )}
-          <PageHeader title={pageTitle} description={pageDescription} />
+          <div className="flex justify-between items-start">
+            <PageHeader title={pageTitle} description={pageDescription} />
+            <LoadingSpinner loading={loading} />
+          </div>
         </div>
 
         {children}

@@ -1,4 +1,4 @@
-import { LogOut, User } from "lucide-react";
+import { LogOut, Settings, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,12 +15,14 @@ import type { UserProfile } from "@/types/userProfile";
 interface AppHeaderUserMenuProps {
   userProfile: UserProfile;
   onNavigateProfile: () => void;
+  onNavigateSettings: () => void;
   onLogout: () => Promise<void>;
 }
 
 export function AppHeaderUserMenu({
   userProfile,
   onNavigateProfile,
+  onNavigateSettings,
   onLogout,
 }: Readonly<AppHeaderUserMenuProps>) {
   return (
@@ -49,6 +51,10 @@ export function AppHeaderUserMenu({
         <DropdownMenuItem onClick={onNavigateProfile}>
           <User className="mr-2 h-4 w-4" />
           プロフィール
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onNavigateSettings}>
+          <Settings className="mr-2 h-4 w-4" />
+          設定
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

@@ -6,7 +6,8 @@ interface SectionHeaderProps {
   icon: LucideIcon;
   iconClassName: string;
   title: string;
-  description: string;
+  titleClassName?: string;
+  description?: string;
   containerClassName?: string;
   descriptionClassName?: string;
 }
@@ -15,6 +16,7 @@ export function SectionHeader({
   icon: Icon,
   iconClassName,
   title,
+  titleClassName,
   description,
   containerClassName,
   descriptionClassName,
@@ -25,17 +27,24 @@ export function SectionHeader({
         <Icon className="h-5 w-5" />
       </div>
       <div>
-        <h3 className="text-lg font-semibold leading-none tracking-tight text-card-foreground">
-          {title}
-        </h3>
-        <p
+        <h3
           className={cn(
-            "mt-1.5 text-sm text-muted-foreground",
-            descriptionClassName,
+            "text-lg font-semibold leading-none tracking-tight text-card-foreground",
+            titleClassName,
           )}
         >
-          {description}
-        </p>
+          {title}
+        </h3>
+        {description && (
+          <p
+            className={cn(
+              "mt-1.5 text-sm text-muted-foreground",
+              descriptionClassName,
+            )}
+          >
+            {description}
+          </p>
+        )}
       </div>
     </div>
   );

@@ -7,13 +7,15 @@ import { ROUTES } from "@/config/routes";
 import LoginPage from "@/pages/auth/LoginPage";
 import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 import SignupPage from "@/pages/auth/SignupPage";
-import EffortPage from "@/pages/effort/EffortPage";
 import AddGoalsPage from "@/pages/goals/AddGoalsPage";
 import GoalsPage from "@/pages/goals/GoalsPage";
 import HomePage from "@/pages/home/HomePage";
 import ProfilePage from "@/pages/profile/ProfilePage";
 import WeeklyReportPage from "@/pages/reports/WeeklyReportPage";
 import { useThemeStore, type Theme } from "@/store/theme";
+import SettingsPage from "@/pages/settings/SettingsPage";
+import EffortsPage from "@/pages/efforts/EffortsPage";
+import EffortsNewPage from "@/pages/efforts/EffortsNewPage";
 
 function App() {
   const theme: Theme = useThemeStore((s) => s.theme);
@@ -26,7 +28,8 @@ function App() {
           <Routes>
             <Route element={<AuthenticatedLayout />}>
               <Route path={ROUTES.home} element={<HomePage />} />
-              <Route path={ROUTES.effort} element={<EffortPage />} />
+              <Route path={ROUTES.effortsNew} element={<EffortsNewPage />} />
+              <Route path={ROUTES.efforts} element={<EffortsPage />} />
               <Route path={ROUTES.goals} element={<GoalsPage />} />
               <Route path={ROUTES.goalsAdd} element={<AddGoalsPage />} />
               <Route
@@ -34,6 +37,7 @@ function App() {
                 element={<WeeklyReportPage />}
               />
               <Route path={ROUTES.profile} element={<ProfilePage />} />
+              <Route path={ROUTES.settings} element={<SettingsPage />} />
             </Route>
             <Route path={ROUTES.login} element={<LoginPage />} />
             <Route path={ROUTES.signup} element={<SignupPage />} />

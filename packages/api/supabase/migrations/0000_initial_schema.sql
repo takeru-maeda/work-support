@@ -27,6 +27,18 @@ CREATE TABLE work_records (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE VIEW work_record_diffs AS
+SELECT
+    id,
+    user_id,
+    task_id,
+    work_date,
+    hours,
+    estimated_hours,
+    hours - COALESCE(estimated_hours, 0) AS hours_diff,
+    created_at
+FROM work_records;
+
 CREATE TABLE work_entry_drafts (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,

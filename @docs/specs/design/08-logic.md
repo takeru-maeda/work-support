@@ -147,7 +147,7 @@ function onSubmit(e) {
 
 目標管理画面で表示する全体進捗率／加重進捗率は、取得済みの現在目標データを用いて以下の手順で算出する。
 
-1. 対象データは最新期間に属する目標一覧（`GET /api/goals` のレスポンス）とする。
+1. 対象データは最新期間に属する目標一覧（`GET /api/goals/current` のレスポンス）とする。
 2. **全体進捗率 (`overallProgress`)**
    - `overallProgress = SUM(goal.progress) / goals.length`
    - 進捗率は0〜100、平均値も0〜100の範囲に収まる前提でクリップ処理は不要。

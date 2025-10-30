@@ -1,10 +1,12 @@
 export const ROUTES = {
   home: "/",
-  effort: "/effort",
+  efforts: "/efforts",
+  effortsNew: "/efforts/new",
   goals: "/goals",
   goalsAdd: "/goals/add",
   weeklyReport: "/weekly-report",
   profile: "/profile",
+  settings: "/settings",
   login: "/login",
   signup: "/signup",
   resetPassword: "/reset-password",

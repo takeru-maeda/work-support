@@ -14,7 +14,8 @@ import type { UserProfile } from "@/types/userProfile";
 
 const navLinks: AppHeaderNavLink[] = [
   { href: ROUTES.home, label: "ホーム" },
-  { href: ROUTES.effort, label: "工数登録" },
+  { href: ROUTES.effortsNew, label: "工数登録" },
+  { href: ROUTES.efforts, label: "工数一覧" },
   { href: ROUTES.goals, label: "目標管理" },
   { href: ROUTES.weeklyReport, label: "週報出力" },
 ];
@@ -56,6 +57,7 @@ export function AppHeader() {
           <AppHeaderUserMenu
             userProfile={userProfile}
             onNavigateProfile={() => navigate(ROUTES.profile)}
+            onNavigateSettings={() => navigate(ROUTES.settings)}
             onLogout={handleLogout}
           />
           <AppHeaderMobileNav
