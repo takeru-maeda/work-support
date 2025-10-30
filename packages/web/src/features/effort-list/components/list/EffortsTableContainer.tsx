@@ -14,7 +14,10 @@ export function EffortsTableContainer({
 }: Readonly<EffortsTableContainerProps>): JSX.Element {
   return (
     <div
-      className={cn("overflow-x-auto overflow-y-auto", className)}
+      className={cn(
+        "custom-scrollbar overflow-x-auto overflow-y-auto [&_[data-slot=table-container]]:overflow-visible",
+        className,
+      )}
       style={{ height: `${height}px` }}
     >
       {children}

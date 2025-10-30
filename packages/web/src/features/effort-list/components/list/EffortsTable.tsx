@@ -69,7 +69,7 @@ export function EffortsTable({
 }: Readonly<EffortsTableProps>): JSX.Element {
   return (
     <Table className={className}>
-      <TableHeader className="sticky top-0 z-10 bg-muted/50">
+      <TableHeader className="sticky top-0 z-10 bg-muted/80 backdrop-blur supports-[backdrop-filter]:bg-muted/60">
         <TableRow>
           {HEADERS.map(({ key, label, align = "left", minWidth }) => (
             <TableHead

@@ -45,13 +45,13 @@ export function PastGoalsDataTable({
   });
 
   return (
-    <div className="rounded-lg border border-border overflow-hidden">
+    <div className="rounded-lg border border-border">
       <div
-        className="overflow-x-auto overflow-y-auto"
+        className="custom-scrollbar overflow-x-auto overflow-y-auto [&>[data-slot=table-container]]:overflow-visible"
         style={{ height: `${tableHeight}px` }}
       >
         <Table className="min-w-[500px]">
-          <TableHeader className="sticky top-0 z-10 bg-muted/50">
+          <TableHeader className="sticky top-0 z-10 bg-muted/80 backdrop-blur supports-[backdrop-filter]:bg-muted/60">
             <TableRow>
               <TableHead
                 className="min-w-[120px] cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
