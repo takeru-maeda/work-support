@@ -10,6 +10,7 @@ import { cors } from "hono/cors";
 import { globalErrorHandler } from "./lib/errorHandler";
 import { openAPIRouteHandler } from "hono-openapi";
 import { swaggerUI } from "@hono/swagger-ui";
+import logs from "./features/logs";
 
 const app = new Hono<HonoEnv>();
 
@@ -44,6 +45,7 @@ app.route("/api/effort", effort);
 app.route("/api/missions", missions);
 app.route("/api/goals", goals);
 app.route("/api/reports", reports);
+app.route("/api/logs", logs);
 
 app.get(
   "/openapi",

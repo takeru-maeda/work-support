@@ -10,6 +10,7 @@ import { createSupabaseClient } from "../lib/supabase";
 import { Context } from "hono";
 import { HonoEnv } from "../custom-types";
 import { AppError } from "../lib/errors";
+import { createLogger } from "../lib/logger";
 
 export const accessLogMiddleware = createMiddleware(async (c, next) => {
   c.set("start", Date.now());
@@ -29,6 +30,17 @@ export const accessLogMiddleware = createMiddleware(async (c, next) => {
   }
 
   c.set("accessLog", accessLog);
+  c.set(
+    "logger",
+    createLogger({
+      accessLogId: accessLog.id,
+      supabase,
+      defaultSource: "API",
+      defaultUserAgent: c.req.header("user-agent"),
+      defaultPageUrl: c.req.url,
+      defaultAppVersion: c.req.header("x-app-version") ?? null,
+    }),
+  );
 
   await next();
 
@@ -54,5 +66,15 @@ export async function updateAccessLog(c: Context<HonoEnv>) {
     .select("*")
     .maybeSingle();
 
-  if (!data || error) console.error("Failed to update access log:", error);
+  const logger = c.get("logger");
+
+  if (!data || error) {
+    if (logger) {
+      await logger.error("Failed to update access log", {
+        stackTrace: error?.message ?? null,
+      });
+    } else {
+      console.error("Failed to update access log:", error);
+    }
+  }
 }

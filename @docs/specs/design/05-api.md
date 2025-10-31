@@ -449,11 +449,12 @@
   "appVersion": "string | null",
   "clientContext": {
     "key": "any"
-  }
+  } | null
 }
 ```
 
 > **Note:** `source` は `API` / `UI` のみを受け付ける。`clientContext` は任意キーを持つ JSON オブジェクトで、必要に応じて空オブジェクトを送信する。
+> **Note:** `clientContext` を省略した場合や値がない場合は `null` を送信する。
 
 **Responses:**
 
