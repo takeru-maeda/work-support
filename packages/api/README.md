@@ -9,6 +9,9 @@
 - Resend / Google Apps Script 連携（メール送信ユーティリティ、実装中）
 - Vitest（テスト）
 
+## デプロイ URL
+- 本番環境 (Cloudflare Workers): https://work-support.noreply-work-s-dev.workers.dev/
+
 ## アーキテクチャ
 フィーチャーベース（Vertical Slice）でモジュール化しています。`packages/api/src` の主な構成は以下の通りです。
 
@@ -57,22 +60,27 @@ packages/api/src/
 
 リクエスト／レスポンススキーマは `@docs/specs/design/05-api.md` および `packages/shared` の Zod 定義に準拠します。
 
+## 環境変数
+`packages/api/.dev.vars`（ローカル開発）や Cloudflare Workers の Secrets に次の変数を設定してください。
+
+| 変数名 | 必須 | 説明 | 例 |
+| --- | --- | --- | --- |
+| `SUPABASE_URL` | 必須 | Supabase プロジェクトの URL。 | `https://xyzcompany.supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | 必須 | Supabase Service Role キー（DB への管理操作用）。 | `eyJhbGciOi...` |
+| `SUPABASE_JWT_SECRET` | 必須 | Supabase が発行する JWT を検証するための秘密鍵。 | `super-secret-jwt-key` |
+| `API_KEY` | 必須 | Google Apps Script など外部サービスからの API 認証、およびメール送信で使用する固定キー。 | `my-secure-api-key` |
+| `GAS_EMAIL_ENDPOINT` | 必須 | 工数登録完了メールを送信する Google Apps Script のエンドポイント。 | `https://script.google.com/macros/s/.../exec` |
+| `PROD_FRONTEND_URL` | 必須 | 本番フロントエンドのオリジン（CORS 許可対象）。 | `https://work-support.example.com` |
+| `DEV_FRONTEND_URL` | 任意 | 開発時に許可するフロントエンドのオリジン。未設定時は `http://localhost:5173` を使用。 | `http://localhost:5173` |
+
+> `.dev.vars` は Git 管理下に置かないでください。Cloudflare では `wrangler secret put` を利用して本番値を登録します。
+
 ## 環境構築
 1. ルートで依存関係をインストールします。
    ```bash
    pnpm install
    ```
-2. `packages/api/.dev.vars` を作成し、必要な環境変数を設定します。
-   ```
-   SUPABASE_URL=https://<project>.supabase.co
-   SUPABASE_SERVICE_ROLE_KEY=<service_role_key>
-   API_KEY=<fixed_api_key_for_gas>
-   RESEND_API_KEY=<email_provider_key>
-   APP_EMAIL=<sender_email>
-   PROD_FRONTEND_URL=<https://your-frontend.vercel.app>
-   DEV_FRONTEND_URL=http://localhost:5173
-   ```
-   Supabase 認証管理に必要な ID や認証情報は `@docs/specs/design/07-operations.md` を参照してください。
+2. 上記の環境変数を `packages/api/.dev.vars` に設定します（詳細は `@docs/specs/design/07-operations.md` を参照）。
 3. 開発サーバーを起動します。
    ```bash
    pnpm dev:api

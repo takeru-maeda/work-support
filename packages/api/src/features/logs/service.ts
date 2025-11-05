@@ -4,6 +4,14 @@ import type { Database, Json, Tables } from "../../../../shared/src/types/db";
 import { ErrorLogCreateRequest } from "./types";
 import { createErrorLog } from "./repository";
 
+/**
+ * エラーログを保存します。
+ *
+ * @param supabase Supabaseクライアント
+ * @param accessLogId アクセスログID
+ * @param payload エラー情報
+ * @returns 保存したエラーログ
+ */
 export const createErrorLogService = async (
   supabase: SupabaseClient<Database>,
   accessLogId: number,

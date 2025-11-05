@@ -19,6 +19,13 @@ interface CreateErrorLogParams {
   clientContext?: TablesInsert<"error_logs">["client_context"];
 }
 
+/**
+ * エラーログを記録します。
+ *
+ * @param supabase Supabaseクライアント
+ * @param params 記録するエラー情報
+ * @returns 保存したエラーログ
+ */
 export const createErrorLog = async (
   supabase: SupabaseClient<Database>,
   params: CreateErrorLogParams,

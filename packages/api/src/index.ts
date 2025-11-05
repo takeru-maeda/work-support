@@ -3,7 +3,9 @@ import { HonoEnv } from "./custom-types";
 import effort from "./features/effort";
 import missions from "./features/missions";
 import goals from "./features/goals";
+import projects from "./features/projects";
 import reports from "./features/reports";
+import userSettings from "./features/user-settings";
 import { accessLogMiddleware } from "./middleware/logger";
 import { logger } from "hono/logger";
 import { cors } from "hono/cors";
@@ -44,7 +46,9 @@ app.get("/", async (c) => c.text("Hello Work Support"));
 app.route("/api/effort", effort);
 app.route("/api/missions", missions);
 app.route("/api/goals", goals);
+app.route("/api/projects", projects);
 app.route("/api/reports", reports);
+app.route("/api/user-settings", userSettings);
 app.route("/api/logs", logs);
 
 app.get(
@@ -55,6 +59,16 @@ app.get(
         title: "Work Support API",
         version: "1.0.0",
       },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT",
+          },
+        },
+      },
+      security: [{ bearerAuth: [] }],
     },
   }),
 );

@@ -31,6 +31,12 @@ export interface Logger {
   critical: (message: string, options?: LoggerErrorOptions) => Promise<void>;
 }
 
+/**
+ * ロガーを生成します。
+ *
+ * @param options ロガー作成時の設定
+ * @returns ロガーインスタンス
+ */
 export const createLogger = (options: LoggerOptions): Logger => {
   const {
     accessLogId,
@@ -86,6 +92,9 @@ export const createLogger = (options: LoggerOptions): Logger => {
   };
 };
 
+/**
+ * 情報ログを挿入します。
+ */
 async function insertInfoLog(
   supabase: SupabaseClient<Database>,
   accessLogId: number,
@@ -108,6 +117,9 @@ async function insertInfoLog(
   }
 }
 
+/**
+ * エラーログを挿入します。
+ */
 async function insertErrorLog(
   supabase: SupabaseClient<Database>,
   accessLogId: number,

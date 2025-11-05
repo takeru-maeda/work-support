@@ -8,6 +8,13 @@ import { AppError } from "../lib/errors";
 import { Database } from "../../../shared/src/types/db";
 import { jwtVerify, type JWTPayload } from "jose";
 
+/**
+ * JWT 認証を検証します。
+ *
+ * @param c Honoコンテキスト
+ * @param next 次のミドルウェア
+ * @returns 認証後に実行される処理
+ */
 export const jwtAuthMiddleware = createMiddleware(async (c, next) => {
   const authHeader: string | undefined = c.req.header("Authorization");
   if (authHeader?.startsWith("Bearer ") !== true) {
@@ -32,6 +39,13 @@ export const jwtAuthMiddleware = createMiddleware(async (c, next) => {
   await next();
 });
 
+/**
+ * APIキー認証を検証します。
+ *
+ * @param c Honoコンテキスト
+ * @param next 次のミドルウェア
+ * @returns 認証後に実行される処理
+ */
 export const apiKeyAuthMiddleware = createMiddleware(async (c, next) => {
   const authHeader: string | undefined = c.req.header("Authorization");
   if (authHeader?.startsWith("Bearer ") !== true) {
@@ -66,6 +80,9 @@ export const apiKeyAuthMiddleware = createMiddleware(async (c, next) => {
   await next();
 });
 
+/**
+ * ユーザーをメールアドレスで検索します。
+ */
 const findUserByEmail = async (
   email: string,
   env: HonoEnv["Bindings"],
@@ -100,6 +117,9 @@ const findUserByEmail = async (
   return {};
 };
 
+/**
+ * JWT ペイロードから認証ユーザーを構築します。
+ */
 const buildAuthenticatedUserFromPayload = (
   payload: JWTPayload,
 ): AuthenticatedUser => {
@@ -108,7 +128,7 @@ const buildAuthenticatedUserFromPayload = (
     throw new AppError(401, "Unauthorized");
   }
 
-  const email =
+  const email: string | null =
     typeof payload.email === "string"
       ? payload.email
       : Array.isArray(payload.email) && payload.email.length > 0

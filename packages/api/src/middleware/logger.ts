@@ -12,6 +12,13 @@ import { HonoEnv } from "../custom-types";
 import { AppError } from "../lib/errors";
 import { createLogger } from "../lib/logger";
 
+/**
+ * アクセスログを記録します。
+ *
+ * @param c Honoコンテキスト
+ * @param next 次のミドルウェア
+ * @returns 記録後に実行される処理
+ */
 export const accessLogMiddleware = createMiddleware(async (c, next) => {
   c.set("start", Date.now());
   const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
@@ -47,6 +54,12 @@ export const accessLogMiddleware = createMiddleware(async (c, next) => {
   c.executionCtx.waitUntil((async () => updateAccessLog(c))());
 });
 
+/**
+ * アクセスログを更新します。
+ *
+ * @param c Honoコンテキスト
+ * @returns 更新処理
+ */
 export async function updateAccessLog(c: Context<HonoEnv>) {
   const duration: number = Date.now() - c.get("start");
 

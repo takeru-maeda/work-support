@@ -9,17 +9,27 @@ import {
   CreateGoalRequestSchema,
   GetGoalResponseSchema,
   GoalCreateRequest,
+  GoalHistoryQuery,
+  GoalHistoryQuerySchema,
+  GoalHistoryResponse,
+  GoalHistoryResponseSchema,
+  GoalPreviousWeekProgress,
+  GoalPreviousWeekProgressSchema,
+  GoalPreviousWeekQuery,
+  GoalPreviousWeekQuerySchema,
   GoalUpdateRequest,
   UpdateGoalResponseSchema,
   UpdateGoalRequestSchema,
 } from "./types";
 import { AppError } from "../../lib/errors";
-import { Tables } from "../../../../shared/src/types/db";
+import { Database, Tables } from "../../../../shared/src/types/db";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import {
   createGoalService,
   deleteGoalService,
   getLatestGoalsService,
+  getPreviousWeekProgressService,
+  searchGoalsService,
   updateGoalService,
 } from "./service";
 
@@ -46,7 +56,7 @@ goals.get(
     const user: AuthenticatedUser | undefined = c.get("user");
     if (!user) throw new AppError(401, "Unauthorized");
 
-    const supabase: SupabaseClient = createSupabaseClient(c.env);
+    const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
     const latestGoals: Tables<"goals">[] = await getLatestGoalsService(
       supabase,
       user.id,
@@ -76,7 +86,7 @@ goals.post(
     if (!user) throw new AppError(401, "Unauthorized");
 
     const goal: GoalCreateRequest = c.req.valid("json");
-    const supabase: SupabaseClient = createSupabaseClient(c.env);
+    const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
     const createdGoal: Tables<"goals"> = await createGoalService(
       supabase,
       user.id,
@@ -111,7 +121,7 @@ goals.put(
 
     const goalId: number = Number.parseInt(c.req.param("id"), 10);
     const goal: GoalUpdateRequest = c.req.valid("json");
-    const supabase: SupabaseClient = createSupabaseClient(c.env);
+    const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
     const updatedGoal: Tables<"goals"> = await updateGoalService(
       supabase,
       user.id,
@@ -128,7 +138,7 @@ goals.put(
 goals.delete(
   "/:id",
   describeRoute({
-    description: "目標を更新します",
+    description: "目標を削除します",
     responses: {
       204: {
         description: "Goal data delete successfully",
@@ -140,9 +150,87 @@ goals.delete(
     if (!user) throw new AppError(401, "Unauthorized");
 
     const goalId: number = Number.parseInt(c.req.param("id"), 10);
-    const supabase: SupabaseClient = createSupabaseClient(c.env);
+    const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
     await deleteGoalService(supabase, user.id, goalId);
     return c.body(null, 204);
+  },
+);
+
+goals.get(
+  "/progress/previous-week",
+  describeRoute({
+    description: "前週末時点の最新進捗率を取得します",
+    responses: {
+      200: {
+        description: "Previous week progress fetch successfully",
+        content: {
+          "application/json": {
+            schema: resolver(GoalPreviousWeekProgressSchema),
+          },
+        },
+      },
+    },
+  }),
+  validator("query", GoalPreviousWeekQuerySchema),
+  async (c) => {
+    const user: AuthenticatedUser | undefined = c.get("user");
+    if (!user) throw new AppError(401, "Unauthorized");
+
+    const query: GoalPreviousWeekQuery = c.req.valid("query");
+    const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
+
+    const result: GoalPreviousWeekProgress =
+      await getPreviousWeekProgressService(
+        supabase,
+        user.id,
+        query.referenceDate,
+      );
+
+    return c.json(GoalPreviousWeekProgressSchema.parse(result), 200);
+  },
+);
+
+goals.get(
+  "/history",
+  describeRoute({
+    description: "過去の目標を検索します",
+    responses: {
+      200: {
+        description: "Goal history fetch successfully",
+        content: {
+          "application/json": {
+            schema: resolver(GoalHistoryResponseSchema),
+          },
+        },
+      },
+    },
+  }),
+  validator("query", GoalHistoryQuerySchema),
+  async (c) => {
+    const user: AuthenticatedUser | undefined = c.get("user");
+    if (!user) throw new AppError(401, "Unauthorized");
+
+    const query: GoalHistoryQuery = c.req.valid("query");
+    const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
+
+    const { items, total } = await searchGoalsService(supabase, user.id, query);
+
+    const totalPages = total === 0 ? 0 : Math.ceil(total / query.pageSize);
+
+    const response: GoalHistoryResponse = {
+      items,
+      meta: {
+        page: query.page,
+        pageSize: query.pageSize,
+        total,
+        totalPages,
+      },
+      aggregations: {
+        totalCount: total,
+      },
+    };
+
+    return c.json(GoalHistoryResponseSchema.parse(response), 200);
   },
 );
 

@@ -10,8 +10,13 @@ export function GoalsWeightWarning({
   if (isBalanced) return null;
 
   return (
-    <p className="text-sm text-warning">
-      ⚠️ トータルウェイト: {totalWeight}% (100%になるようにしてください)
-    </p>
+    <div className="flex flex-col sm:flex-row sm:items-center gap-1">
+      <p className="text-sm text-yellow-600 dark:text-yellow-400">
+        ⚠️ トータルウェイト: {totalWeight}%
+      </p>
+      <p className="text-sm text-yellow-600 dark:text-yellow-400">
+        (100%になるようにしてください)
+      </p>
+    </div>
   );
 }

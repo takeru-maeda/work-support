@@ -50,14 +50,14 @@
 - [x] ルートを定義する (`features/effort/index.ts`)
 - [x] 工数テキストの解析ロジックを実装する (`features/effort/effort.service.ts`)
 - [x] DBへの書き込み処理を実装する (`features/effort/effort.repository.ts`)
-- [ ] Web UI向け構造化工数登録APIを実装する (`POST /api/effort/entries`)
-- [ ] 工数ドラフト保存APIを実装する (`PUT /api/effort/draft`, `DELETE /api/effort/draft`)
-- [ ] 工数ドラフト取得APIを実装する (`GET /api/effort/draft`)
-- [ ] 工数ドラフト更新時の `clientUpdatedAt` に基づく同時実行制御を実装する
-- [ ] 工数登録完了時に `user_settings.notify_effort_email` を参照して完了メールを送信する処理を実装する
-- [ ] GAS 向けメール送信ユーティリティ（API キー検証含む）を実装する
-- [ ] 工数登録完了メールの本文生成ロジック（差分・集計を含む）を実装する
-- [ ] `POST /api/user-settings` を実装し、新規ユーザー作成直後に通知設定レコードを登録できるようにする
+- [x] Web UI向け構造化工数登録APIを実装する (`POST /api/effort/entries`)
+- [x] 工数ドラフト保存APIを実装する (`PUT /api/effort/draft`, `DELETE /api/effort/draft`)
+- [x] 工数ドラフト取得APIを実装する (`GET /api/effort/draft`)
+- [x] 工数ドラフト更新時の `clientUpdatedAt` に基づく同時実行制御を実装する
+- [x] 工数登録完了時に `user_settings.notify_effort_email` を参照して完了メールを送信する処理を実装する
+- [x] GAS 向けメール送信ユーティリティ（API キー検証含む）を実装する
+- [x] 工数登録完了メールの本文生成ロジック（差分・集計を含む）を実装する
+- [x] `POST /api/user-settings` を実装し、新規ユーザー作成直後に通知設定レコードを登録できるようにする
 
 ### 3.3. ミッション管理機能 (`/api/missions`)
 - [x] ルートを定義する (`features/missions/index.ts`)
@@ -66,10 +66,10 @@
 ### 3.4. 目標管理機能 (`/api/goals`, `/api/goals/current`)
 - [x] ルートを定義する (`features/goals/index.ts`)
 - [x] 最新期間の目標取得（`GET /api/goals/current`）およびCRUDロジックを実装する (`features/goals/service.ts`, `repository.ts`)
-- [ ] 目標作成・更新APIで `content` を取り扱う
-- [ ] 前週進捗取得APIを実装する (`GET /api/goals/progress/previous-week`)
-- [ ] 過去目標検索APIを実装する（キーワード・期間・進捗率フィルタ、複数ソートに対応）(`GET /api/goals/history`)
-- [ ] 目標進捗集計ロジック（全体進捗率／加重進捗率）を `packages/shared` へ抽出し、API・フロント双方で共通利用する
+- [x] 目標作成・更新APIで `content` を取り扱う
+- [x] 前週進捗取得APIを実装する (`GET /api/goals/progress/previous-week`)
+- [x] 過去目標検索APIを実装する（キーワード・期間・進捗率フィルタ、複数ソートに対応）(`GET /api/goals/history`)
+- [x] 目標進捗集計ロジック（全体進捗率／加重進捗率）を `packages/shared` へ抽出し、API・フロント双方で共通利用する
 - [x] エラーログ保存APIを実装する (`POST /api/logs/error`)
 - [x] エラーログ保存APIのバリデーションとUIメタ情報保存処理を実装する
 
@@ -78,14 +78,14 @@
 - [x] 週報データ生成ロジックを実装する (`features/reports/reports.service.ts`)
 
 ### 3.6. マスターデータ取得API
-- [ ] ユーザーの案件・タスク取得APIを実装する (`GET /api/projects`)
+- [x] ユーザーの案件・タスク取得APIを実装する (`GET /api/projects`)
 
 ### 3.7. ユーザー設定API
-- [ ] ユーザー設定取得APIを実装する (`GET /api/user-settings`)
-- [ ] ユーザー設定更新APIを実装する (`PUT /api/user-settings`)
+- [x] ユーザー設定取得APIを実装する (`GET /api/user-settings`)
+- [x] ユーザー設定更新APIを実装する (`PUT /api/user-settings`)
 
 ### 3.8. 工数レポートAPI
-- [ ] 工数一覧取得APIを実装する (`GET /api/reports/work-records`)
+- [x] 工数一覧取得APIを実装する (`GET /api/reports/work-records`)
 
 ### 3.9. ログ運用機能
 - [x] アプリケーションロガーを実装し、`access_log_id` と紐付けて `info_logs` に保存する
@@ -129,7 +129,7 @@
 - [x] パスワードリセット画面のUIとリセットメール送信／新パスワード入力フローを実装する
 - [x] プロフィール画面で名前・プロフィール画像の更新処理を実装する (`/profile`)
 - [ ] サインアップ完了後に `POST /api/user-settings` を呼び出し、通知設定を初期化するフローを実装する
-- [ ] 設定画面を実装し、工数メール通知トグルを `user_settings` と同期する (`/settings`)
+- [ ] 設定画面の工数メール通知トグルを `user_settings` と同期する (`/settings`)
 
 ### 4.6. 工数登録画面 (`/efforts/new`)
 - [x] 工数エントリのドラッグ＆ドロップ並び替え

@@ -1,5 +1,24 @@
 import { z } from "zod";
 
+export type {
+  EffortDraft,
+  EffortDraftRecord,
+  EffortDraftUpsertResponse,
+  EffortEntriesRequest,
+  EffortEntriesResponse,
+  EffortEntry,
+  EffortDraftResponse,
+} from "../../../../shared/src/schemas/effort";
+export {
+  EffortDraftRecordSchema,
+  EffortDraftSchema,
+  EffortDraftUpsertResponseSchema,
+  EffortEntriesRequestSchema,
+  EffortEntriesResponseSchema,
+  EffortEntrySchema,
+  EffortDraftResponseSchema,
+} from "../../../../shared/src/schemas/effort";
+
 export const EffortRequestSchema = z.object({
   date: z.iso.date(),
   email: z.email(),

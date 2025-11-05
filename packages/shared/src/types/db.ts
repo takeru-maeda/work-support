@@ -360,29 +360,11 @@ export type Database = {
           hours: number | null;
           hours_diff: number | null;
           id: number | null;
+          project_name: string | null;
           task_id: number | null;
+          task_name: string | null;
           user_id: string | null;
           work_date: string | null;
-        };
-        Insert: {
-          created_at?: string | null;
-          estimated_hours?: number | null;
-          hours?: number | null;
-          hours_diff?: never;
-          id?: number | null;
-          task_id?: number | null;
-          user_id?: string | null;
-          work_date?: string | null;
-        };
-        Update: {
-          created_at?: string | null;
-          estimated_hours?: number | null;
-          hours?: number | null;
-          hours_diff?: never;
-          id?: number | null;
-          task_id?: number | null;
-          user_id?: string | null;
-          work_date?: string | null;
         };
         Relationships: [
           {

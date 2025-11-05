@@ -14,6 +14,9 @@
 
 各パッケージの詳細は `packages/api/README.md` と `packages/web/README.md` を参照してください。
 
+## デプロイ URL
+- バックエンド (Cloudflare Workers): https://work-support.noreply-work-s-dev.workers.dev/
+
 ## セットアップ
 1. ルートディレクトリで依存関係をインストールします。
    ```bash

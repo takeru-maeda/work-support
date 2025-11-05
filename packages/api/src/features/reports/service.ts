@@ -4,6 +4,7 @@ import {
   getGoalsForReport,
   getGoalProgressHistories,
   getMissionForReport,
+  getWorkRecordList,
   getWorkRecordsForReport,
 } from "./repository";
 import dayjs, { Dayjs } from "dayjs";
@@ -11,9 +12,15 @@ import {
   Effort,
   GoalSummary,
   GoalWithProgressDiff,
+  WorkRecordListQuery,
+  WorkRecordListResponse,
   WeeklyReportData,
   WeeklyReportResponse,
 } from "./types";
+import {
+  calculateGoalSummaries,
+  GoalProgressSummary,
+} from "../../../../shared/src/utils/goalProgress";
 
 /**
  * 週報の雛形を生成します
@@ -40,6 +47,42 @@ export const generateFormattedReport = async (
   return {
     mission: reportData.mission,
     weeklyReport,
+  };
+};
+
+/**
+ * 工数一覧を取得します。
+ *
+ * @param supabase Supabaseクライアント
+ * @param userId ユーザーID
+ * @param query クエリ
+ * @returns 工数一覧
+ */
+export const getWorkRecordListService = async (
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  query: WorkRecordListQuery,
+): Promise<WorkRecordListResponse> => {
+  const { items, total } = await getWorkRecordList(supabase, userId, query);
+  const totalPages: number =
+    total === 0 ? 0 : Math.ceil(total / query.pageSize);
+
+  return {
+    items: items.map((item) => ({
+      id: item.id,
+      date: item.work_date,
+      project: item.project_name,
+      task: item.task_name,
+      estimated_hours: item.estimated_hours,
+      hours: item.hours,
+      diff: item.hours_diff,
+    })),
+    meta: {
+      page: query.page,
+      pageSize: query.pageSize,
+      total,
+      totalPages,
+    },
   };
 };
 
@@ -162,8 +205,10 @@ function calculateGoalSummary(
 ): GoalSummary | null {
   if (!endOfWeekGoals || endOfWeekGoals.length === 0) return null;
 
-  const endOfWeekSummary = calculateWeightedSummary(endOfWeekGoals);
-  const startOfWeekSummary = calculateWeightedSummary(startOfWeekGoals);
+  const endOfWeekSummary: GoalProgressSummary | null =
+    calculateGoalSummaries(endOfWeekGoals);
+  const startOfWeekSummary: GoalProgressSummary | null =
+    calculateGoalSummaries(startOfWeekGoals);
 
   if (!endOfWeekSummary || !startOfWeekSummary) return null;
 
@@ -192,39 +237,10 @@ function calculateGoalSummary(
     simpleAverageProgressDiff,
     weightedAchievementRate: endOfWeekSummary.weightedAchievementRate,
     weightedAchievementRateDiff,
-    expectedValue: parseFloat(expectedValue.toFixed(1)),
-    differenceFromExpected: parseFloat(differenceFromExpected.toFixed(1)),
-  };
-}
-
-/**
- * 加重進捗率を計算します
- *
- * @param goals 目標
- * @returns ウェイトを加算しない進捗率と加重進捗率
- */
-function calculateWeightedSummary(goals: Tables<"goals">[]): {
-  simpleAverageProgress: number;
-  weightedAchievementRate: number;
-} | null {
-  if (!goals || goals.length === 0) return null;
-
-  // ウェイトの合計
-  const totalWeight: number = goals.reduce((sum, goal) => sum + goal.weight, 0);
-  if (totalWeight === 0) return null;
-
-  // ウェイトを加算しない進捗率の平均
-  const simpleAverageProgress: number =
-    goals.reduce((sum, goal) => sum + goal.progress, 0) / goals.length;
-
-  // 加重進捗率
-  const weightedAchievementRate: number =
-    goals.reduce((sum, goal) => sum + goal.progress * goal.weight, 0) /
-    totalWeight;
-
-  return {
-    simpleAverageProgress: parseFloat(simpleAverageProgress.toFixed(1)),
-    weightedAchievementRate: parseFloat(weightedAchievementRate.toFixed(1)),
+    expectedValue: Number.parseFloat(expectedValue.toFixed(1)),
+    differenceFromExpected: Number.parseFloat(
+      differenceFromExpected.toFixed(1),
+    ),
   };
 }
 

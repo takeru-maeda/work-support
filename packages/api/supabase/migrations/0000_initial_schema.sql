@@ -29,15 +29,19 @@ CREATE TABLE work_records (
 
 CREATE VIEW work_record_diffs AS
 SELECT
-    id,
-    user_id,
-    task_id,
-    work_date,
-    hours,
-    estimated_hours,
-    hours - COALESCE(estimated_hours, 0) AS hours_diff,
-    created_at
-FROM work_records;
+    wr.id,
+    wr.user_id,
+    wr.task_id,
+    wr.work_date,
+    wr.hours,
+    wr.estimated_hours,
+    wr.hours - COALESCE(wr.estimated_hours, 0) AS hours_diff,
+    wr.created_at,
+    t.name AS task_name,
+    p.name AS project_name
+FROM work_records AS wr
+JOIN tasks AS t ON t.id = wr.task_id
+JOIN projects AS p ON p.id = t.project_id;
 
 CREATE TABLE work_entry_drafts (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,

@@ -6,6 +6,13 @@ import {
 } from "../../../../shared/src/types/db";
 import { AppError } from "../../lib/errors";
 
+/**
+ * ミッションを取得します。
+ *
+ * @param supabase Supabaseクライアント
+ * @param userId ユーザーID
+ * @returns ミッション
+ */
 export const getMission = async (
   supabase: SupabaseClient<Database>,
   userId: string,
@@ -22,6 +29,14 @@ export const getMission = async (
   return data;
 };
 
+/**
+ * ミッションを登録または更新します。
+ *
+ * @param supabase Supabaseクライアント
+ * @param userId ユーザーID
+ * @param content ミッション内容
+ * @returns 保存後のミッション
+ */
 export const upsertMission = async (
   supabase: SupabaseClient<Database>,
   userId: string,

@@ -9,6 +9,13 @@ import { updateAccessLog } from "../middleware/logger";
 import { createErrorLogService } from "../features/logs/service";
 import type { LoggerErrorOptions } from "./logger";
 
+/**
+ * アプリ全体のエラーを処理します。
+ *
+ * @param err 発生したエラー
+ * @param c Honoコンテキスト
+ * @returns エラーレスポンス
+ */
 export const globalErrorHandler = async (err: Error, c: Context<HonoEnv>) => {
   const accessLog: Tables<"access_logs"> = c.get("accessLog");
   const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);

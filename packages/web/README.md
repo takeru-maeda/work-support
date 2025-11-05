@@ -49,6 +49,17 @@ packages/web/src/
    ```
 3. 環境変数は `VITE_` プレフィックスを付けて `packages/web/.env` などに設定してください。（例：`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`）
 
+## 環境変数
+`packages/web/.env`（または `.env.local`）に以下を設定してください。
+
+| 変数名 | 必須 | 説明 | 例 |
+| --- | --- | --- | --- |
+| `VITE_SUPABASE_URL` | 必須 | Supabase プロジェクトの URL。`https://<project>.supabase.co` 形式。 | `https://xyzcompany.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | 必須 | Supabase の anon 公開キー。ブラウザから Supabase API を呼び出す際に使用。 | `eyJhbGciOi...` |
+| `VITE_API_BASE_URL` | 任意 | バックエンド API のベース URL。未設定時は `http://localhost:8787` を利用。 | `https://work-support.noreply-work-s-dev.workers.dev` |
+
+> `.env` に記述した値は Vite のビルド時に注入されます。機密情報を Git 管理から除外するため、`.env` ファイルはコミットしないでください。
+
 ## API との連携
 - 全 API は JWT 認証が必要です。Supabase のアクセストークンを `Authorization: Bearer <jwt>` で送信します。
 - 工数・目標・週報などの API コントラクトは `@docs/specs/design/05-api.md` に定義されている OpenAPI 相当の仕様に従います。

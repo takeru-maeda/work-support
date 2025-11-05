@@ -5,6 +5,8 @@ import { GoalContentDialog } from "@/features/goals/components/current/GoalConte
 import { useGoalsTableManager } from "@/features/goals/hooks/useGoalsTableManager";
 import GoalsEmptyPanel from "./GoalsEmptyPanel";
 import CardContainer from "@/components/shared/CardContainer";
+import { Button } from "@/components/ui/button";
+import { Save } from "lucide-react";
 
 export function GoalsTable() {
   const {
@@ -60,10 +62,16 @@ export function GoalsTable() {
               onViewContent={openContentDialog}
             />
 
-            <GoalsWeightWarning
-              totalWeight={totalWeight}
-              isBalanced={isWeightBalanced}
-            />
+            <div className="flex justify-between">
+              <GoalsWeightWarning
+                totalWeight={totalWeight}
+                isBalanced={isWeightBalanced}
+              />
+              <Button className="ml-auto">
+                <Save className="size-4" />
+                更新
+              </Button>
+            </div>
           </div>
         </CardContainer>
       ) : (
