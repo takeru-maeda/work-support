@@ -62,6 +62,7 @@ export const useProfilePersistence = ({
         setUser(nextUser);
         setProfile((prev) => ({
           name: result.user?.name ?? updates.name ?? prev.name,
+          email: result.user?.email ?? prev.email,
           avatarUrl:
             result.user?.avatarUrl ?? updates.avatarUrl ?? prev.avatarUrl,
         }));

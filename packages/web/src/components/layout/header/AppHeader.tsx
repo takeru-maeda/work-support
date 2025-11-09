@@ -29,6 +29,7 @@ export function AppHeader() {
 
   const userProfile: UserProfile = {
     name: user?.name ?? "",
+    email: user?.email ?? "",
     avatarUrl: user?.avatarUrl ?? "",
   };
 
