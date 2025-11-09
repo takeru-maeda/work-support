@@ -16,18 +16,21 @@ interface DatePickerProps {
   date?: Date;
   onDateChange?: (date: Date | undefined) => void;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export function DatePicker({
   date,
   onDateChange,
   placeholder = "日付を選択",
-}: DatePickerProps) {
+  disabled = false,
+}: Readonly<DatePickerProps>) {
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
           variant={"outline"}
+          disabled={disabled}
           className={cn(
             "w-[130px] justify-start text-left font-normal h-8 text-sm",
             !date && "text-muted-foreground",
@@ -46,7 +49,6 @@ export function DatePicker({
           mode="single"
           selected={date}
           onSelect={onDateChange}
-          initialFocus
           captionLayout="dropdown-months"
         />
       </PopoverContent>

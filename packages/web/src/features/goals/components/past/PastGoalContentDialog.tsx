@@ -20,7 +20,7 @@ export function PastGoalContentDialog({
 }: Readonly<PastGoalContentDialogProps>) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[calc(80vh)] overflow-auto">
         <DialogHeader>
           <DialogTitle>{goal?.name}</DialogTitle>
           <DialogDescription>目標の詳細内容</DialogDescription>

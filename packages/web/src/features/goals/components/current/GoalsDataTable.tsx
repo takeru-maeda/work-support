@@ -15,17 +15,19 @@ import type {
   GoalSortField,
   SortDirection,
 } from "@/features/goals/types";
+import { cn } from "@/lib/utils";
 
 interface GoalsDataTableProps {
   goals: Goal[];
   sortField: GoalSortField;
   sortDirection: SortDirection;
   onSort: (field: GoalSortField) => void;
-  onNameChange: (id: string, value: string) => void;
-  onWeightChange: (id: string, value: number) => void;
-  onProgressChange: (id: string, value: number) => void;
-  onRemove: (id: string) => void;
+  onNameChange: (id: number, value: string) => void;
+  onWeightChange: (id: number, value: number) => void;
+  onProgressChange: (id: number, value: number) => void;
+  onRemove: (goal: Goal) => void;
   onViewContent: (goal: Goal) => void;
+  disabled?: boolean;
 }
 
 export function GoalsDataTable({
@@ -38,6 +40,7 @@ export function GoalsDataTable({
   onProgressChange,
   onRemove,
   onViewContent,
+  disabled = false,
 }: Readonly<GoalsDataTableProps>) {
   const getSortIcon = (field: GoalSortField) => {
     if (sortField !== field) {
@@ -96,6 +99,7 @@ export function GoalsDataTable({
                 <TableCell className="min-w-[120px]">
                   <Input
                     value={goal.name}
+                    disabled={disabled}
                     onChange={(event) =>
                       onNameChange(goal.id, event.target.value)
                     }
@@ -109,13 +113,19 @@ export function GoalsDataTable({
                       min="0"
                       max="100"
                       value={goal.weight}
+                      disabled={disabled}
                       onChange={(event) =>
                         onWeightChange(
                           goal.id,
                           Number.parseInt(event.target.value) || 0,
                         )
                       }
-                      className="h-8 w-16 text-center text-sm"
+                      className={cn(
+                        "h-8 w-14 text-center text-sm",
+                        "[&::-webkit-outer-spin-button]:appearance-none",
+                        "[&::-webkit-inner-spin-button]:appearance-none",
+                        "[appearance:textfield]",
+                      )}
                     />
                     <span className="text-sm text-muted-foreground">%</span>
                   </div>
@@ -124,16 +134,23 @@ export function GoalsDataTable({
                   <div className="flex items-center gap-1">
                     <Input
                       type="number"
-                      min="0"
-                      max="100"
+                      min="0.1"
+                      max="100.0"
+                      step={0.1}
                       value={goal.progress}
+                      disabled={disabled}
                       onChange={(event) =>
                         onProgressChange(
                           goal.id,
-                          Number.parseInt(event.target.value) || 0,
+                          Number.parseFloat(event.target.value) || 0,
                         )
                       }
-                      className="h-8 w-16 text-center text-sm"
+                      className={cn(
+                        "h-8 w-14 text-center text-sm",
+                        "[&::-webkit-outer-spin-button]:appearance-none",
+                        "[&::-webkit-inner-spin-button]:appearance-none",
+                        "[appearance:textfield]",
+                      )}
                     />
                     <span className="text-sm text-muted-foreground">%</span>
                   </div>
@@ -152,8 +169,9 @@ export function GoalsDataTable({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => onRemove(goal.id)}
+                    onClick={() => onRemove(goal)}
                     className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                    disabled={disabled}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

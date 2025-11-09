@@ -70,7 +70,7 @@ export const GoalHistoryQuerySchema = z
     endDate: z.iso.date().optional(),
     minProgress: optionalProgressSchema,
     maxProgress: optionalProgressSchema,
-    sort: z.enum(GOAL_HISTORY_SORT_OPTIONS).optional().default("-end_date"),
+    sort: z.enum(GOAL_HISTORY_SORT_OPTIONS).optional(),
     page: z.coerce.number().int().min(1).default(1),
     pageSize: z.coerce.number().int().min(1).max(100).default(20),
   })

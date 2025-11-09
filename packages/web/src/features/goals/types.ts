@@ -1,26 +1,25 @@
 export interface PastGoal {
-  id: string;
+  id: number;
   name: string;
   weight: number;
   progress: number;
+  startDate: Date;
+  endDate: Date;
   period: string;
-  content?: string;
+  content: string | null;
 }
 
 export type SortField = "name" | "weight" | "period" | "progress";
 export type SortDirection = "asc" | "desc" | null;
 
 export interface Goal {
-  id: string;
+  id: number;
   name: string;
   weight: number;
   progress: number;
-  content?: string;
-}
-
-export interface HistoricalData {
-  date: string;
-  [key: string]: number | string;
+  content: string | null;
+  startDate: Date;
+  endDate: Date;
 }
 
 export type GoalSortField = "name" | "weight" | "progress" | null;
@@ -30,4 +29,10 @@ export interface NewGoal {
   name: string;
   content: string;
   weight: number;
+}
+
+export interface NewGoalDraft {
+  periodStart?: Date;
+  periodEnd?: Date;
+  goals?: NewGoal[];
 }

@@ -1,4 +1,4 @@
-import { CalendarIcon, FileText } from "lucide-react";
+import { CalendarIcon, FileText, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 
@@ -25,6 +25,7 @@ export function WeeklyReportControls({
   date,
   weekStart,
   weekEnd,
+  loading = false,
   onDateChange,
   onOutput,
   className,
@@ -52,9 +53,22 @@ export function WeeklyReportControls({
         </PopoverContent>
       </Popover>
 
-      <Button onClick={onOutput} className="whitespace-nowrap">
-        <FileText className="mr-2 h-4 w-4" />
-        出力
+      <Button
+        onClick={onOutput}
+        className="whitespace-nowrap"
+        disabled={loading}
+      >
+        {loading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            出力中...
+          </>
+        ) : (
+          <>
+            <FileText className="mr-2 h-4 w-4" />
+            出力
+          </>
+        )}
       </Button>
     </div>
   );

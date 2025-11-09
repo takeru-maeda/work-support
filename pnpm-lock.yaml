@@ -11,6 +11,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.58.0
         version: 2.58.0
+      dayjs:
+        specifier: ^1.11.18
+        version: 1.11.18
     devDependencies:
       '@eslint/js':
         specifier: ^9.36.0
@@ -66,9 +69,6 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.58.0
         version: 2.58.0
-      dayjs:
-        specifier: ^1.11.18
-        version: 1.11.18
       hono:
         specifier: ^4.9.9
         version: 4.9.9

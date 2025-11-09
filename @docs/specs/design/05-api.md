@@ -533,7 +533,6 @@
 
   ```json
   {
-    "mission": "string | null",
     "weeklyReport": "string"
   }
   ```

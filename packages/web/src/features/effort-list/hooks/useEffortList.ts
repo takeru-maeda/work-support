@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useTableResize } from "@/hooks/useTableResize";
 import type {
   EffortListEntry,
   EffortSortColumn,
@@ -272,12 +271,6 @@ export function useEffortList() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
-  const { tableHeight, isResizing, handleResizeStart } = useTableResize({
-    initialHeight: 300,
-    minHeight: 300,
-    maxHeight: 1000,
-  });
-
   const projectOptions = useMemo(
     () =>
       Array.from(new Set(entries.map((entry) => entry.project))).filter(
@@ -427,10 +420,5 @@ export function useEffortList() {
     setCurrentPage,
     itemsPerPage,
     handleItemsPerPageChange,
-
-    // Table resize
-    tableHeight,
-    isResizing,
-    handleResizeStart,
   };
 }

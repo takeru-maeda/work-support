@@ -290,8 +290,8 @@ export const buildEffortCompletionEmail = (
   entries: StructuredEffortResult[],
   memo: string | null,
 ): { subject: string; body: string } => {
-  const subject = "工数を登録しました";
   const formattedDate: string = formatMailDate(date);
+  const subject = `${formattedDate} 工数を登録しました`;
 
   const grouped = new Map<
     number,
@@ -568,7 +568,7 @@ const taskKey = (projectId: number, name: string): string => {
 };
 
 /**
- * メール日付を整形します。
+ * メール日付をyyyy/MM/dd形式に整形します。
  */
 const formatMailDate = (date: Date): string => {
   const normalized = new Date(date);

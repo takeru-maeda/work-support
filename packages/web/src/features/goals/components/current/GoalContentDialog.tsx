@@ -15,7 +15,7 @@ interface GoalContentDialogProps {
   goal: Goal | null;
   editedContent: string;
   onContentChange: (value: string) => void;
-  onSave: () => void;
+  onSave: () => Promise<void>;
   onOpenChange: (open: boolean) => void;
 }
 
@@ -29,7 +29,7 @@ export function GoalContentDialog({
 }: Readonly<GoalContentDialogProps>) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[calc(90vh)] overflow-auto">
         <DialogHeader>
           <DialogTitle>{goal?.name}</DialogTitle>
           <DialogDescription>目標の詳細内容を編集できます</DialogDescription>
@@ -39,14 +39,14 @@ export function GoalContentDialog({
             value={editedContent}
             onChange={(event) => onContentChange(event.target.value)}
             placeholder="目標の内容を入力してください"
-            className="min-h-[200px] resize-y"
+            className="min-h-[100px] resize-y max-h-[calc(70vh-80px)] text-sm"
           />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             キャンセル
           </Button>
-          <Button onClick={onSave}>保存</Button>
+          <Button onClick={() => void onSave()}>保存</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

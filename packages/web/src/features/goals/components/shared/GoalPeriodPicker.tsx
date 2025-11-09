@@ -7,6 +7,7 @@ interface GoalPeriodPickerProps {
   onPeriodStartChange: (date?: Date) => void;
   onPeriodEndChange: (date?: Date) => void;
   className?: string;
+  disabled?: boolean;
 }
 
 export function GoalPeriodPicker({
@@ -15,6 +16,7 @@ export function GoalPeriodPicker({
   onPeriodStartChange,
   onPeriodEndChange,
   className,
+  disabled = false,
 }: Readonly<GoalPeriodPickerProps>) {
   return (
     <div
@@ -29,12 +31,14 @@ export function GoalPeriodPicker({
           date={periodStart}
           onDateChange={onPeriodStartChange}
           placeholder="開始日"
+          disabled={disabled}
         />
         <span className="text-muted-foreground">-</span>
         <DatePicker
           date={periodEnd}
           onDateChange={onPeriodEndChange}
           placeholder="終了日"
+          disabled={disabled}
         />
       </div>
     </div>

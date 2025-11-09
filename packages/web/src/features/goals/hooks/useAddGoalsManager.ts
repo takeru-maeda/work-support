@@ -1,8 +1,12 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { ROUTES } from "@/config/routes";
-
+import { useGoalsData } from "@/features/goals/hooks/modules/current/useGoalsData";
+import { useGoalDraft } from "@/features/goals/hooks/modules/add/useGoalDraft";
+import { useAddGoalMetrics } from "@/features/goals/hooks/modules/add/useAddGoalMetrics";
+import { useAddGoalPeriodValidation } from "@/features/goals/hooks/modules/add/useAddGoalPeriodValidation";
+import { useAddGoalSave } from "@/features/goals/hooks/modules/add/useAddGoalSave";
 import type { NewGoal } from "../types";
 
 interface UseAddGoalsManagerResult {
@@ -18,67 +22,67 @@ interface UseAddGoalsManagerResult {
     field: keyof Omit<NewGoal, "id">,
     value: string | number,
   ) => void;
-  handleSave: () => void;
+  handleSave: () => Promise<void>;
   handleCancel: () => void;
   totalWeight: number;
   isWeightValid: boolean;
   isWeightExceeded: boolean;
+  periodError: string | null;
+  isPeriodValid: boolean;
+  latestGoalEndDate?: Date;
+  isSaving: boolean;
 }
 
 export function useAddGoalsManager(): UseAddGoalsManagerResult {
   const navigate = useNavigate();
-  const [periodStart, setPeriodStart] = useState<Date | undefined>(new Date());
-  const [periodEnd, setPeriodEnd] = useState<Date | undefined>(undefined);
-  const [goals, setGoals] = useState<NewGoal[]>([
-    { id: "1", name: "", content: "", weight: 0 },
-  ]);
+  const { goals: currentGoals, mutateGoals } = useGoalsData();
 
-  const addGoal = useCallback(() => {
-    setGoals((prev) => [
-      ...prev,
-      { id: Date.now().toString(), name: "", content: "", weight: 0 },
-    ]);
-  }, []);
-
-  const removeGoal = useCallback((id: string) => {
-    setGoals((prev) => {
-      if (prev.length <= 1) return prev;
-      return prev.filter((goal) => goal.id !== id);
-    });
-  }, []);
-
-  const updateGoal = useCallback(
-    (id: string, field: keyof Omit<NewGoal, "id">, value: string | number) => {
-      setGoals((prev) =>
-        prev.map((goal) =>
-          goal.id === id ? { ...goal, [field]: value } : goal,
-        ),
-      );
-    },
-    [],
-  );
-
-  const totalWeight: number = useMemo(
-    () => goals.reduce((sum, goal) => sum + (goal.weight || 0), 0),
-    [goals],
-  );
-  const isWeightValid: boolean = totalWeight === 100;
-  const isWeightExceeded: boolean = totalWeight > 100;
-
-  const handleSave = useCallback(() => {
-    const validGoals = goals.filter(
-      (goal) => goal.name.trim() && goal.weight > 0,
-    );
-
-    if (validGoals.length > 0 && periodStart && periodEnd) {
-      console.log("Saving goals:", {
-        periodStart,
-        periodEnd,
-        goals: validGoals,
-      });
-      navigate(ROUTES.goals);
+  const latestGoalEndDate: Date | undefined = useMemo(() => {
+    if (currentGoals.length === 0) {
+      return undefined;
     }
-  }, [goals, navigate, periodEnd, periodStart]);
+    return currentGoals.reduce<Date>(
+      (max, goal) => (goal.endDate > max ? goal.endDate : max),
+      currentGoals[0].endDate,
+    );
+  }, [currentGoals]);
+
+  const {
+    periodStart,
+    periodEnd,
+    goals,
+    setPeriodStart,
+    setPeriodEnd,
+    addGoal,
+    removeGoal,
+    updateGoal,
+    clearDraft,
+  } = useGoalDraft();
+
+  const { totalWeight, isWeightValid, isWeightExceeded } =
+    useAddGoalMetrics(goals);
+
+  const {
+    periodError,
+    isPeriodValid,
+    validatePeriod,
+    setPeriodError,
+  } = useAddGoalPeriodValidation({
+    latestGoalEndDate,
+    periodStart,
+    periodEnd,
+  });
+
+  const { handleSave, isSaving } = useAddGoalSave({
+    goals,
+    periodStart,
+    periodEnd,
+    validatePeriod,
+    setPeriodError,
+    mutateGoals,
+    clearDraft,
+    onSuccess: () => navigate(ROUTES.goals),
+  });
 
   const handleCancel = useCallback(() => {
     navigate(ROUTES.goals);
@@ -98,5 +102,9 @@ export function useAddGoalsManager(): UseAddGoalsManagerResult {
     totalWeight,
     isWeightValid,
     isWeightExceeded,
+    periodError,
+    isPeriodValid,
+    latestGoalEndDate,
+    isSaving,
   };
 }

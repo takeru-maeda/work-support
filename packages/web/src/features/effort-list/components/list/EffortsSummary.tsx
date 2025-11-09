@@ -38,22 +38,27 @@ export function EffortsSummary({
         className,
       )}
     >
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 grid-cols-3">
         <div>
           <p className="mb-1 text-sm text-muted-foreground">見積合計</p>
-          <p className="text-2xl font-bold tabular-nums">
+          <p className="text-xl sm:text-2xl font-bold tabular-nums">
             {totals.estimated.toFixed(1)}h
           </p>
         </div>
         <div>
           <p className="mb-1 text-sm text-muted-foreground">実績合計</p>
-          <p className="text-2xl font-bold tabular-nums">
+          <p className="text-xl sm:text-2xl font-bold tabular-nums">
             {totals.actual.toFixed(1)}h
           </p>
         </div>
         <div>
           <p className="mb-1 text-sm text-muted-foreground">差分合計</p>
-          <p className={cn("text-2xl font-bold tabular-nums", differenceClass)}>
+          <p
+            className={cn(
+              "text-xl sm:text-2xl font-bold tabular-nums",
+              differenceClass,
+            )}
+          >
             {totals.difference > 0 ? "+" : ""}
             {totals.difference.toFixed(1)}h
           </p>

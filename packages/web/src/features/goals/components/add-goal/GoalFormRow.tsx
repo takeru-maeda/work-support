@@ -16,6 +16,7 @@ interface GoalFormRowProps {
   onContentChange: (value: string) => void;
   onWeightChange: (value: number) => void;
   onRemove: () => void;
+  disabled?: boolean;
 }
 
 export function GoalFormRow({
@@ -29,6 +30,7 @@ export function GoalFormRow({
   onContentChange,
   onWeightChange,
   onRemove,
+  disabled = false,
 }: Readonly<GoalFormRowProps>) {
   return (
     <div className="rounded-lg border border-border bg-card p-4 sm:p-6 space-y-4">
@@ -38,13 +40,14 @@ export function GoalFormRow({
           placeholder={`目標${index + 1}`}
           value={name}
           onChange={(event) => onNameChange(event.target.value)}
+          disabled={disabled}
           className="flex-1 text-xl font-semibold border-none bg-transparent p-0 h-auto shadow-none focus:ring-0 focus:outline-none text-foreground placeholder:text-muted-foreground/50"
         />
         <Button
           variant="ghost"
           size="sm"
           onClick={onRemove}
-          disabled={disableRemove}
+          disabled={disableRemove || disabled}
           className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive flex-shrink-0"
         >
           <Trash2 className="h-4 w-4" />
@@ -60,6 +63,7 @@ export function GoalFormRow({
             value={content}
             onChange={(event) => onContentChange(event.target.value)}
             rows={4}
+            disabled={disabled}
             className="resize-y"
           />
         </div>
@@ -76,6 +80,7 @@ export function GoalFormRow({
             onChange={(event) =>
               onWeightChange(Number.parseInt(event.target.value) || 0)
             }
+            disabled={disabled}
             className="max-w-[200px]"
           />
         </div>

@@ -19,6 +19,7 @@ import {
 } from "./repository";
 import { calculateGoalSummaries } from "../../../../shared/src/utils/goalProgress";
 import { AppError } from "../../lib/errors";
+import dayjs from "dayjs";
 
 /**
  * 最新期間の目標を取得します。
@@ -126,11 +127,11 @@ export const getPreviousWeekProgressService = async (
   userId: string,
   referenceDate: string,
 ): Promise<GoalPreviousWeekProgress> => {
-  const { previousFriday, reference } = getPreviousWeekFriday(referenceDate);
+  const { previousSunday, reference } = getPreviousWeekSunday(referenceDate);
 
   const goals: Tables<"goals">[] = await getGoalsByUser(supabase, userId);
   const histories: GoalProgressHistoryMini[] =
-    await getGoalProgressHistoriesUntil(supabase, userId, previousFriday);
+    await getGoalProgressHistoriesUntil(supabase, userId, previousSunday); //TODO: 時差が怪しい
 
   const latestHistoryByGoal = new Map<number, (typeof histories)[number]>();
   for (const history of histories) {
@@ -141,19 +142,24 @@ export const getPreviousWeekProgressService = async (
 
   const progress = goals
     .map((goal) => {
-      const history = latestHistoryByGoal.get(goal.id);
+      const history: GoalProgressHistoryMini | undefined =
+        latestHistoryByGoal.get(goal.id);
       if (history) {
         return {
           goal_id: goal.id,
           progress: history.progress,
-          recorded_at: history.recorded_at.slice(0, 10),
+          recorded_at: history.recorded_at.slice(0, 10), //TODO: 時差が怪しい
           source: "history" as const,
         };
       }
+      const isCreatedInThisWeek: boolean =
+        dayjs(goal.created_at) > dayjs(previousSunday);
       return {
         goal_id: goal.id,
-        progress: goal.progress,
-        recorded_at: previousFriday,
+        progress: isCreatedInThisWeek ? 0 : goal.progress,
+        recorded_at: isCreatedInThisWeek
+          ? goal.created_at.slice(0, 10) //TODO: 時差が怪しい
+          : previousSunday,
         source: "goal" as const,
       };
     })
@@ -161,7 +167,7 @@ export const getPreviousWeekProgressService = async (
 
   return {
     referenceDate: reference,
-    previousWeekEnd: previousFriday,
+    previousWeekEnd: previousSunday,
     progress,
   };
 };
@@ -194,11 +200,11 @@ function formatDate(date: Date): string {
 }
 
 /**
- * 基準日を含む週の前週金曜日を算出します。
+ * 基準日を含む週の前週日曜日を算出します。
  */
-function getPreviousWeekFriday(referenceDate: string): {
+function getPreviousWeekSunday(referenceDate: string): {
   reference: string;
-  previousFriday: string;
+  previousSunday: string;
 } {
   const reference = new Date(referenceDate);
   if (Number.isNaN(reference.getTime())) {
@@ -208,11 +214,11 @@ function getPreviousWeekFriday(referenceDate: string): {
   const diffToMonday: number = (day + 6) % 7;
   const monday = new Date(reference);
   monday.setDate(reference.getDate() - diffToMonday);
-  const friday = new Date(monday);
-  friday.setDate(monday.getDate() - 3);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() - 1);
 
   return {
     reference: formatDate(reference),
-    previousFriday: formatDate(friday),
+    previousSunday: formatDate(sunday),
   };
 }

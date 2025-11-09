@@ -1,13 +1,15 @@
-import { Edit2, Target } from "lucide-react";
-import { useMission } from "@/features/reports/hooks/useMission";
+import { Edit2 } from "lucide-react";
+import { updateMission, useMission } from "@/services/missions";
 import { useEffect, useState } from "react";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { FormActions } from "@/components/form/FormActions";
-import { SectionHeader } from "@/components/sections/SectionHeader";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import CardContainer from "@/components/shared/CardContainer";
-import { CardSkeleton } from "@/components/skeleton/CardSkeleton";
+import { reportUiError } from "@/services/logs";
+import MissionSectionHeader from "./MissionSectionHeader";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Mission } from "../../types";
 
 interface MissionEditorProps {
   saving: boolean;
@@ -18,7 +20,8 @@ export function MissionEditor({
   saving,
   setSaving,
 }: Readonly<MissionEditorProps>) {
-  const { mission, isLoading, error, updateMission, reload } = useMission();
+  const { data, isLoading, error, mutate } = useMission();
+  const mission: Mission | null = data?.mission ?? null;
   const [tempMission, setTempMission] = useState<string>("");
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
@@ -45,26 +48,30 @@ export function MissionEditor({
       setIsEditing(false);
       showSuccessToast("ミッションを更新しました");
     } catch (err) {
-      console.error(err);
       showErrorToast("ミッションの更新に失敗しました");
+      reportUiError(err);
     } finally {
       setSaving(false);
     }
   };
 
   if (isLoading) {
-    return <CardSkeleton />;
+    return (
+      <CardContainer className="space-y-4">
+        <MissionSectionHeader />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+          <Skeleton className="h-4 w-4/6" />
+        </div>
+      </CardContainer>
+    );
   }
 
   return (
     <CardContainer className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <SectionHeader
-          icon={Target}
-          iconClassName="bg-primary/10 text-primary"
-          title="ミッション"
-          description="目的と方向性を定義"
-        />
+        <MissionSectionHeader />
         {!isEditing && !error && (
           <Button
             variant="outline"
@@ -84,7 +91,7 @@ export function MissionEditor({
               ? error.message
               : "ミッションの取得に失敗しました"}
           </p>
-          <Button onClick={() => void reload()} variant="outline" size="sm">
+          <Button onClick={() => void mutate()} variant="outline" size="sm">
             再読み込み
           </Button>
         </div>
@@ -108,7 +115,9 @@ export function MissionEditor({
           />
         </div>
       ) : (
-        <p className="whitespace-pre-line text-pretty leading-relaxed text-foreground mb-2">
+        <p
+          className={`whitespace-pre-line text-pretty leading-relaxed mb-2 ${mission ? "text-foreground" : "text-muted-foreground"}`}
+        >
           {mission?.content ?? "まだミッションが設定されていません。"}
         </p>
       )}

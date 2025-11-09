@@ -1,61 +1,42 @@
-import { useState } from "react";
-import { format, startOfWeek, endOfWeek } from "date-fns";
-import { ja } from "date-fns/locale";
+import { useCallback, useState } from "react";
+import { endOfWeek, startOfWeek } from "date-fns";
 
 import { WeeklyReportControls } from "@/features/reports/components/weekly-report/WeeklyReportControls";
 import { WeeklyReportPreview } from "@/features/reports/components/weekly-report/WeeklyReportPreview";
 import { SectionHeader } from "@/components/sections/SectionHeader";
 import { FileText } from "lucide-react";
 import CardContainer from "@/components/shared/CardContainer";
+import { useWeeklyReport } from "@/features/reports/hooks/useWeeklyReport";
+import { reportUiError } from "@/services/logs";
 
 export function WeeklyReport() {
   const [date, setDate] = useState<Date>(new Date());
   const [copied, setCopied] = useState(false);
-  const [showReport, setShowReport] = useState(false);
+  const { report, isLoading, error, generateReport } = useWeeklyReport();
 
   const weekStart = startOfWeek(date, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
 
-  const generateReportText = () => {
-    return `週報
-期間: ${format(weekStart, "yyyy年M月d日", { locale: ja })} - ${format(weekEnd, "yyyy年M月d日", { locale: ja })}
+  const handleCopy = useCallback(async () => {
+    if (!report) return;
 
-■ 今週の活動内容
-・プロジェクトAの設計レビューを完了
-・バグ修正を15件対応
-・チームメンバー向けの技術勉強会を実施
-
-■ 進捗状況
-・タスク完了数: 24件
-・作業時間: 42時間
-・会議参加: 8回
-・コードレビュー: 12件
-
-■ 課題・問題点
-・統合テスト環境の不具合により、テストが遅延
-・ドキュメント作成のリソースが不足
-
-■ 来週の予定
-・ベータテストフェーズの開始
-・API仕様書の完成
-・チーム振り返りミーティングの実施
-
-以上`;
-  };
-
-  const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(generateReportText());
+      await navigator.clipboard.writeText(report);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error("Failed to copy:", err);
+      reportUiError(err);
     }
-  };
+  }, [report]);
 
-  const handleOutput = () => {
-    setShowReport(true);
-  };
+  const handleOutput = useCallback(async () => {
+    try {
+      await generateReport(date);
+      setCopied(false);
+    } catch (err) {
+      reportUiError(err);
+    }
+  }, [date, generateReport]);
 
   return (
     <CardContainer className="space-y-4">
@@ -69,16 +50,23 @@ export function WeeklyReport() {
         date={date}
         weekStart={weekStart}
         weekEnd={weekEnd}
+        loading={isLoading}
         onDateChange={(next) => setDate(next)}
         onOutput={handleOutput}
       />
 
-      {showReport && (
+      {report && (
         <WeeklyReportPreview
-          reportText={generateReportText()}
+          reportText={report}
           copied={copied}
           onCopy={handleCopy}
         />
+      )}
+
+      {error && (
+        <p className="text-sm text-destructive">
+          週報の取得に失敗しました: {error}
+        </p>
       )}
     </CardContainer>
   );

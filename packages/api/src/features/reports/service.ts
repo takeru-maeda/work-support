@@ -3,7 +3,6 @@ import { Database, Tables } from "../../../../shared/src/types/db";
 import {
   getGoalsForReport,
   getGoalProgressHistories,
-  getMissionForReport,
   getWorkRecordList,
   getWorkRecordsForReport,
 } from "./repository";
@@ -44,10 +43,7 @@ export const generateFormattedReport = async (
     reportData.goalSummary,
   );
 
-  return {
-    mission: reportData.mission,
-    weeklyReport,
-  };
+  return { weeklyReport };
 };
 
 /**
@@ -100,10 +96,8 @@ const getWeeklyReportData = async (
   targetDate: Date,
 ): Promise<WeeklyReportData> => {
   const { startDate, endDate } = getWeekRange(targetDate);
-  const sunday: Date = dayjs(startDate).add(6, "day").toDate();
 
-  const [mission, workRecords, goals] = await Promise.all([
-    getMissionForReport(supabase, userId),
+  const [workRecords, goals] = await Promise.all([
     getWorkRecordsForReport(supabase, userId, startDate, endDate),
     getGoalsForReport(supabase, userId, startDate, endDate),
   ]);
@@ -112,7 +106,7 @@ const getWeeklyReportData = async (
     supabase,
     goals,
     startDate,
-    sunday,
+    endDate,
   );
 
   const goalSummary: GoalSummary | null = calculateGoalSummary(
@@ -131,7 +125,6 @@ const getWeeklyReportData = async (
   return {
     startDate,
     endDate,
-    mission: mission?.content ?? null,
     workRecords,
     goals: goalsWithDiff,
     goalSummary,
@@ -139,23 +132,23 @@ const getWeeklyReportData = async (
 };
 
 /**
- * 週の開始日（月曜日）と終了日（金曜日）を計算します
+ * 週の開始日（月曜日）と終了日（日曜日）を計算します
  *
  * @param date 日付（時間のない '2025-10-01' のようなデータを期待）
- * @returns 引数の日付の週の開始日（月曜日）と終了日（金曜日）
+ * @returns 引数の日付の週の開始日（月曜日）と終了日（日曜日）
  */
 function getWeekRange(date: Date): { startDate: Date; endDate: Date } {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
-  const day = d.getDay(); // 0 (Sun) - 6 (Sat)
+  const day: number = d.getDay(); // 0 (Sun) - 6 (Sat)
   const diffToMonday = d.getDate() - day + (day === 0 ? -6 : 1);
   const monday = new Date(d.setDate(diffToMonday));
-  const friday = new Date(monday);
-  friday.setDate(monday.getDate() + 4);
+  const sunDay = new Date(monday);
+  sunDay.setDate(monday.getDate() + 6);
 
   return {
     startDate: monday,
-    endDate: friday,
+    endDate: sunDay,
   };
 }
 
@@ -363,39 +356,75 @@ const formatDailyWorkStatus = (
 const formatProjectWorkStatus = (workRecords: Effort[]): string => {
   if (workRecords.length === 0) return "";
 
-  const projectTasks: {
-    [project: string]: {
-      totalHours: number;
-      tasks: { [task: string]: number };
-    };
-  } = {};
-
-  for (const record of workRecords) {
-    const projectName = record.tasks.projects.name;
-    const taskName = record.tasks.name;
-    if (!projectTasks[projectName]) {
-      projectTasks[projectName] = { totalHours: 0, tasks: {} };
-    }
-    projectTasks[projectName].totalHours += record.hours;
-    projectTasks[projectName].tasks[taskName] =
-      (projectTasks[projectName].tasks[taskName] || 0) + record.hours;
+  interface TaskSummary {
+    id: number;
+    name: string;
+    hours: number;
   }
 
-  let projectStatus = "<案件別業務状況>\n";
-  const projectNames: string[] = Object.keys(projectTasks).sort((a, b) =>
-    a.localeCompare(b),
-  );
+  interface ProjectSummary {
+    id: number;
+    name: string;
+    totalHours: number;
+    tasks: Map<number, TaskSummary>;
+  }
 
-  for (const projectName of projectNames) {
-    const projectData = projectTasks[projectName];
-    projectStatus += `■${projectName}（合計：${formatNumber(projectData.totalHours, 2)}h）\n`;
-    const taskNames: string[] = Object.keys(projectData.tasks).sort((a, b) =>
-      a.localeCompare(b),
-    );
-    for (const taskName of taskNames) {
-      const taskHours = projectData.tasks[taskName];
-      projectStatus += `>・${taskName}：${formatNumber(taskHours, 2)}h\n`;
+  const projectSummaries: Map<number, ProjectSummary> = new Map();
+
+  for (const record of workRecords) {
+    const task = record.tasks;
+    const project = task?.projects;
+
+    if (task?.id == null || project?.id == null) {
+      continue;
     }
+
+    const projectSummary: ProjectSummary =
+      projectSummaries.get(project.id) ??
+      {
+        id: project.id,
+        name: project.name,
+        totalHours: 0,
+        tasks: new Map<number, TaskSummary>(),
+      };
+
+    projectSummary.totalHours += record.hours;
+
+    const existingTask: TaskSummary | undefined =
+      projectSummary.tasks.get(task.id);
+
+    if (existingTask) {
+      existingTask.hours += record.hours;
+    } else {
+      projectSummary.tasks.set(task.id, {
+        id: task.id,
+        name: task.name,
+        hours: record.hours,
+      });
+    }
+
+    projectSummaries.set(project.id, projectSummary);
+  }
+
+  if (projectSummaries.size === 0) return "";
+
+  let projectStatus = "<案件別業務状況>\n";
+
+  const sortedProjects: ProjectSummary[] = Array.from(
+    projectSummaries.values(),
+  ).sort((a, b) => b.id - a.id);
+
+  for (const projectSummary of sortedProjects) {
+    projectStatus += `■${projectSummary.name}（合計：${formatNumber(projectSummary.totalHours, 2)}h）\n`;
+
+    const sortedTasks: TaskSummary[] = Array.from(
+      projectSummary.tasks.values(),
+    ).sort((a, b) => b.id - a.id);
+
+    for (const taskSummary of sortedTasks) {
+      projectStatus += `>・${taskSummary.name}：${formatNumber(taskSummary.hours, 2)}h\n`;
+    }
+
     projectStatus += "\n";
   }
 

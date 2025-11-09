@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { useUserStore } from "@/store/user";
 
 /**
  * クラス名をマージします。
@@ -27,9 +28,21 @@ export function getInitials(name: string): string {
 
   if (parts.length >= 2) {
     const first: string = parts[0]?.[0] ?? "";
-    const last: string = parts[parts.length - 1]?.[0] ?? "";
+    const last: string = parts.at(-1)?.[0] ?? "";
     return `${first}${last}`.toUpperCase();
   }
 
   return normalized.slice(0, 2).toUpperCase();
+}
+
+/**
+ * ユーザーIDを付与したローカルストレージキーを生成します。
+ *
+ * @param baseKey ベースとなるキー名
+ * @returns ユーザーID付きのキー
+ */
+export function buildUserScopedKey(baseKey: string): string {
+  const userId: string | null = useUserStore.getState().user?.id ?? null;
+  if (!userId) throw new Error("User not authenticated");
+  return `${baseKey}_${userId}`;
 }

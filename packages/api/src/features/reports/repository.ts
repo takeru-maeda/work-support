@@ -29,7 +29,14 @@ export const getWorkRecordsForReport = async (
       `
       work_date,
       hours,
-      tasks ( name, projects ( name ) )
+      tasks (
+        id,
+        name,
+        projects (
+          id,
+          name
+        )
+      )
     `,
     )
     .eq("user_id", userId)
@@ -70,30 +77,6 @@ export const getGoalsForReport = async (
   if (error) {
     throw new AppError(500, `Failed to fetch goals: ${error.message}`, error);
   }
-  return data;
-};
-
-/**
- * 週報向けのミッションを取得します。
- *
- * @param supabase Supabaseクライアント
- * @param userId ユーザーID
- * @returns ミッション
- */
-export const getMissionForReport = async (
-  supabase: SupabaseClient<Database>,
-  userId: string,
-): Promise<{ content: string | null } | null> => {
-  const { data, error } = await supabase
-    .from("missions")
-    .select("content")
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  if (error) {
-    throw new AppError(500, `Failed to fetch mission: ${error.message}`, error);
-  }
-
   return data;
 };
 

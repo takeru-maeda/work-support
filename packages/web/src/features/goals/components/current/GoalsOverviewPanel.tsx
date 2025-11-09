@@ -1,8 +1,8 @@
-import { Target, Award, Plus, TrendingUp } from "lucide-react";
+import { Target, Award, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { SectionHeader } from "@/components/sections/SectionHeader";
 import { GoalProgressCard } from "@/features/goals/components/shared/GoalProgressCard";
+import GoalSectionHeader from "./GoalSectionHeader";
 
 interface GoalsOverviewPanelProps {
   periodStart?: Date;
@@ -26,12 +26,7 @@ export function GoalsOverviewPanel({
   return (
     <div className="space-y-4 ">
       <div className="flex items-start justify-between gap-4">
-        <SectionHeader
-          icon={TrendingUp}
-          iconClassName="bg-chart-2/10 text-chart-2"
-          title="目標進捗"
-          description="進行中の目標の追跡と更新"
-        />
+        <GoalSectionHeader />
 
         <Button onClick={onAddGoal} size="sm" className="shrink-0 gap-2">
           <Plus className="h-4 w-4" />

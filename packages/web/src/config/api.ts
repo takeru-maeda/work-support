@@ -5,6 +5,13 @@ export const API_BASE_URL: string =
 
 export const API_ENDPOINTS = {
   missions: "/api/missions",
+  goals: "/api/goals",
+  goalsCurrent: "/api/goals/current",
+  goalsHistory: "/api/goals/history",
+  goalsPreviousWeekProgress: "/api/goals/progress/previous-week",
+  weeklyReport: "/api/reports/weekly",
+  errorLogs: "/api/logs/error",
+  userSettings: "/api/user-settings",
 } as const;
 
 export type ApiEndpointKey = keyof typeof API_ENDPOINTS;

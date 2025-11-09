@@ -5,6 +5,7 @@ import type {
   EffortEntry,
   EffortFormData,
 } from "@/features/effort-entry/types";
+import { reportUiError } from "@/services/logs";
 
 const STORAGE_KEY = "work-support-effort";
 
@@ -21,7 +22,11 @@ interface UseEffortFormManagerResult {
   setMemo: (value: string) => void;
   addEntry: () => void;
   removeEntry: (id: string) => void;
-  updateEntry: (id: string, field: keyof EffortEntry, value: string | number) => void;
+  updateEntry: (
+    id: string,
+    field: keyof EffortEntry,
+    value: string | number,
+  ) => void;
   handleSubmit: () => void;
   projectBreakdown: ProjectBreakdownItem[];
   totalEstimated: number;
@@ -50,7 +55,7 @@ export function useEffortFormManager(): UseEffortFormManagerResult {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved: string | null = localStorage.getItem(STORAGE_KEY);
     if (!saved) return;
 
     try {
@@ -60,7 +65,7 @@ export function useEffortFormManager(): UseEffortFormManagerResult {
         date: new Date(parsed.date),
       });
     } catch (error) {
-      console.error("Failed to load saved effort data:", error);
+      reportUiError(error);
     }
   }, []);
 
@@ -123,14 +128,17 @@ export function useEffortFormManager(): UseEffortFormManagerResult {
       }
     >();
 
-    formData.entries.forEach((entry) => {
-      if (!entry.project) return;
-      const current = breakdown.get(entry.project) ?? { estimated: 0, actual: 0 };
+    for (const entry of formData.entries) {
+      if (!entry.project) continue;
+      const current = breakdown.get(entry.project) ?? {
+        estimated: 0,
+        actual: 0,
+      };
       breakdown.set(entry.project, {
         estimated: current.estimated + entry.estimatedHours,
         actual: current.actual + entry.actualHours,
       });
-    });
+    }
 
     return Array.from(breakdown.entries()).map(([project, totals]) => ({
       project,
@@ -141,7 +149,8 @@ export function useEffortFormManager(): UseEffortFormManagerResult {
   }, [formData.entries]);
 
   const totalEstimated = useMemo(
-    () => formData.entries.reduce((sum, entry) => sum + entry.estimatedHours, 0),
+    () =>
+      formData.entries.reduce((sum, entry) => sum + entry.estimatedHours, 0),
     [formData.entries],
   );
 

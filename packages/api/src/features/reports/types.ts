@@ -20,8 +20,10 @@ export interface Effort {
   work_date: string;
   hours: number;
   tasks: {
+    id: number;
     name: string;
     projects: {
+      id: number;
       name: string;
     };
   };
@@ -43,7 +45,6 @@ export interface GoalSummary {
 export interface WeeklyReportData {
   startDate: Date;
   endDate: Date;
-  mission: string | null;
   workRecords: Effort[];
   goals: GoalWithProgressDiff[];
   goalSummary: GoalSummary | null;
