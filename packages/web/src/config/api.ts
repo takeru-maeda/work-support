@@ -10,6 +10,7 @@ export const API_ENDPOINTS = {
   goalsHistory: "/api/goals/history",
   goalsPreviousWeekProgress: "/api/goals/progress/previous-week",
   weeklyReport: "/api/reports/weekly",
+  workRecords: "/api/reports/work-records",
   errorLogs: "/api/logs/error",
   userSettings: "/api/user-settings",
 } as const;

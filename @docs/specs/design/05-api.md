@@ -619,8 +619,8 @@
 **Query Parameters:**
 
 - `date` (string (date), optional) — 絞り込み対象の日付。指定すると該当日付の工数のみを返す。
-- `project` (string, optional) — 案件名（部分一致）。
-- `task` (string, optional) — タスク名（部分一致）。
+- `projectId` (number, optional) — 案件 ID。完全一致で絞り込む。
+- `taskId` (number, optional) — タスク ID。完全一致で絞り込む。
 - `sort` (string, optional) — 並び順を指定。以下の値を想定：
   - `date`, `-date`
   - `project`, `-project`
@@ -642,10 +642,12 @@
         "id": "number",
         "date": "string (date)",
         "project": "string",
+        "project_id": "number",
         "task": "string",
+        "task_id": "number",
         "estimated_hours": "number | null",
         "hours": "number",
-        "diff": "number"
+        "diff": "number | null"
       }
     ],
     "meta": {

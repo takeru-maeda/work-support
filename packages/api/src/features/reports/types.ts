@@ -54,7 +54,8 @@ export type WorkRecordWithRelations = Tables<"work_record_diffs"> & {
   id: number;
   work_date: string;
   hours: number;
-  hours_diff: number;
+  hours_diff: number | null;
   project_name: string;
+  project_id: number;
   task_name: string;
 };

@@ -20,8 +20,8 @@ interface EffortsFilterPanelProps {
   onProjectChange: (value: string) => void;
   taskValue: string | undefined;
   onTaskChange: (value: string) => void;
-  projectOptions: string[];
-  taskOptions: string[];
+  projectOptions: { id: number; name: string }[];
+  taskOptions: { id: number; name: string }[];
   onApply: () => void;
   onClear: () => void;
   className?: string;
@@ -69,8 +69,8 @@ export function EffortsFilterPanel({
                 <SelectLabel>案件</SelectLabel>
                 <SelectItem value={allValue}>{allLabel}</SelectItem>
                 {projectOptions.map((project) => (
-                  <SelectItem key={project} value={project}>
-                    {project}
+                  <SelectItem key={project.id} value={String(project.id)}>
+                    {project.name}
                   </SelectItem>
                 ))}
               </SelectGroup>
@@ -86,8 +86,8 @@ export function EffortsFilterPanel({
                 <SelectLabel>タスク</SelectLabel>
                 <SelectItem value={allValue}>{allLabel}</SelectItem>
                 {taskOptions.map((task) => (
-                  <SelectItem key={task} value={task}>
-                    {task}
+                  <SelectItem key={task.id} value={String(task.id)}>
+                    {task.name}
                   </SelectItem>
                 ))}
               </SelectGroup>

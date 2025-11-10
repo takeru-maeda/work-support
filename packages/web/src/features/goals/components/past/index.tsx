@@ -1,7 +1,7 @@
 import CardContainer from "@/components/shared/CardContainer";
 import { TableFooter } from "@/components/table-footer/TableFooter";
 import { EmptyState } from "@/components/empty-state/EmptyState";
-import { Target } from "lucide-react";
+import { Search } from "lucide-react";
 
 import { PastGoalsDataTable } from "@/features/goals/components/past/PastGoalsDataTable";
 import { PastGoalsFilter } from "@/features/goals/components/past/PastGoalsFilter";
@@ -42,7 +42,7 @@ export function PastGoalsTable() {
   } = usePastGoals();
 
   return (
-    <CardContainer className="space-y-6">
+    <CardContainer className="space-y-2 sm:space-y-4">
       <PastGoalSectionHeader />
 
       <PastGoalsFilter
@@ -61,7 +61,10 @@ export function PastGoalsTable() {
       />
 
       {isLoading ? (
-        <TableAndFooterSkeleton rows={itemsPerPage} />
+        <TableAndFooterSkeleton
+          rows={itemsPerPage}
+          className="space-y-2 sm:space-y-4"
+        />
       ) : goals.length > 0 ? (
         <>
           <PastGoalsDataTable
@@ -82,7 +85,7 @@ export function PastGoalsTable() {
         </>
       ) : (
         <EmptyState
-          icon={<Target className="size-8" />}
+          icon={<Search className="size-8" />}
           title="該当する目標は見つかりませんでした"
           description="条件を変更して再度お試しください。"
         />

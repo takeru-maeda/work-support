@@ -32,10 +32,14 @@ SELECT
     wr.id,
     wr.user_id,
     wr.task_id,
+    t.project_id,
     wr.work_date,
     wr.hours,
     wr.estimated_hours,
-    wr.hours - COALESCE(wr.estimated_hours, 0) AS hours_diff,
+    CASE
+        WHEN wr.estimated_hours IS NULL THEN NULL
+        ELSE wr.hours - wr.estimated_hours
+    END AS hours_diff,
     wr.created_at,
     t.name AS task_name,
     p.name AS project_name

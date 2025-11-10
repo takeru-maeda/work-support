@@ -7,25 +7,14 @@ interface EffortsSummaryProps {
   className?: string;
 }
 
-const calculateTotals = (entries: EffortListEntry[]) => {
-  return entries.reduce(
-    (acc, entry) => {
-      acc.estimated += entry.estimatedHours;
-      acc.actual += entry.actualHours;
-      acc.difference += entry.actualHours - entry.estimatedHours;
-      return acc;
-    },
-    { estimated: 0, actual: 0, difference: 0 },
-  );
-};
-
 export function EffortsSummary({
   entries,
   className,
 }: Readonly<EffortsSummaryProps>): JSX.Element {
   const totals = calculateTotals(entries);
-  const differenceClass =
-    totals.difference > 0
+  const differenceClass = !totals.hasEstimated
+    ? "text-primary"
+    : totals.difference > 0
       ? "text-destructive"
       : totals.difference < 0
         ? "text-green-600 dark:text-green-400"
@@ -42,7 +31,7 @@ export function EffortsSummary({
         <div>
           <p className="mb-1 text-sm text-muted-foreground">見積合計</p>
           <p className="text-xl sm:text-2xl font-bold tabular-nums">
-            {totals.estimated.toFixed(1)}h
+            {totals.hasEstimated ? `${totals.estimated.toFixed(1)}h` : "-"}
           </p>
         </div>
         <div>
@@ -59,11 +48,39 @@ export function EffortsSummary({
               differenceClass,
             )}
           >
-            {totals.difference > 0 ? "+" : ""}
-            {totals.difference.toFixed(1)}h
+            {totals.hasEstimated
+              ? `${totals.difference > 0 ? "+" : ""}${totals.difference.toFixed(1)}h`
+              : "-"}
           </p>
         </div>
       </div>
     </div>
+  );
+}
+
+function calculateTotals(entries: EffortListEntry[]): {
+  estimated: number;
+  actual: number;
+  difference: number;
+  hasEstimated: boolean;
+} {
+  return entries.reduce(
+    (acc, entry) => {
+      if (entry.estimatedHours != null) {
+        acc.estimated += entry.estimatedHours;
+        acc.hasEstimated = true;
+        acc.difference += entry.actualHours - entry.estimatedHours;
+      } else {
+        acc.difference += entry.actualHours;
+      }
+      acc.actual += entry.actualHours;
+      return acc;
+    },
+    { estimated: 0, actual: 0, difference: 0, hasEstimated: false } as {
+      estimated: number;
+      actual: number;
+      difference: number;
+      hasEstimated: boolean;
+    },
   );
 }

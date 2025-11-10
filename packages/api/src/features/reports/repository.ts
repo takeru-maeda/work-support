@@ -156,8 +156,8 @@ export const getWorkRecordList = async (
 ): Promise<{ items: WorkRecordWithRelations[]; total: number }> => {
   const { sort = "-date", page, pageSize } = query;
   const sortOption = WORK_RECORD_SORT_MAP[sort];
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
+  const from: number = (page - 1) * pageSize;
+  const to: number = from + pageSize - 1;
 
   let builder = supabase
     .from("work_record_diffs")
@@ -166,6 +166,7 @@ export const getWorkRecordList = async (
         id,
         user_id,
         task_id,
+        project_id,
         work_date,
         hours,
         estimated_hours,
@@ -182,12 +183,12 @@ export const getWorkRecordList = async (
     builder = builder.eq("work_date", query.date);
   }
 
-  if (query.project) {
-    builder = builder.ilike("project_name", `%${query.project}%`);
+  if (query.projectId) {
+    builder = builder.eq("project_id", query.projectId);
   }
 
-  if (query.task) {
-    builder = builder.ilike("task_name", `%${query.task}%`);
+  if (query.taskId) {
+    builder = builder.eq("task_id", query.taskId);
   }
 
   for (const order of sortOption) {

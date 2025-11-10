@@ -1,424 +1,209 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
+import { format } from "date-fns";
+
+import { showErrorToast } from "@/lib/toast";
+import { reportUiError } from "@/services/logs";
+import {
+  useEffortListFilters,
+  ALL_OPTION,
+  type EffortListFiltersState,
+} from "@/features/effort-list/hooks/modules/useEffortListFilters";
+import { useEffortListData } from "@/features/effort-list/hooks/modules/useEffortListData";
 import type {
   EffortListEntry,
   EffortSortColumn,
   EffortSortDirection,
 } from "@/features/effort-list/types";
+import type {
+  WorkRecordListQuery,
+  WorkRecordSort,
+} from "@shared/schemas/workRecords";
 
-const MOCK_ENTRIES: EffortListEntry[] = [
-  {
-    id: "1",
-    date: "2025-01-15",
-    project: "プロジェクトA",
-    task: "要件定義",
-    estimatedHours: 4,
-    actualHours: 5,
-  },
-  {
-    id: "2",
-    date: "2025-01-15",
-    project: "プロジェクトB",
-    task: "実装",
-    estimatedHours: 6,
-    actualHours: 5.5,
-  },
-  {
-    id: "3",
-    date: "2025-01-16",
-    project: "プロジェクトA",
-    task: "設計",
-    estimatedHours: 3,
-    actualHours: 4,
-  },
-  {
-    id: "4",
-    date: "2025-01-16",
-    project: "プロジェクトC",
-    task: "レビュー",
-    estimatedHours: 2,
-    actualHours: 1.5,
-  },
-  {
-    id: "5",
-    date: "2025-01-17",
-    project: "プロジェクトA",
-    task: "実装",
-    estimatedHours: 8,
-    actualHours: 7.5,
-  },
-  {
-    id: "6",
-    date: "2025-01-17",
-    project: "プロジェクトB",
-    task: "テスト",
-    estimatedHours: 5,
-    actualHours: 6,
-  },
-  {
-    id: "7",
-    date: "2025-01-18",
-    project: "プロジェクトC",
-    task: "要件定義",
-    estimatedHours: 3,
-    actualHours: 2.5,
-  },
-  {
-    id: "8",
-    date: "2025-01-18",
-    project: "プロジェクトD",
-    task: "設計",
-    estimatedHours: 4,
-    actualHours: 4.5,
-  },
-  {
-    id: "9",
-    date: "2025-01-19",
-    project: "プロジェクトA",
-    task: "レビュー",
-    estimatedHours: 2,
-    actualHours: 2.5,
-  },
-  {
-    id: "10",
-    date: "2025-01-19",
-    project: "プロジェクトB",
-    task: "実装",
-    estimatedHours: 7,
-    actualHours: 6.5,
-  },
-  {
-    id: "11",
-    date: "2025-01-20",
-    project: "プロジェクトC",
-    task: "テスト",
-    estimatedHours: 4,
-    actualHours: 3.5,
-  },
-  {
-    id: "12",
-    date: "2025-01-20",
-    project: "プロジェクトD",
-    task: "要件定義",
-    estimatedHours: 3,
-    actualHours: 3,
-  },
-  {
-    id: "13",
-    date: "2025-01-21",
-    project: "プロジェクトA",
-    task: "テスト",
-    estimatedHours: 4,
-    actualHours: 4.5,
-  },
-  {
-    id: "14",
-    date: "2025-01-21",
-    project: "プロジェクトD",
-    task: "設計",
-    estimatedHours: 5,
-    actualHours: 5,
-  },
-  {
-    id: "15",
-    date: "2025-01-22",
-    project: "プロジェクトB",
-    task: "要件定義",
-    estimatedHours: 3,
-    actualHours: 3.5,
-  },
-  {
-    id: "16",
-    date: "2025-01-22",
-    project: "プロジェクトC",
-    task: "実装",
-    estimatedHours: 7,
-    actualHours: 6.5,
-  },
-  {
-    id: "17",
-    date: "2025-01-23",
-    project: "プロジェクトA",
-    task: "レビュー",
-    estimatedHours: 2,
-    actualHours: 2,
-  },
-  {
-    id: "18",
-    date: "2025-01-23",
-    project: "プロジェクトD",
-    task: "実装",
-    estimatedHours: 6,
-    actualHours: 7,
-  },
-  {
-    id: "19",
-    date: "2025-01-24",
-    project: "プロジェクトB",
-    task: "テスト",
-    estimatedHours: 4,
-    actualHours: 3.5,
-  },
-  {
-    id: "20",
-    date: "2025-01-24",
-    project: "プロジェクトC",
-    task: "設計",
-    estimatedHours: 3,
-    actualHours: 4,
-  },
-  {
-    id: "21",
-    date: "2025-01-25",
-    project: "プロジェクトA",
-    task: "実装",
-    estimatedHours: 8,
-    actualHours: 7.5,
-  },
-  {
-    id: "22",
-    date: "2025-01-25",
-    project: "プロジェクトD",
-    task: "テスト",
-    estimatedHours: 5,
-    actualHours: 5.5,
-  },
-  {
-    id: "23",
-    date: "2025-01-26",
-    project: "プロジェクトB",
-    task: "レビュー",
-    estimatedHours: 2,
-    actualHours: 1.5,
-  },
-  {
-    id: "24",
-    date: "2025-01-26",
-    project: "プロジェクトC",
-    task: "要件定義",
-    estimatedHours: 4,
-    actualHours: 4.5,
-  },
-  {
-    id: "25",
-    date: "2025-01-27",
-    project: "プロジェクトA",
-    task: "テスト",
-    estimatedHours: 5,
-    actualHours: 5,
-  },
-  {
-    id: "26",
-    date: "2025-01-27",
-    project: "プロジェクトD",
-    task: "レビュー",
-    estimatedHours: 3,
-    actualHours: 3,
-  },
-  {
-    id: "27",
-    date: "2025-01-28",
-    project: "プロジェクトB",
-    task: "設計",
-    estimatedHours: 4,
-    actualHours: 4.5,
-  },
-  {
-    id: "28",
-    date: "2025-01-28",
-    project: "プロジェクトC",
-    task: "実装",
-    estimatedHours: 6,
-    actualHours: 5.5,
-  },
-  {
-    id: "29",
-    date: "2025-01-29",
-    project: "プロジェクトA",
-    task: "レビュー",
-    estimatedHours: 2,
-    actualHours: 2.5,
-  },
-  {
-    id: "30",
-    date: "2025-01-29",
-    project: "プロジェクトD",
-    task: "実装",
-    estimatedHours: 7,
-    actualHours: 6.5,
-  },
-];
-
-const ALL_OPTION = "__all__";
+const SORT_COLUMN_MAP: Record<EffortSortColumn, string> = {
+  date: "date",
+  project: "project",
+  task: "task",
+  estimatedHours: "estimated_hours",
+  actualHours: "hours",
+  difference: "diff",
+};
 
 export function useEffortList() {
-  const [entries] = useState<EffortListEntry[]>(MOCK_ENTRIES);
-  const [filteredEntries, setFilteredEntries] =
-    useState<EffortListEntry[]>(MOCK_ENTRIES);
+  const filters: EffortListFiltersState = useEffortListFilters();
 
-  const [tempFilterDate, setTempFilterDate] = useState<Date | undefined>();
-  const [tempFilterProject, setTempFilterProject] = useState<
-    string | undefined
-  >();
-  const [tempFilterTask, setTempFilterTask] = useState<string | undefined>();
+  const query: WorkRecordListQuery | null = useMemo(() => {
+    if (!filters.filtersInitialized) return null;
 
-  const [filterDate, setFilterDate] = useState<Date | undefined>();
-  const [filterProject, setFilterProject] = useState<string | undefined>();
-  const [filterTask, setFilterTask] = useState<string | undefined>();
+    return {
+      date: filters.filterDate
+        ? format(filters.filterDate, "yyyy-MM-dd")
+        : undefined,
+      projectId: filters.filterProject,
+      taskId: filters.filterTask,
+      sort: mapSortToApi(filters.sortColumn, filters.sortDirection),
+      page: filters.currentPage,
+      pageSize: filters.itemsPerPage,
+    };
+  }, [
+    filters.currentPage,
+    filters.filterDate,
+    filters.filterProject,
+    filters.filterTask,
+    filters.filtersInitialized,
+    filters.itemsPerPage,
+    filters.sortColumn,
+    filters.sortDirection,
+  ]);
 
-  const [sortColumn, setSortColumn] = useState<EffortSortColumn | null>(null);
-  const [sortDirection, setSortDirection] = useState<EffortSortDirection>(null);
-
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
-
-  const projectOptions = useMemo(
-    () =>
-      Array.from(new Set(entries.map((entry) => entry.project))).filter(
-        Boolean,
-      ),
-    [entries],
-  );
-
-  const taskOptions = useMemo(
-    () =>
-      Array.from(new Set(entries.map((entry) => entry.task))).filter(Boolean),
-    [entries],
-  );
+  const { data, error, isLoading } = useEffortListData(query);
 
   useEffect(() => {
-    let filtered = [...entries];
+    if (!error) return;
+    showErrorToast("工数データの取得に失敗しました");
+    void reportUiError(error, { message: "Failed to fetch work records" });
+  }, [error]);
 
-    if (filterDate) {
-      const targetDate = filterDate.toISOString().split("T")[0];
-      filtered = filtered.filter((entry) => entry.date === targetDate);
-    }
+  const entries: EffortListEntry[] = useMemo(() => {
+    if (!data?.items) return [];
+    return data.items.map(mapWorkRecordToEntry);
+  }, [data?.items]);
 
-    if (filterProject) {
-      filtered = filtered.filter((entry) => entry.project === filterProject);
-    }
-
-    if (filterTask) {
-      filtered = filtered.filter((entry) => entry.task === filterTask);
-    }
-
-    setFilteredEntries(filtered);
-    setCurrentPage(1);
-  }, [entries, filterDate, filterProject, filterTask]);
-
-  const sortedEntries = useMemo(() => {
-    if (!sortColumn || !sortDirection) {
-      return [...filteredEntries];
-    }
-
-    return [...filteredEntries].sort((a, b) => {
-      const resolveValue = (entry: EffortListEntry) => {
-        if (sortColumn === "difference") {
-          return entry.actualHours - entry.estimatedHours;
-        }
-        return entry[sortColumn];
-      };
-
-      const aValue = resolveValue(a);
-      const bValue = resolveValue(b);
-
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return sortDirection === "asc"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
+  const projectOptions = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const entry of entries) {
+      if (!map.has(entry.projectId)) {
+        map.set(entry.projectId, entry.project);
       }
-
-      if (typeof aValue === "number" && typeof bValue === "number") {
-        return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
-      }
-
-      return 0;
-    });
-  }, [filteredEntries, sortColumn, sortDirection]);
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(sortedEntries.length / itemsPerPage),
-  );
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentEntries = sortedEntries.slice(
-    startIndex,
-    startIndex + itemsPerPage,
-  );
-
-  const handleSort = (column: EffortSortColumn) => {
-    if (sortColumn === column) {
-      if (sortDirection === "asc") {
-        setSortDirection("desc");
-      } else if (sortDirection === "desc") {
-        setSortColumn(null);
-        setSortDirection(null);
-      }
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
     }
-  };
+    return Array.from(map.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [entries]);
 
-  const applyFilters = () => {
-    setFilterDate(tempFilterDate);
-    setFilterProject(
-      tempFilterProject === ALL_OPTION ? undefined : tempFilterProject,
-    );
-    setFilterTask(tempFilterTask === ALL_OPTION ? undefined : tempFilterTask);
-  };
+  const taskOptions = useMemo(() => {
+    const projectTaskMap = new Map<number, Map<number, string>>();
+    for (const entry of entries) {
+      if (!projectTaskMap.has(entry.projectId)) {
+        projectTaskMap.set(entry.projectId, new Map());
+      }
+      projectTaskMap.get(entry.projectId)?.set(entry.taskId, entry.task);
+    }
 
-  const clearFilters = () => {
-    setTempFilterDate(undefined);
-    setTempFilterProject(ALL_OPTION);
-    setTempFilterTask(ALL_OPTION);
-    setFilterDate(undefined);
-    setFilterProject(undefined);
-    setFilterTask(undefined);
-    setCurrentPage(1);
-  };
+    const parsedProjectId: number = filters.tempFilterProject
+      ? Number(filters.tempFilterProject)
+      : Number.NaN;
+    const selectedProjectId: number | null =
+      !filters.tempFilterProject ||
+      filters.tempFilterProject === ALL_OPTION ||
+      Number.isNaN(parsedProjectId)
+        ? null
+        : parsedProjectId;
+
+    const source: [number, string][] =
+      selectedProjectId === null
+        ? Array.from(
+            entries.reduce((map, entry) => {
+              if (!map.has(entry.taskId)) {
+                map.set(entry.taskId, entry.task);
+              }
+              return map;
+            }, new Map<number, string>()),
+          )
+        : Array.from(
+            projectTaskMap.get(selectedProjectId) ?? new Map<number, string>(),
+          );
+
+    return source
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [entries, filters.tempFilterProject]);
+
+  const totalPages: number = data?.meta.totalPages ?? 1;
+  const totalCount: number = data?.meta.total ?? entries.length;
+
+  useEffect(() => {
+    if (!filters.filtersInitialized) return;
+    if (filters.currentPage > totalPages) {
+      filters.setCurrentPage(Math.max(totalPages, 1));
+    }
+  }, [
+    filters.currentPage,
+    filters.filtersInitialized,
+    filters.setCurrentPage,
+    totalPages,
+  ]);
 
   const handleItemsPerPageChange = (value: number) => {
-    setItemsPerPage(value);
-    setCurrentPage(1);
+    filters.setItemsPerPage(value);
+    filters.setCurrentPage(1);
   };
 
-  useEffect(() => {
-    setCurrentPage((prev) => Math.min(prev, totalPages));
-  }, [totalPages]);
-
-  const hasActiveFilters =
-    Boolean(filterDate) || Boolean(filterProject) || Boolean(filterTask);
+  const hasActiveFilters: boolean =
+    Boolean(filters.filterDate) ||
+    filters.filterProject !== undefined ||
+    filters.filterTask !== undefined;
 
   return {
-    // Data
-    entries,
-    sortedEntries,
-    currentEntries,
-    totalPages,
-
-    // Filters
-    tempFilterDate,
-    setTempFilterDate,
-    tempFilterProject,
-    setTempFilterProject,
-    tempFilterTask,
-    setTempFilterTask,
+    tempFilterDate: filters.tempFilterDate,
+    setTempFilterDate: filters.setTempFilterDate,
+    tempFilterProject: filters.tempFilterProject,
+    setTempFilterProject: filters.setTempFilterProject,
+    tempFilterTask: filters.tempFilterTask,
+    setTempFilterTask: filters.setTempFilterTask,
     projectOptions,
     taskOptions,
-    applyFilters,
-    clearFilters,
-    hasActiveFilters,
+    applyFilters: filters.applyFilters,
+    clearFilters: filters.clearFilters,
     ALL_OPTION,
-
-    // Sorting
-    sortColumn,
-    sortDirection,
-    handleSort,
-
-    // Pagination
-    currentPage,
-    setCurrentPage,
-    itemsPerPage,
+    sortColumn: filters.sortColumn,
+    sortDirection: filters.sortDirection,
+    handleSort: filters.handleSort,
+    currentEntries: entries,
+    isLoading,
+    currentPage: filters.currentPage,
+    setCurrentPage: filters.setCurrentPage,
+    totalPages,
+    totalCount,
+    itemsPerPage: filters.itemsPerPage,
     handleItemsPerPageChange,
+    hasActiveFilters,
+  };
+}
+
+function mapSortToApi(
+  column: EffortSortColumn | null,
+  direction: EffortSortDirection,
+): WorkRecordSort {
+  if (!column || !direction) {
+    return "-date";
+  }
+  const apiField: string = SORT_COLUMN_MAP[column];
+  if (!apiField) {
+    return "-date";
+  }
+  return `${direction === "desc" ? "-" : ""}${apiField}` as WorkRecordSort;
+}
+
+function mapWorkRecordToEntry(record: {
+  id: number;
+  date: string;
+  project: string;
+  project_id: number;
+  task: string;
+  task_id: number;
+  estimated_hours: number | null;
+  hours: number;
+  diff: number | null;
+}): EffortListEntry {
+  return {
+    id: String(record.id),
+    date: record.date,
+    project: record.project,
+    projectId: record.project_id,
+    task: record.task,
+    taskId: record.task_id,
+    estimatedHours: record.estimated_hours,
+    actualHours: record.hours,
+    difference: record.diff,
   };
 }

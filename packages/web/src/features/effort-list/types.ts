@@ -2,9 +2,12 @@ export interface EffortListEntry {
   id: string;
   date: string;
   project: string;
+  projectId: number;
   task: string;
-  estimatedHours: number;
+  taskId: number;
+  estimatedHours: number | null;
   actualHours: number;
+  difference: number | null;
 }
 
 export type EffortSortColumn =

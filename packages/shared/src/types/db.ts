@@ -360,6 +360,7 @@ export type Database = {
           hours: number | null;
           hours_diff: number | null;
           id: number | null;
+          project_id: number | null;
           project_name: string | null;
           task_id: number | null;
           task_name: string | null;
@@ -367,6 +368,13 @@ export type Database = {
           work_date: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: "tasks_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "projects";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "work_records_task_id_fkey";
             columns: ["task_id"];

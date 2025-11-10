@@ -68,7 +68,9 @@ export const getWorkRecordListService = async (
       id: item.id,
       date: item.work_date,
       project: item.project_name,
+      project_id: item.project_id,
       task: item.task_name,
+      task_id: item.task_id!,
       estimated_hours: item.estimated_hours,
       hours: item.hours,
       diff: item.hours_diff,
@@ -379,19 +381,18 @@ const formatProjectWorkStatus = (workRecords: Effort[]): string => {
       continue;
     }
 
-    const projectSummary: ProjectSummary =
-      projectSummaries.get(project.id) ??
-      {
-        id: project.id,
-        name: project.name,
-        totalHours: 0,
-        tasks: new Map<number, TaskSummary>(),
-      };
+    const projectSummary: ProjectSummary = projectSummaries.get(project.id) ?? {
+      id: project.id,
+      name: project.name,
+      totalHours: 0,
+      tasks: new Map<number, TaskSummary>(),
+    };
 
     projectSummary.totalHours += record.hours;
 
-    const existingTask: TaskSummary | undefined =
-      projectSummary.tasks.get(task.id);
+    const existingTask: TaskSummary | undefined = projectSummary.tasks.get(
+      task.id,
+    );
 
     if (existingTask) {
       existingTask.hours += record.hours;
