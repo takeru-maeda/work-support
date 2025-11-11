@@ -13,7 +13,7 @@ export function EffortsTableContainer({
   return (
     <div
       className={cn(
-        "custom-scrollbar overflow-x-auto overflow-y-auto [&_[data-slot=table-container]]:overflow-visible max-h-[calc(45vh)]",
+        "custom-scrollbar overflow-x-auto overflow-y-auto **:data-[slot=table-container]:overflow-visible max-h-[calc(45dvh)]",
         className,
       )}
     >

@@ -1,9 +1,7 @@
 import { useCallback, useState } from "react";
 
-import { getWeeklyReport } from "@/services/reports";
-import {
-  type WeeklyReportResponse,
-} from "@shared/schemas/reports";
+import { useWeeklyReportMutation } from "@/services/reports";
+import { type WeeklyReportResponse } from "@shared/schemas/reports";
 
 interface UseWeeklyReportResult {
   report: string | null;
@@ -19,16 +17,17 @@ interface UseWeeklyReportResult {
  */
 export const useWeeklyReport = (): UseWeeklyReportResult => {
   const [report, setReport] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const { trigger, isMutating } = useWeeklyReportMutation();
 
   const generateReport = useCallback(
     async (targetDate: Date): Promise<WeeklyReportResponse> => {
-      setIsLoading(true);
       setError(null);
 
       try {
-        const parsed: WeeklyReportResponse = await getWeeklyReport(targetDate);
+        const parsed: WeeklyReportResponse = await trigger(targetDate, {
+          throwOnError: true,
+        });
         setReport(parsed.weeklyReport);
 
         return parsed;
@@ -39,16 +38,14 @@ export const useWeeklyReport = (): UseWeeklyReportResult => {
         setError(message);
 
         throw err instanceof Error ? err : new Error(message);
-      } finally {
-        setIsLoading(false);
       }
     },
-    [],
+    [trigger],
   );
 
   return {
     report,
-    isLoading,
+    isLoading: isMutating,
     error,
     generateReport,
   };

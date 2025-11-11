@@ -113,6 +113,7 @@ appEffort.post(
         result,
         logger,
         accessLog.id,
+        payload.memo ?? null,
       ),
     );
 

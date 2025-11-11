@@ -12,6 +12,7 @@ export const EffortEntrySchema = z.object({
 export const EffortEntriesRequestSchema = z.object({
   date: z.iso.date(),
   entries: z.array(EffortEntrySchema),
+  memo: z.string().nullable().optional(),
 });
 
 export const EffortEntriesResponseSchema = z.object({
@@ -28,7 +29,7 @@ export const EffortEntriesResponseSchema = z.object({
 
 export const EffortDraftSchema = EffortEntriesRequestSchema.extend({
   memo: z.string().nullable().optional(),
-  clientUpdatedAt: z.iso.date(),
+  clientUpdatedAt: z.iso.datetime({ offset: true }),
 });
 
 export const EffortDraftRecordSchema = z.object({

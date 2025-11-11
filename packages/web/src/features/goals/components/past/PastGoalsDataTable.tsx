@@ -38,9 +38,9 @@ export function PastGoalsDataTable({
 
   return (
     <div className="rounded-lg border border-border">
-      <div className="custom-scrollbar overflow-x-auto overflow-y-auto [&>[data-slot=table-container]]:overflow-visible max-h-[calc(60vh)]">
+      <div className="custom-scrollbar overflow-x-auto overflow-y-auto *:data-[slot=table-container]:overflow-visible max-h-[calc(60dvh)]">
         <Table className="min-w-[500px]">
-          <TableHeader className="sticky top-0 z-10 bg-muted/80 backdrop-blur supports-[backdrop-filter]:bg-muted/60">
+          <TableHeader className="sticky top-0 z-10 bg-muted/80 backdrop-blur supports-backdrop-filter:bg-muted/60">
             <TableRow>
               <TableHead
                 className="min-w-[120px] cursor-pointer text-muted-foreground transition-colors hover:text-foreground"

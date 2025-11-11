@@ -23,6 +23,8 @@ interface EffortComboboxProps {
   placeholder: string;
   emptyLabel: string;
   onChange: (value: string) => void;
+  disabled?: boolean;
+  isLoading?: boolean;
 }
 
 export function EffortCombobox({
@@ -31,6 +33,8 @@ export function EffortCombobox({
   placeholder,
   emptyLabel,
   onChange,
+  disabled = false,
+  isLoading = false,
 }: Readonly<EffortComboboxProps>) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState(value);
@@ -50,14 +54,20 @@ export function EffortCombobox({
     onChange(next);
   };
 
+  const handleOpenChange = (next: boolean) => {
+    if (disabled) return;
+    setOpen(next);
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={disabled ? false : open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           aria-haspopup="listbox"
           aria-expanded={open}
           className="w-full justify-between bg-transparent"
+          disabled={disabled}
         >
           <span
             className={cn("truncate", !inputValue && "text-muted-foreground")}
@@ -73,37 +83,47 @@ export function EffortCombobox({
             placeholder={`${placeholder}を検索または入力...`}
             value={inputValue}
             onValueChange={handleInputChange}
+            disabled={disabled}
           />
           <CommandList>
             <CommandEmpty className="py-0">
-              <div className="p-2">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => handleSelect(inputValue)}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  {emptyLabel.replace("{value}", inputValue || "")}
-                </Button>
-              </div>
+              {isLoading ? (
+                <div className="p-3 text-sm text-muted-foreground">
+                  データを読み込み中です…
+                </div>
+              ) : (
+                <div className="p-2">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => handleSelect(inputValue)}
+                    disabled={disabled || inputValue.trim().length === 0}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    {emptyLabel.replace("{value}", inputValue || "")}
+                  </Button>
+                </div>
+              )}
             </CommandEmpty>
-            <CommandGroup>
-              {items.map((item) => (
-                <CommandItem
-                  key={item}
-                  value={item}
-                  onSelect={() => handleSelect(item)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-1 h-4 w-4",
-                      value === item ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                  {item}
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            {items.length > 0 && (
+              <CommandGroup>
+                {items.map((item) => (
+                  <CommandItem
+                    key={item}
+                    value={item}
+                    onSelect={() => handleSelect(item)}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-1 h-4 w-4",
+                        value === item ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+                    {item}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

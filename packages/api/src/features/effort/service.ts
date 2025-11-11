@@ -311,34 +311,44 @@ export const buildEffortCompletionEmail = (
 
   let totalEstimated = 0;
   let totalActual = 0;
+  let totalActualWithEstimate = 0;
 
   for (const { project, items } of grouped.values()) {
     lines.push(`■${project.name}`);
 
     let projectEstimated = 0;
     let projectActual = 0;
+    let projectActualWithEstimate = 0;
 
     for (const item of items) {
       const estimated: number | null = item.entry.estimated_hours ?? null;
       const actual: number = item.entry.hours;
       projectEstimated += estimated ?? 0;
       projectActual += actual;
+      if (estimated !== null) {
+        projectActualWithEstimate += actual;
+      }
 
-      const diff = actual - (estimated ?? 0);
+      const diffText =
+        estimated === null ? "" : formatDiff(actual - estimated);
       lines.push(
         `・${item.task.name}`,
-        `${INDENT}見積：${formatHours(estimated)}   実績：${formatHours(actual)}${formatDiff(diff)}`,
+        `${INDENT}見積：${formatHoursOrDash(estimated)}   実績：${formatHoursValue(actual)}${diffText}`,
       );
     }
 
     totalEstimated += projectEstimated;
     totalActual += projectActual;
+    totalActualWithEstimate += projectActualWithEstimate;
     lines.push("");
   }
 
   lines.push("", "--- 集計 ---", "■案件別");
 
   for (const { project, items } of grouped.values()) {
+    const projectHasEstimate = items.some(
+      (item) => item.entry.estimated_hours !== null,
+    );
     const projectEstimated: number = items.reduce(
       (sum, item) => sum + (item.entry.estimated_hours ?? 0),
       0,
@@ -347,18 +357,26 @@ export const buildEffortCompletionEmail = (
       (sum, item) => sum + item.entry.hours,
       0,
     );
-    const diff = projectActual - projectEstimated;
+    const projectActualWithEstimate: number = items.reduce(
+      (sum, item) =>
+        item.entry.estimated_hours === null ? sum : sum + item.entry.hours,
+      0,
+    );
+    const diff = projectActualWithEstimate - projectEstimated;
     lines.push(
       `・${project.name}`,
-      `${INDENT}見積：${formatHours(projectEstimated)}   実績：${formatHours(projectActual)}${formatDiff(diff)}`,
+      `${INDENT}見積：${projectHasEstimate ? formatHoursValue(projectEstimated) : "-"}   実績：${formatHoursValue(projectActual)}${projectHasEstimate ? formatDiff(diff) : ""}`,
     );
   }
 
-  const totalDiff = totalActual - totalEstimated;
+  const hasAnyEstimate = entries.some(
+    (record) => record.entry.estimated_hours !== null,
+  );
+  const totalDiff = totalActualWithEstimate - totalEstimated;
   lines.push(
     "",
     "■全体",
-    `見積：${formatHours(totalEstimated)}   実績：${formatHours(totalActual)}${formatDiff(totalDiff)}`,
+    `見積：${hasAnyEstimate ? formatHoursValue(totalEstimated) : "-"}   実績：${formatHoursValue(totalActual)}${hasAnyEstimate ? formatDiff(totalDiff) : ""}`,
   );
 
   if (memo && memo.trim().length > 0) {
@@ -388,6 +406,7 @@ export const sendEffortCompletionEmailIfNeeded = async (
   result: StructuredEffortSaveResult,
   logger: Logger | undefined,
   accessLogId: number,
+  memo: string | null,
 ): Promise<void> => {
   if (!user.email) return;
   if (!result.savedRecords.length) return;
@@ -399,7 +418,7 @@ export const sendEffortCompletionEmailIfNeeded = async (
   const { subject, body } = buildEffortCompletionEmail(
     result.date,
     result.savedRecords,
-    null,
+    memo,
   );
 
   await sendEffortCompletionEmail(bindings, {
@@ -581,13 +600,17 @@ const formatMailDate = (date: Date): string => {
 /**
  * 時間を h 単位で整形します。
  */
-const formatHours = (value: number | null): string => {
-  if (value === null) return "";
+const formatHoursValue = (value: number): string => {
   const rounded: number = Math.round(value * 100) / 100;
   const text = Number.isInteger(rounded)
     ? String(rounded)
     : rounded.toFixed(2).replace(/\.0+$/, "").replace(/0+$/, "");
   return `${text}h`;
+};
+
+const formatHoursOrDash = (value: number | null): string => {
+  if (value === null) return "-";
+  return formatHoursValue(value);
 };
 
 /**
@@ -598,6 +621,6 @@ const formatDiff = (diff: number): string => {
     return "（±0h）";
   }
   const sign = diff > 0 ? "+" : "-";
-  const value = formatHours(Math.abs(diff));
+  const value = formatHoursValue(Math.abs(diff));
   return `（${sign}${value}）`;
 };

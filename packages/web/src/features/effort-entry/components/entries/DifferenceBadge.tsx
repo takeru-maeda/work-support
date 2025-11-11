@@ -1,17 +1,26 @@
 import { Badge } from "@/components/ui/badge";
+import { formatWorkHours } from "@/features/effort-entry/utils/formatHours";
 
 interface DifferenceBadgeProps {
-  difference: number;
+  difference: number | null;
 }
 
-export function DifferenceBadge({ difference }: Readonly<DifferenceBadgeProps>) {
+export function DifferenceBadge({
+  difference,
+}: Readonly<DifferenceBadgeProps>) {
+  if (difference === null) return null;
+
   if (difference === 0) {
     return <Badge variant="secondary">±0</Badge>;
   }
 
+  const formatted: string = formatWorkHours(Math.abs(difference));
+
   if (difference > 0) {
-    return <Badge variant="destructive">+{difference.toFixed(1)}</Badge>;
+    return <Badge variant="destructive">+{formatted}</Badge>;
   }
 
-  return <Badge className="bg-green-500 hover:bg-green-600">{difference.toFixed(1)}</Badge>;
+  return (
+    <Badge className="bg-green-500 hover:bg-green-600">-{formatted}</Badge>
+  );
 }

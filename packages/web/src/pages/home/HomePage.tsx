@@ -12,15 +12,15 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto max-w-7xl px-6 py-8 sm:px-8 lg:px-16">
         <header className="mb-12 text-center">
-          <h1 className="text-balance text-5xl font-bold text-foreground mb-4">
+          <h1 className="text-balance text-4xl sm:text-5xl font-bold text-foreground mb-4">
             Work Support
           </h1>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-lg sm:text-xl text-muted-foreground">
             {user?.name ? `ようこそ、${user.name}さん` : "ようこそ"}
           </p>
         </header>
 
-        <div className="mx-auto grid max-w-5xl gap-3 sm:gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-4">
+        <div className="mx-auto grid grid-cols-2 max-w-5xl gap-3 sm:gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-4">
           <HomeFeatureCard
             to={ROUTES.effortsNew}
             icon={Clock}

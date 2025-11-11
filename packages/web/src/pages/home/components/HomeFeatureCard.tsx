@@ -32,8 +32,12 @@ export function HomeFeatureCard({
             <Icon className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">{title}</h2>
-            <p className="text-muted-foreground">{description}</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
+              {title}
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              {description}
+            </p>
           </div>
         </div>
       </Card>

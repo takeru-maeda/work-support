@@ -1,22 +1,42 @@
-import { existingProjects } from "@/features/effort-entry/data";
 import { EffortCombobox } from "@/features/effort-entry/components/entries/EffortCombobox";
+import type {
+  EffortProjectOption,
+  EffortSelectionValue,
+} from "@/features/effort-entry/types";
 
 interface ProjectComboboxProps {
-  value: string;
-  onChange: (value: string) => void;
+  value: EffortSelectionValue;
+  options: EffortProjectOption[];
+  isLoading: boolean;
+  onChange: (value: EffortSelectionValue) => void;
 }
 
 export function ProjectCombobox({
   value,
+  options,
+  isLoading,
   onChange,
 }: Readonly<ProjectComboboxProps>) {
+  const projectNames: string[] = options.map((option) => option.name);
+
+  const handleChange = (next: string) => {
+    const matched: EffortProjectOption | undefined = options.find(
+      (option) => option.name === next,
+    );
+    onChange({
+      id: matched?.id ?? null,
+      name: next,
+    });
+  };
+
   return (
     <EffortCombobox
-      value={value}
-      items={existingProjects}
+      value={value.name}
+      items={projectNames}
       placeholder="案件"
       emptyLabel='"{value}" を追加'
-      onChange={onChange}
+      onChange={handleChange}
+      isLoading={isLoading}
     />
   );
 }

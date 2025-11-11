@@ -1,11 +1,15 @@
-import type React from "react";
 import { GripVertical, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-import type { EffortEntry } from "@/features/effort-entry/types";
+import type {
+  EffortEntry,
+  EffortEntryError,
+  EffortProjectOption,
+  EffortSelectionValue,
+} from "@/features/effort-entry/types";
 import { DifferenceBadge } from "@/features/effort-entry/components/entries/DifferenceBadge";
 import { ProjectCombobox } from "@/features/effort-entry/components/entries/ProjectCombobox";
 import { TaskCombobox } from "@/features/effort-entry/components/entries/TaskCombobox";
@@ -14,75 +18,113 @@ interface EffortRowProps {
   entry: EffortEntry;
   index: number;
   isDragging: boolean;
-  onUpdate: (
-    id: string,
-    field: keyof EffortEntry,
-    value: string | number,
-  ) => void;
+  projectOptions: EffortProjectOption[];
+  isProjectLoading: boolean;
+  errors?: EffortEntryError;
+  onUpdate: (id: string, changes: Partial<EffortEntry>) => void;
   onRemove: (id: string) => void;
-  onDragStart: (index: number) => void;
-  onDragOver: (event: React.DragEvent, index: number) => void;
-  onDragEnd: () => void;
 }
-
-const calculateDifference = (estimated: number, actual: number) =>
-  actual - estimated;
 
 export function EffortRow({
   entry,
   index,
   isDragging,
+  projectOptions,
+  isProjectLoading,
+  errors,
   onUpdate,
   onRemove,
-  onDragStart,
-  onDragOver,
-  onDragEnd,
 }: Readonly<EffortRowProps>) {
-  const difference = calculateDifference(
-    entry.estimatedHours,
-    entry.actualHours,
+  const hasEstimated: boolean = entry.estimatedHours !== null;
+  const difference: number | null =
+    hasEstimated && entry.actualHours !== null && entry.estimatedHours !== null
+      ? entry.actualHours - entry.estimatedHours
+      : null;
+
+  const resolvedProject = projectOptions.find(
+    (option) => option.id === entry.projectId,
   );
+  const projectValue: EffortSelectionValue = {
+    id: entry.projectId,
+    name: entry.projectName || resolvedProject?.name || "",
+  };
+
+  const resolvedTask = resolvedProject?.tasks.find(
+    (task) => task.id === entry.taskId,
+  );
+  const taskValue: EffortSelectionValue = {
+    id: entry.taskId,
+    name: entry.taskName || resolvedTask?.name || "",
+  };
 
   return (
     <section
-      draggable
       aria-label={`工数エントリー${index + 1}`}
-      onDragStart={() => onDragStart(index)}
-      onDragOver={(event) => onDragOver(event, index)}
-      onDragEnd={onDragEnd}
       className={cn(
-        "cursor-move space-y-4 rounded-lg border p-4 transition-opacity",
+        "space-y-4 rounded-lg border p-4 transition-opacity",
         isDragging && "opacity-50",
       )}
     >
       <div className="flex items-start gap-1 sm:gap-2">
-        <div className="flex-shrink-0 pt-2 hidden sm:block">
+        <div className="shrink-0 pt-2 hidden sm:block">
           <GripVertical className="size-4 sm:size-5 text-muted-foreground" />
         </div>
         <div className="flex-1 space-y-2 sm:space-y-4">
           <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2">
-            <ProjectCombobox
-              value={entry.project}
-              onChange={(value) => onUpdate(entry.id, "project", value)}
-            />
-            <TaskCombobox
-              value={entry.task}
-              onChange={(value) => onUpdate(entry.id, "task", value)}
-            />
+            <div>
+              <ProjectCombobox
+                value={projectValue}
+                options={projectOptions}
+                isLoading={isProjectLoading}
+                onChange={(selection) =>
+                  onUpdate(entry.id, {
+                    projectId: selection.id,
+                    projectName: selection.name,
+                    taskId: null,
+                    taskName: "",
+                  })
+                }
+              />
+              {errors?.project && (
+                <p className="mt-1 text-xs text-destructive">
+                  {errors.project}
+                </p>
+              )}
+            </div>
+            <div>
+              <TaskCombobox
+                value={taskValue}
+                projectId={entry.projectId}
+                projectName={projectValue.name}
+                options={projectOptions}
+                isLoading={isProjectLoading}
+                onChange={(selection) =>
+                  onUpdate(entry.id, {
+                    taskId: selection.id,
+                    taskName: selection.name,
+                  })
+                }
+              />
+              {errors?.task && (
+                <p className="mt-1 text-xs text-destructive">{errors.task}</p>
+              )}
+            </div>
           </div>
 
-          <div className="grid items-end gap-2 sm:gap-4 grid-cols-2 sm:grid-cols-4">
+          <div className="grid items-center gap-2 sm:gap-4 grid-cols-2 sm:grid-cols-4">
             <Input
               type="number"
               min="0"
               step="0.5"
-              value={entry.estimatedHours || ""}
+              value={entry.estimatedHours ?? ""}
               onChange={(event) =>
-                onUpdate(
-                  entry.id,
-                  "estimatedHours",
-                  Number.parseFloat(event.target.value) || 0,
-                )
+                onUpdate(entry.id, {
+                  estimatedHours: (() => {
+                    if (event.target.value === "") return null;
+                    const parsed = Number.parseFloat(event.target.value);
+                    return Number.isNaN(parsed) ? null : parsed;
+                  })(),
+                })
               }
               placeholder="見積工数(h)"
               className="text-sm"
@@ -92,20 +134,25 @@ export function EffortRow({
               type="number"
               min="0"
               step="0.5"
-              value={entry.actualHours || ""}
+              value={entry.actualHours ?? ""}
               onChange={(event) =>
-                onUpdate(
-                  entry.id,
-                  "actualHours",
-                  Number.parseFloat(event.target.value) || 0,
-                )
+                onUpdate(entry.id, {
+                  actualHours: (() => {
+                    if (event.target.value === "") return null;
+                    const parsed = Number.parseFloat(event.target.value);
+                    return Number.isNaN(parsed) ? null : parsed;
+                  })(),
+                })
               }
               placeholder="実績工数(h)"
-              className="text-sm"
+              className={cn(
+                "text-sm",
+                errors?.actualHours &&
+                  "border-destructive focus-visible:ring-destructive",
+              )}
             />
 
-            <div className="flex items-center gap-2 h-10">
-              <span className="font-semibold">{difference.toFixed(1)}h</span>
+            <div>
               <DifferenceBadge difference={difference} />
             </div>
 
@@ -120,6 +167,10 @@ export function EffortRow({
               </Button>
             </div>
           </div>
+
+          {errors?.actualHours && (
+            <p className="text-xs text-destructive">{errors.actualHours}</p>
+          )}
         </div>
       </div>
     </section>

@@ -114,15 +114,15 @@ export function EffortsTable({
               <TableCell>{entry.project}</TableCell>
               <TableCell>{entry.task}</TableCell>
               <TableCell className="text-right tabular-nums">
-                {entry.estimatedHours?.toFixed(1) ?? "-"}
+                {entry.estimatedHours?.toFixed(2) ?? "-"}
               </TableCell>
               <TableCell className="text-right tabular-nums">
-                {entry.actualHours.toFixed(1)}
+                {entry.actualHours.toFixed(2)}
               </TableCell>
               <TableCell className="text-right tabular-nums">
                 <span className={differenceClass}>
                   {difference === null ? "" : difference > 0 ? "+" : ""}
-                  {difference?.toFixed(1) ?? "-"}
+                  {difference?.toFixed(2) ?? "-"}
                 </span>
               </TableCell>
             </TableRow>
