@@ -82,7 +82,7 @@ export default function SettingsPage() {
                 工数登録時、登録内容をメールで通知します
               </p>
               {errorMessage && (
-                <p className="text-xs text-destructive sm:text-sm">
+                <p className="text-xs text-destructive-foreground sm:text-sm">
                   {errorMessage}
                 </p>
               )}

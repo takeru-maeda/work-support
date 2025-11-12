@@ -18,7 +18,9 @@ const DifferenceLabel = ({ difference, commonStyle }: DifferenceLabelProps) => {
   const formatted: string = formatWorkHours(Math.abs(difference));
 
   if (difference > 0) {
-    return <p className={cn("text-destructive", style)}>+{formatted}h</p>;
+    return (
+      <p className={cn("text-destructive-foreground", style)}>+{formatted}h</p>
+    );
   }
 
   return <p className={cn("text-green-500", style)}>-{formatted}h</p>;

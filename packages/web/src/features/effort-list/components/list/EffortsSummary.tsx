@@ -15,7 +15,7 @@ export function EffortsSummary({
   const differenceClass = !totals.hasEstimated
     ? "text-primary"
     : totals.difference > 0
-      ? "text-destructive"
+      ? "text-destructive-foreground"
       : totals.difference < 0
         ? "text-green-600 dark:text-green-400"
         : "";

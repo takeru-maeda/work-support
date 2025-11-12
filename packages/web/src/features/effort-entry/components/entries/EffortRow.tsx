@@ -88,7 +88,7 @@ export function EffortRow({
                 }
               />
               {errors?.project && (
-                <p className="mt-1 text-xs text-destructive">
+                <p className="mt-1 text-xs text-destructive-foreground">
                   {errors.project}
                 </p>
               )}
@@ -109,7 +109,9 @@ export function EffortRow({
                 }
               />
               {errors?.task && (
-                <p className="mt-1 text-xs text-destructive">{errors.task}</p>
+                <p className="mt-1 text-xs text-destructive-foreground">
+                  {errors.task}
+                </p>
               )}
             </div>
           </div>
@@ -150,7 +152,7 @@ export function EffortRow({
               placeholder="実績工数(h)"
               className={cn(
                 "text-sm",
-                errors?.actualHours && "border-destructive",
+                errors?.actualHours && "border-destructive-foreground",
               )}
             />
 
@@ -159,7 +161,7 @@ export function EffortRow({
             </div>
 
             <div className="flex items-center">
-              <p className="text-xs text-destructive mr-auto sm:hidden">
+              <p className="text-xs text-destructive-foreground mr-auto sm:hidden self-start">
                 {errors?.actualHours}
               </p>
               <div className="ml-auto">
@@ -167,7 +169,7 @@ export function EffortRow({
                   variant="ghost"
                   size="sm"
                   onClick={() => onRemove(entry.id)}
-                  className="h-10 text-destructive hover:text-destructive"
+                  className="h-10 text-destructive-foreground hover:text-destructive-foreground self-center"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -177,12 +179,14 @@ export function EffortRow({
 
           <div
             className={cn(
-              "grid items-center gap-2 sm:gap-4 grid-cols-2 sm:grid-cols-4",
+              "grid items-center gap-2 sm:gap-4 grid-cols-2 sm:grid-cols-4 -mt-4",
               errors?.actualHours ? "hidden sm:grid" : "hidden",
             )}
           >
             <div />
-            <p className="text-xs text-destructive">{errors?.actualHours}</p>
+            <p className="text-xs text-destructive-foreground">
+              {errors?.actualHours}
+            </p>
           </div>
         </div>
       </div>

@@ -70,7 +70,7 @@ export default function AddGoalsPage() {
           </p>
         )}
         {periodError && (
-          <p className="text-sm text-destructive">{periodError}</p>
+          <p className="text-sm text-destructive-foreground">{periodError}</p>
         )}
       </div>
 

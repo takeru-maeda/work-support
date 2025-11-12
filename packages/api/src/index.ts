@@ -6,6 +6,7 @@ import goals from "./features/goals";
 import projects from "./features/projects";
 import reports from "./features/reports";
 import userSettings from "./features/user-settings";
+import users from "./features/users";
 import { accessLogMiddleware } from "./middleware/logger";
 import { logger } from "hono/logger";
 import { cors } from "hono/cors";
@@ -49,6 +50,7 @@ app.route("/api/goals", goals);
 app.route("/api/projects", projects);
 app.route("/api/reports", reports);
 app.route("/api/user-settings", userSettings);
+app.route("/api/users", users);
 app.route("/api/logs", logs);
 
 app.get(

@@ -77,7 +77,9 @@ export function GoalsTable() {
           />
 
           {errorMessage && (
-            <p className="mt-3 text-sm text-destructive">{errorMessage}</p>
+            <p className="mt-3 text-sm text-destructive-foreground">
+              {errorMessage}
+            </p>
           )}
 
           <div className="space-y-4 pt-4 mb-1">

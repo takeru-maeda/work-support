@@ -48,7 +48,7 @@ export function GoalFormRow({
           size="sm"
           onClick={onRemove}
           disabled={disableRemove || disabled}
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive flex-shrink-0"
+          className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive-foreground shrink-0"
         >
           <Trash2 className="h-4 w-4" />
         </Button>

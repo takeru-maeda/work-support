@@ -8,7 +8,7 @@ export function GoalWeightSummary({
   isExceeded,
 }: Readonly<GoalWeightSummaryProps>) {
   const statusClass = isExceeded
-    ? "text-destructive"
+    ? "text-destructive-foreground"
     : totalWeight === 100
       ? "text-primary"
       : "text-muted-foreground";

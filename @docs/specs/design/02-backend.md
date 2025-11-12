@@ -102,3 +102,14 @@ Googleフォームからのリクエスト (`POST /api/effort`) でエラーが�
 
 エラー通知の責務は、APIを呼び出す側のGoogle Apps Scriptが担う。GASは、APIからのエラーレスポンスを検知した場合、開発者宛にエラー通知メールを送信する。これにより、バックエンドはメール送信の責務から解放される。
 
+## ユーザー削除 API
+
+- **エンドポイント:** `DELETE /api/users/me`
+- **認証:** `jwtAuthMiddleware` で JWT を検証し、コンテキストに格納された `user` から ID を取得する。
+- **実装フロー:**
+  1. 認証済みユーザー ID を取得する。
+  2. Supabase Admin クライアントで `auth.admin.getUserById(userId)` を呼び出し、`user_metadata.avatarUrl` からプロファイル画像の Storage パスを推測する。
+  3. `auth.admin.deleteUser(userId)` を実行して Supabase Auth のユーザーを削除する（テーブルの `ON DELETE CASCADE` により関連データが削除される）。
+  4. 画像パスが特定できた場合は `storage.from("avatars").remove([`${userId}/`])` を実行し、ユーザー用フォルダごと削除する。
+  5. 成功したら `204 No Content` を返却する。
+- **エラー処理:** 各ステップで Supabase がエラーを返した場合は `AppError` をスローし、`500` として応答する。

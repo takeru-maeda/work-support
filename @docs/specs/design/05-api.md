@@ -23,6 +23,7 @@
 | `GET` | `/api/user-settings` | JWT | **ユーザー設定取得**: 認証ユーザーの設定を取得する。 |
 | `POST` | `/api/user-settings` | JWT | **ユーザー設定作成**: 新規ユーザーの通知設定を登録する。 |
 | `PUT` | `/api/user-settings` | JWT | **ユーザー設定更新**: ユーザー設定の値を更新する。 |
+| `DELETE` | `/api/users/me` | JWT | **ユーザー削除**: 現在ログイン中のユーザーを削除する。 |
 | `POST` | `/api/logs/error` | JWT | **エラーログ作成**: UI や API から送信されたエラー情報を保存する。 |
 
 ## エンドポイント詳細
@@ -608,6 +609,20 @@
     }
   }
   ```
+
+---
+
+### DELETE /api/users/me
+
+**Description:** 認証済みユーザー自身のアカウントを削除します。バックエンドは Supabase の管理 API（Service Role キーを使用）で `auth.users` から当該ユーザーを削除し、ユーザー ID を外部キーに持つテーブルは `ON DELETE CASCADE` により自動的に関連レコードが削除されます。
+
+**Request Body:** なし
+
+**Responses:**
+
+- **204:** User deleted successfully（レスポンスボディなし）
+- **401:** Unauthorized（JWT が無効な場合）
+- **500:** Supabase API 呼び出しでエラーが発生した場合
 
 ---
 

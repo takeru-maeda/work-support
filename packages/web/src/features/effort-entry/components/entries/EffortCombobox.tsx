@@ -70,7 +70,8 @@ export function EffortCombobox({
           aria-expanded={open}
           className={cn(
             "w-full justify-between bg-transparent",
-            isError && "border-destructive",
+            isError &&
+              "border-destructive-foreground dark:border-destructive-foreground",
           )}
           disabled={disabled}
         >

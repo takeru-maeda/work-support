@@ -86,7 +86,7 @@ export function MissionEditor({
       </div>
       {error ? (
         <div className="space-y-4">
-          <p className="text-sm text-destructive">
+          <p className="text-sm text-destructive-foreground">
             {error instanceof Error
               ? error.message
               : "ミッションの取得に失敗しました"}

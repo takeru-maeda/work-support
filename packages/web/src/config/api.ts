@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
   workRecords: "/api/reports/work-records",
   errorLogs: "/api/logs/error",
   userSettings: "/api/user-settings",
+  userAccount: "/api/users/me",
 } as const;
 
 export type ApiEndpointKey = keyof typeof API_ENDPOINTS;

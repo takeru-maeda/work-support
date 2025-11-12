@@ -64,7 +64,7 @@ export function WeeklyReport() {
       )}
 
       {error && (
-        <p className="text-sm text-destructive">
+        <p className="text-sm text-destructive-foreground">
           週報の取得に失敗しました: {error}
         </p>
       )}
