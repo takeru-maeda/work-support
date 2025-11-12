@@ -30,19 +30,19 @@ export function GoalContentDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-h-[calc(90vh)] overflow-auto"
+        className="max-h-[calc(90vh)] p-4 sm:p-6"
         showCloseButton={false}
       >
         <DialogHeader>
           <DialogTitle>{goal?.name}</DialogTitle>
           <DialogDescription>目標の詳細内容を編集できます</DialogDescription>
         </DialogHeader>
-        <div className="mt-4">
+        <div className="mt-2 sm:mt-4">
           <Textarea
             value={editedContent}
             onChange={(event) => onContentChange(event.target.value)}
             placeholder="目標の内容を入力してください"
-            className="min-h-[220px] max-h-[calc(70vh-80px)] resize-y text-sm sm:min-h-[260px]"
+            className="h-[calc(50vh)] resize-none text-xs sm:min-h-[200px] sm:max-h-[calc(70vh-80px)] sm:resize-y sm:text-sm"
           />
         </div>
         <DialogFooter>
