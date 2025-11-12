@@ -30,7 +30,7 @@ export function GoalContentDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-h-[calc(95dvh)] overflow-auto sm:max-h-[calc(90vh)]"
+        className="max-h-[calc(90vh)] overflow-auto"
         showCloseButton={false}
       >
         <DialogHeader>
@@ -42,7 +42,7 @@ export function GoalContentDialog({
             value={editedContent}
             onChange={(event) => onContentChange(event.target.value)}
             placeholder="目標の内容を入力してください"
-            className="min-h-40 sm:resize-y max-h-[calc(70dvh-80px)] text-sm sm:min-h-50"
+            className="min-h-[220px] max-h-[calc(70vh-80px)] resize-y text-sm sm:min-h-[260px]"
           />
         </div>
         <DialogFooter>
