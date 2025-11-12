@@ -93,13 +93,13 @@ export const validateEffortEntry = (
 ): EffortEntryError | null => {
   const errors: EffortEntryError = {};
   if (!entry.projectId && entry.projectName.trim().length === 0) {
-    errors.project = "案件を入力してください。";
+    errors.project = "必須入力";
   }
   if (!entry.taskId && entry.taskName.trim().length === 0) {
-    errors.task = "タスクを入力してください。";
+    errors.task = "必須入力";
   }
   if (entry.actualHours === null) {
-    errors.actualHours = "実績工数を入力してください。";
+    errors.actualHours = "必須入力";
   }
   return Object.keys(errors).length > 0 ? errors : null;
 };

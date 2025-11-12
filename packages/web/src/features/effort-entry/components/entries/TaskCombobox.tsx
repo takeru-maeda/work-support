@@ -10,6 +10,7 @@ interface TaskComboboxProps {
   projectId: number | null;
   projectName: string;
   options: EffortProjectOption[];
+  isError: boolean;
   isLoading: boolean;
   onChange: (value: EffortSelectionValue) => void;
 }
@@ -19,6 +20,7 @@ export function TaskCombobox({
   projectId,
   projectName,
   options,
+  isError,
   isLoading,
   onChange,
 }: Readonly<TaskComboboxProps>) {
@@ -50,6 +52,7 @@ export function TaskCombobox({
       emptyLabel='"{value}" を追加'
       onChange={handleChange}
       isLoading={isLoading}
+      isError={isError}
     />
   );
 }

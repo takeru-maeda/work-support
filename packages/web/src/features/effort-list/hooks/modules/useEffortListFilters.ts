@@ -10,7 +10,7 @@ import type {
 export const ALL_OPTION = "__all__";
 const DEFAULT_SORT_COLUMN: EffortSortColumn = "date";
 const DEFAULT_SORT_DIRECTION: EffortSortDirection = "desc";
-const DEFAULT_ITEMS_PER_PAGE = 20;
+const DEFAULT_ITEMS_PER_PAGE = 10;
 
 interface StoredEffortFilters {
   date?: string | null;

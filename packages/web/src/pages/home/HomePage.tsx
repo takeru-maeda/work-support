@@ -11,7 +11,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto max-w-7xl px-6 py-8 sm:px-8 lg:px-16">
-        <header className="mb-12 text-center">
+        <header className="mb-8 sm:mb-12 text-center">
           <h1 className="text-balance text-4xl sm:text-5xl font-bold text-foreground mb-4">
             Work Support
           </h1>

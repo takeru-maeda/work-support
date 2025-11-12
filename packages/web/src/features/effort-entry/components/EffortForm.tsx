@@ -1,5 +1,4 @@
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 
 import { EffortEntries } from "@/features/effort-entry/components/entries";
@@ -9,8 +8,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import CardContainer from "@/components/shared/CardContainer";
 import EffortEntrySkeleton from "./skeleton/EffortEntrySkeleton";
 import EffortSummarySkeleton from "./skeleton/EffortSummarySkeleton";
+import { ConfirmEffortSubmitDialog } from "@/features/effort-entry/components/ConfirmEffortSubmitDialog";
+import { useState } from "react";
 
 export function EffortForm() {
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const {
     formData,
     projectOptions,
@@ -34,6 +36,10 @@ export function EffortForm() {
   } = useEffortFormManager();
 
   const hasEntries = formData.entries.length > 0;
+  const handleConfirmSubmit = (): void => {
+    setConfirmOpen(false);
+    void handleSubmit();
+  };
 
   return (
     <div className="space-y-8">
@@ -69,7 +75,7 @@ export function EffortForm() {
       ) : (
         hasEntries && (
           <section className="space-y-2">
-            <h2 className="text-xl font-semibold">工数集計</h2>
+            <h2 className="text-xl font-semibold">集計</h2>
             <EffortSummary
               projectBreakdown={projectBreakdown}
               totalEstimated={totalEstimated}
@@ -92,7 +98,7 @@ export function EffortForm() {
           </CardContainer>
         ) : (
           <Textarea
-            placeholder="作業内容や特記事項を入力してください..."
+            placeholder="自由にご入力ください"
             value={formData.memo}
             onChange={(event) => setMemo(event.target.value)}
             rows={6}
@@ -102,13 +108,13 @@ export function EffortForm() {
       </section>
 
       <div className="flex justify-end">
-        <Button
-          onClick={() => void handleSubmit()}
-          size="lg"
+        <ConfirmEffortSubmitDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
           disabled={!canSubmit || isInitializing}
-        >
-          {isSubmitting ? "送信中..." : "送信"}
-        </Button>
+          isSubmitting={isSubmitting}
+          onConfirm={handleConfirmSubmit}
+        />
       </div>
     </div>
   );

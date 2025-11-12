@@ -25,6 +25,7 @@ interface EffortComboboxProps {
   onChange: (value: string) => void;
   disabled?: boolean;
   isLoading?: boolean;
+  isError: boolean;
 }
 
 export function EffortCombobox({
@@ -35,6 +36,7 @@ export function EffortCombobox({
   onChange,
   disabled = false,
   isLoading = false,
+  isError,
 }: Readonly<EffortComboboxProps>) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState(value);
@@ -66,7 +68,10 @@ export function EffortCombobox({
           variant="outline"
           aria-haspopup="listbox"
           aria-expanded={open}
-          className="w-full justify-between bg-transparent"
+          className={cn(
+            "w-full justify-between bg-transparent",
+            isError && "border-destructive",
+          )}
           disabled={disabled}
         >
           <span

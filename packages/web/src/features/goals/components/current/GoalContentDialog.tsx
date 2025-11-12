@@ -30,7 +30,7 @@ export function GoalContentDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-h-[calc(90dvh)] overflow-auto"
+        className="max-h-[calc(90ddvh)] overflow-auto"
         showCloseButton={false}
       >
         <DialogHeader>

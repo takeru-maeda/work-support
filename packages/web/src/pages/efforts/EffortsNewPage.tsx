@@ -7,7 +7,7 @@ export default function EffortsNewPage(): JSX.Element {
     <PageLayout
       pageTitle="工数登録"
       pageDescription="作業内容と時間の記録"
-      className="mb-4 sm:mb-8"
+      className="mb-6 sm:mb-10"
     >
       <EffortForm />
     </PageLayout>

@@ -13,6 +13,7 @@ import type {
 import { DifferenceBadge } from "@/features/effort-entry/components/entries/DifferenceBadge";
 import { ProjectCombobox } from "@/features/effort-entry/components/entries/ProjectCombobox";
 import { TaskCombobox } from "@/features/effort-entry/components/entries/TaskCombobox";
+import type { Task } from "@shared/schemas/projects";
 
 interface EffortRowProps {
   entry: EffortEntry;
@@ -41,7 +42,7 @@ export function EffortRow({
       ? entry.actualHours - entry.estimatedHours
       : null;
 
-  const resolvedProject = projectOptions.find(
+  const resolvedProject: EffortProjectOption | undefined = projectOptions.find(
     (option) => option.id === entry.projectId,
   );
   const projectValue: EffortSelectionValue = {
@@ -49,7 +50,7 @@ export function EffortRow({
     name: entry.projectName || resolvedProject?.name || "",
   };
 
-  const resolvedTask = resolvedProject?.tasks.find(
+  const resolvedTask: Task | undefined = resolvedProject?.tasks.find(
     (task) => task.id === entry.taskId,
   );
   const taskValue: EffortSelectionValue = {
@@ -75,6 +76,7 @@ export function EffortRow({
               <ProjectCombobox
                 value={projectValue}
                 options={projectOptions}
+                isError={errors?.project != null}
                 isLoading={isProjectLoading}
                 onChange={(selection) =>
                   onUpdate(entry.id, {
@@ -97,6 +99,7 @@ export function EffortRow({
                 projectId={entry.projectId}
                 projectName={projectValue.name}
                 options={projectOptions}
+                isError={errors?.task != null}
                 isLoading={isProjectLoading}
                 onChange={(selection) =>
                   onUpdate(entry.id, {
@@ -147,8 +150,7 @@ export function EffortRow({
               placeholder="実績工数(h)"
               className={cn(
                 "text-sm",
-                errors?.actualHours &&
-                  "border-destructive focus-visible:ring-destructive",
+                errors?.actualHours && "border-destructive",
               )}
             />
 
@@ -156,7 +158,7 @@ export function EffortRow({
               <DifferenceBadge difference={difference} />
             </div>
 
-            <div className="ml-auto">
+            <div className="ml-auto hidden sm:block">
               <Button
                 variant="ghost"
                 size="sm"
@@ -168,9 +170,26 @@ export function EffortRow({
             </div>
           </div>
 
-          {errors?.actualHours && (
-            <p className="text-xs text-destructive">{errors.actualHours}</p>
-          )}
+          <div
+            className={cn(
+              "grid items-center gap-2 sm:gap-4 grid-cols-2 sm:grid-cols-4",
+              errors?.actualHours ? "" : "hidden",
+            )}
+          >
+            <div />
+            <p className="text-xs text-destructive">{errors?.actualHours}</p>
+          </div>
+
+          <div className="flex justify-end sm:hidden">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onRemove(entry.id)}
+              className="h-10 text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </section>

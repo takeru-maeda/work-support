@@ -7,6 +7,7 @@ import type {
 interface ProjectComboboxProps {
   value: EffortSelectionValue;
   options: EffortProjectOption[];
+  isError: boolean;
   isLoading: boolean;
   onChange: (value: EffortSelectionValue) => void;
 }
@@ -14,6 +15,7 @@ interface ProjectComboboxProps {
 export function ProjectCombobox({
   value,
   options,
+  isError,
   isLoading,
   onChange,
 }: Readonly<ProjectComboboxProps>) {
@@ -37,6 +39,7 @@ export function ProjectCombobox({
       emptyLabel='"{value}" を追加'
       onChange={handleChange}
       isLoading={isLoading}
+      isError={isError}
     />
   );
 }
