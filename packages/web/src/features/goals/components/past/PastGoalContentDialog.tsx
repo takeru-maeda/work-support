@@ -21,7 +21,7 @@ export function PastGoalContentDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-h-[calc(80dvh)] overflow-auto"
+        className="max-h-[calc(80dvh)] overflow-auto p-4 sm:p-6"
         showCloseButton={false}
       >
         <DialogHeader>
@@ -29,7 +29,7 @@ export function PastGoalContentDialog({
           <DialogDescription>目標の詳細内容</DialogDescription>
         </DialogHeader>
         <div className="mt-4">
-          <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
+          <p className="whitespace-pre-line text-xs sm:text-sm leading-relaxed text-foreground">
             {goal?.content || "内容が設定されていません。"}
           </p>
         </div>
