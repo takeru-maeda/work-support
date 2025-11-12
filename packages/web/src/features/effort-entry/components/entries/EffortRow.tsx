@@ -158,37 +158,31 @@ export function EffortRow({
               <DifferenceBadge difference={difference} />
             </div>
 
-            <div className="ml-auto hidden sm:block">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onRemove(entry.id)}
-                className="h-10 text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+            <div className="flex items-center">
+              <p className="text-xs text-destructive mr-auto sm:hidden">
+                {errors?.actualHours}
+              </p>
+              <div className="ml-auto">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onRemove(entry.id)}
+                  className="h-10 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
 
           <div
             className={cn(
               "grid items-center gap-2 sm:gap-4 grid-cols-2 sm:grid-cols-4",
-              errors?.actualHours ? "" : "hidden",
+              errors?.actualHours ? "hidden sm:grid" : "hidden",
             )}
           >
             <div />
             <p className="text-xs text-destructive">{errors?.actualHours}</p>
-          </div>
-
-          <div className="flex justify-end sm:hidden">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onRemove(entry.id)}
-              className="h-10 text-destructive hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
           </div>
         </div>
       </div>
