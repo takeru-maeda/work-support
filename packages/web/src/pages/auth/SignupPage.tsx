@@ -14,6 +14,7 @@ import { AuthPageContainer } from "@/features/auth/components/AuthPageContainer"
 import { createUserSettings } from "@/services/userSettings";
 import { reportUiError } from "@/services/logs";
 import { showSuccessToast } from "@/lib/toast";
+import { PasswordInput } from "@/features/auth/components/PasswordInput";
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -92,31 +93,27 @@ export default function SignupPage() {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="password">パスワード</Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-          />
-        </div>
+        <PasswordInput
+          id="password"
+          label="パスワード"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          minLength={6}
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">パスワード（確認）</Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            placeholder="••••••••"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            minLength={6}
-          />
-        </div>
+        <PasswordInput
+          id="confirmPassword"
+          label="パスワード（確認）"
+          placeholder="••••••••"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+          minLength={6}
+          showLabel="確認用パスワードを表示"
+          hideLabel="確認用パスワードを非表示"
+        />
 
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? "登録中..." : "登録"}

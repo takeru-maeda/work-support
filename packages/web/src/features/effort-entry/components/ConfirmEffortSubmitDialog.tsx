@@ -1,7 +1,8 @@
+import { type JSX } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
-  AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogFooter,
@@ -10,7 +11,6 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import type { JSX } from "react";
 
 interface ConfirmEffortSubmitDialogProps {
   open: boolean;
@@ -18,6 +18,7 @@ interface ConfirmEffortSubmitDialogProps {
   isSubmitting: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
+  onRequestOpen: () => void;
 }
 
 /**
@@ -32,30 +33,36 @@ export function ConfirmEffortSubmitDialog({
   isSubmitting,
   onOpenChange,
   onConfirm,
+  onRequestOpen,
 }: Readonly<ConfirmEffortSubmitDialogProps>): JSX.Element {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogTrigger asChild>
-        <Button size="lg" disabled={disabled} className="w-full sm:w-auto">
-          {isSubmitting ? "送信中..." : "送信"}
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>工数を登録します</AlertDialogTitle>
-          <AlertDialogDescription className="text-sm text-muted-foreground">
-            よろしければ「送信する」をクリックしてください。
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isSubmitting}>
-            キャンセル
-          </AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} disabled={isSubmitting}>
-            送信する
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <>
+      <Button
+        size="lg"
+        disabled={disabled}
+        className="w-full sm:w-auto"
+        onClick={onRequestOpen}
+      >
+        {isSubmitting ? "送信中..." : "送信"}
+      </Button>
+      <AlertDialog open={open} onOpenChange={onOpenChange}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>工数を登録します</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-muted-foreground">
+              よろしければ「送信する」をクリックしてください。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSubmitting}>
+              キャンセル
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirm} disabled={isSubmitting}>
+              送信する
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

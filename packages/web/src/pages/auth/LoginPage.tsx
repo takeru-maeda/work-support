@@ -11,6 +11,7 @@ import { login } from "@/lib/auth";
 import { AuthBrand } from "@/features/auth/components/AuthBrand";
 import { AuthPageContainer } from "@/features/auth/components/AuthPageContainer";
 import { AuthErrorAlert } from "@/features/auth/components/AuthErrorAlert";
+import { PasswordInput } from "@/features/auth/components/PasswordInput";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -55,10 +56,9 @@ export default function LoginPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">パスワード</Label>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
+            label="パスワード"
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

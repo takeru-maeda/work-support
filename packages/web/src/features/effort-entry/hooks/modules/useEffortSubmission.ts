@@ -36,6 +36,7 @@ interface UseEffortSubmissionParams {
 interface UseEffortSubmissionResult {
   isSubmitting: boolean;
   handleSubmit: () => Promise<void>;
+  validateBeforeSubmit: () => boolean;
 }
 
 /**
@@ -56,10 +57,10 @@ export function useEffortSubmission({
 }: UseEffortSubmissionParams): UseEffortSubmissionResult {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const handleSubmit = useCallback(async () => {
+  const runValidation = useCallback((): EffortEntryDto[] | null => {
     if (!formData.entries.length) {
       showErrorToast("工数エントリーを追加してください。");
-      return;
+      return null;
     }
 
     const errors: Record<string, EffortEntryError | undefined> = {};
@@ -78,10 +79,23 @@ export function useEffortSubmission({
     if (hasError) {
       setEntryErrors(errors);
       showErrorToast("入力内容を確認してください。");
-      return;
+      return null;
     }
 
     resetEntryErrors();
+    return payload;
+  }, [formData.entries, resetEntryErrors, setEntryErrors]);
+
+  const validateBeforeSubmit = useCallback((): boolean => {
+    return runValidation() !== null;
+  }, [runValidation]);
+
+  const handleSubmit = useCallback(async () => {
+    const payload: EffortEntryDto[] | null = runValidation();
+    if (!payload) {
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -119,12 +133,10 @@ export function useEffortSubmission({
   }, [
     clearPersistedDraft,
     formData.date,
-    formData.entries,
     formData.memo,
     mutateDraft,
     mutateProjects,
-    resetEntryErrors,
-    setEntryErrors,
+    runValidation,
     setFormData,
     skipNextDraftSync,
   ]);
@@ -132,5 +144,6 @@ export function useEffortSubmission({
   return {
     isSubmitting,
     handleSubmit,
+    validateBeforeSubmit,
   };
 }

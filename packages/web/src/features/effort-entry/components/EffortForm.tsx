@@ -33,12 +33,17 @@ export function EffortForm() {
     totalActual,
     totalDifference,
     handleReorder,
+    validateBeforeSubmit,
   } = useEffortFormManager();
 
   const hasEntries = formData.entries.length > 0;
   const handleConfirmSubmit = (): void => {
     setConfirmOpen(false);
     void handleSubmit();
+  };
+  const handleRequestSubmit = (): void => {
+    if (!validateBeforeSubmit()) return;
+    setConfirmOpen(true);
   };
 
   return (
@@ -113,6 +118,7 @@ export function EffortForm() {
           onOpenChange={setConfirmOpen}
           disabled={!canSubmit || isInitializing}
           isSubmitting={isSubmitting}
+          onRequestOpen={handleRequestSubmit}
           onConfirm={handleConfirmSubmit}
         />
       </div>

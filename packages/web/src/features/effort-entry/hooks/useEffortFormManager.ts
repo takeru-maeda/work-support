@@ -26,6 +26,7 @@ interface UseEffortFormManagerResult {
   removeEntry: (id: string) => void;
   updateEntry: (id: string, changes: Partial<EffortEntry>) => void;
   handleSubmit: () => Promise<void>;
+  validateBeforeSubmit: () => boolean;
   projectBreakdown: ProjectBreakdownItem[];
   totalEstimated: number;
   totalActual: number;
@@ -70,7 +71,7 @@ export function useEffortFormManager(): UseEffortFormManagerResult {
     resetEntryErrors,
   } = useEffortEntriesActions({ setFormData });
 
-  const { handleSubmit, isSubmitting } = useEffortSubmission({
+  const { handleSubmit, isSubmitting, validateBeforeSubmit } = useEffortSubmission({
     formData,
     setFormData,
     clearPersistedDraft,
@@ -99,6 +100,7 @@ export function useEffortFormManager(): UseEffortFormManagerResult {
     removeEntry,
     updateEntry,
     handleSubmit,
+    validateBeforeSubmit,
     projectBreakdown,
     totalEstimated,
     totalActual,
