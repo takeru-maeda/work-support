@@ -100,7 +100,7 @@ export function MissionEditor({
           <Textarea
             value={tempMission}
             onChange={(event) => setTempMission(event.target.value)}
-            className="min-h-[120px] resize-y bg-background text-foreground"
+            className="h-[40vh] text-xs sm:text-sm sm:min-h-[120px] sm:max-h-[70vh] sm:resize-y bg-background text-foreground"
             placeholder="ミッションを入力してください..."
           />
           <FormActions

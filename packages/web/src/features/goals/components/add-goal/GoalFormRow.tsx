@@ -64,7 +64,7 @@ export function GoalFormRow({
             onChange={(event) => onContentChange(event.target.value)}
             rows={4}
             disabled={disabled}
-            className="resize-y"
+            className="h-[25vh] max-h-[50vh] sm:h-16 text-xs sm:text-sm sm:resize-y"
           />
         </div>
 
@@ -81,7 +81,7 @@ export function GoalFormRow({
               onWeightChange(Number.parseInt(event.target.value) || 0)
             }
             disabled={disabled}
-            className="max-w-[200px]"
+            className="max-w-[100px] text-xs sm:text-sm"
           />
         </div>
       </div>

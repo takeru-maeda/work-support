@@ -51,7 +51,7 @@ export function EffortsFilterPanel({
       contentClassName="px-4 pb-4"
     >
       <div className="space-y-3 pt-2">
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex flex-col gap-2 sm:gap-3 sm:flex-row">
           <div className="w-full shrink-0 sm:w-[150px]">
             <DatePicker
               date={date}

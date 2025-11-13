@@ -63,7 +63,8 @@ export default function EffortsPage(): JSX.Element {
       {isLoading ? (
         <TableAndFooterSkeleton
           rows={itemsPerPage}
-          className="space-y-2 sm:space-y-4"
+          className="space-y-2 sm:space-y-4 mb-6"
+          tableClassName="max-h-[calc(45dvh)] overflow-hidden"
         />
       ) : currentEntries.length == 0 ? (
         <EmptyState
@@ -80,7 +81,7 @@ export default function EffortsPage(): JSX.Element {
           }
         />
       ) : (
-        <div className="space-y-2 sm:space-y-4">
+        <div className="space-y-2 sm:space-y-4 mb-6">
           <div className="overflow-hidden rounded-lg border border-border bg-card">
             <EffortsTableContainer>
               <EffortsTable
@@ -99,7 +100,6 @@ export default function EffortsPage(): JSX.Element {
             onPageChange={setCurrentPage}
             onItemsPerPageChange={handleItemsPerPageChange}
             itemsPerPageOptions={[10, 20, 50, 100]}
-            className="mb-6"
           />
         </div>
       )}

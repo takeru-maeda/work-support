@@ -14,6 +14,7 @@
   - 画面遷移時に `GET /api/projects` と `GET /api/effort/draft` を並列で呼び出し、取得した案件・タスクをコンボボックスへ表示する。ドラフトが存在する場合はフォームへ初期反映する。
   - メール通知の有効/無効はユーザー設定（`user_settings.notify_effort_email`）に基づき、UI ではトグルを表示して変更できる。
   - 実績工数 (`hours`) は必須入力とし、空の場合は送信できない。
+  - フォームの Undo / Redo は Immer の `produceWithPatches` と `applyPatches` を用いたヒストリー管理で実装し、`past` / `future` スタックを保持してキーボードショートカット（Cmd/Ctrl + Z / Shift + Cmd/Ctrl + Z）および UI ボタンから切り替えられるようにする。
   - 工数集計カードは以下のルールで算出する:
     - 案件別集計
       - 「見積」はタスクで入力された `estimatedHours` の合計。1件も入力がなければ `-` を表示する。

@@ -70,18 +70,25 @@ export const useAvatarUpload = ({
             },
           );
 
+          const shouldDelete: boolean =
+            user.avatarUrl?.includes(uploadedObjectPath) === false;
+
           if (!success) {
             if (uploadedObjectPath) {
-              try {
-                await deleteAvatarImage(uploadedObjectPath);
-              } catch (deleteError) {
-                reportUiError(deleteError);
-              }
+              await handleAvatarImageDelete(uploadedObjectPath);
             }
             setProfile((prev) => ({
               ...prev,
               avatarUrl: previousAvatar ?? prev.avatarUrl,
             }));
+          } else if (shouldDelete) {
+            const match: RegExpExecArray | null = new RegExp(
+              /avatars\/([^?]+)/,
+            ).exec(user.avatarUrl!);
+            const oldObjectPath: string | null = match ? match[1] : null;
+            if (oldObjectPath) {
+              await handleAvatarImageDelete(oldObjectPath);
+            }
           }
         } catch (error) {
           showErrorToast("プロフィール画像の更新に失敗しました", {
@@ -91,14 +98,11 @@ export const useAvatarUpload = ({
             ...prev,
             avatarUrl: previousAvatar ?? prev.avatarUrl,
           }));
-          void reportUiError(error);
-
+          void reportUiError(error, {
+            message: "Failed update for avatar image.",
+          });
           if (uploadedObjectPath) {
-            try {
-              await deleteAvatarImage(uploadedObjectPath);
-            } catch (deleteError) {
-              reportUiError(deleteError);
-            }
+            await handleAvatarImageDelete(uploadedObjectPath);
           }
         } finally {
           setSaving(false);
@@ -109,3 +113,18 @@ export const useAvatarUpload = ({
     [currentAvatarUrl, persistProfile, setProfile, setSaving, user],
   );
 };
+
+/**
+ * 画像の削除と、エラー時のログ作成を実行します。
+ *
+ * @param objectPath 削除対象のオブジェクトパス
+ */
+async function handleAvatarImageDelete(objectPath: string): Promise<void> {
+  try {
+    await deleteAvatarImage(objectPath);
+  } catch (deleteError) {
+    reportUiError(deleteError, {
+      message: "Failed delete for avatar image.",
+    });
+  }
+}

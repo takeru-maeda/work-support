@@ -139,6 +139,8 @@
 - [x] 完了メール送信結果を UI にフィードバックする（成功/失敗トーストなど）
 - [x] 入力内容の変更ごとにドラフト保存APIへ同期し、送信成功後にドラフトを削除する
 - [x] 画面遷移時に `GET /api/projects`（案件・タスク取得）と `GET /api/effort/draft` を呼び出し、ドラフト初期表示と候補の初期化を実装する
+- [x] Immer の `produceWithPatches` / `applyPatches` を用いた Undo / Redo ヒストリーを実装する
+- [x] Cmd/Ctrl+Z / Shift+Cmd/Ctrl+Z と連動し、UIボタンからも Undo / Redo を操作できるようにする
 
 ### 4.7. 工数一覧画面 (`/efforts`)
 - [x] 工数一覧の検索フォームとテーブルUIを実装する

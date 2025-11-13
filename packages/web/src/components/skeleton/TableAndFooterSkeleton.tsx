@@ -5,15 +5,17 @@ import { cn } from "@/lib/utils";
 interface TableAndFooterSkeletonProps {
   rows?: number;
   className?: string;
+  tableClassName?: string;
 }
 
 const TableAndFooterSkeleton = ({
   rows = 4,
   className,
+  tableClassName,
 }: TableAndFooterSkeletonProps) => {
   return (
     <div className={cn("space-y-6", className)}>
-      <TableSkeleton rows={rows} />
+      <TableSkeleton rows={rows} className={tableClassName} />
       <div className="flex">
         <Skeleton className="flex justify-start h-8 w-12" />
         <div className="flex ml-auto gap-3 mr-1">

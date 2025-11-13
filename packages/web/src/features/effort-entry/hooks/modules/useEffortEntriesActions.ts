@@ -12,7 +12,7 @@ import {
 } from "@/features/effort-entry/utils/form-helpers";
 
 interface UseEffortEntriesActionsParams {
-  setFormData: React.Dispatch<React.SetStateAction<EffortFormData>>;
+  applyFormChange: (recipe: (draft: EffortFormData) => void) => void;
 }
 
 interface UseEffortEntriesActionsResult {
@@ -36,7 +36,7 @@ interface UseEffortEntriesActionsResult {
  * @returns 編集用ハンドラ群
  */
 export function useEffortEntriesActions({
-  setFormData,
+  applyFormChange,
 }: UseEffortEntriesActionsParams): UseEffortEntriesActionsResult {
   const [entryErrors, setEntryErrors] = useState<
     Record<string, EffortEntryError | undefined>
@@ -44,100 +44,93 @@ export function useEffortEntriesActions({
 
   const setDate = useCallback(
     (date?: Date) => {
-      setFormData((prev) => ({
-        ...prev,
-        date: date ?? new Date(),
-      }));
+      applyFormChange((draft) => {
+        draft.date = date ?? new Date();
+      });
     },
-    [setFormData],
+    [applyFormChange],
   );
 
   const setMemo = useCallback(
     (value: string) => {
-      setFormData((prev) => ({
-        ...prev,
-        memo: value,
-      }));
+      applyFormChange((draft) => {
+        draft.memo = value;
+      });
     },
-    [setFormData],
+    [applyFormChange],
   );
 
   const addEntry = useCallback(() => {
-    setFormData((prev) => {
+    applyFormChange((draft) => {
       const newEntry: EffortEntry = createEmptyEntry();
-      if (prev.entries.length > 0) {
-        const lastEntry: EffortEntry = prev.entries.at(-1)!;
+      if (draft.entries.length > 0) {
+        const lastEntry: EffortEntry = draft.entries.at(-1)!;
         newEntry.projectId = lastEntry.projectId ?? null;
         newEntry.projectName = lastEntry.projectName;
       }
-      console.log(newEntry);
-      return { ...prev, entries: [...prev.entries, newEntry] };
+      draft.entries.push(newEntry);
     });
-  }, [setFormData]);
+  }, [applyFormChange]);
 
   const removeEntry = useCallback(
     (id: string) => {
-      setFormData((prev) => ({
-        ...prev,
-        entries: prev.entries.filter((entry) => entry.id !== id),
-      }));
+      applyFormChange((draft) => {
+        draft.entries = draft.entries.filter((entry) => entry.id !== id);
+      });
       setEntryErrors((prev) => {
         if (!prev[id]) return prev;
         const { [id]: _removed, ...rest } = prev;
         return rest;
       });
     },
-    [setFormData],
+    [applyFormChange],
   );
 
   const updateEntry = useCallback(
     (id: string, changes: Partial<EffortEntry>) => {
-      setFormData((prev) => {
-        let updated: EffortEntry | null = null;
-        const entries: EffortEntry[] = prev.entries.map((entry) => {
-          if (entry.id !== id) return entry;
-          updated = { ...entry, ...changes };
-          return updated;
-        });
-
-        if (updated) {
-          setEntryErrors((prevErrors) => {
-            const nextError: EffortEntryError | null = validateEffortEntry(
-              updated as EffortEntry,
-            );
-            if (nextError) {
-              return { ...prevErrors, [id]: nextError };
-            }
-            if (!prevErrors[id]) return prevErrors;
-            const { [id]: _removed, ...rest } = prevErrors;
-            return rest;
-          });
-        }
-
-        return { ...prev, entries };
+      let updated: EffortEntry | null = null;
+      applyFormChange((draft) => {
+        const target: EffortEntry | undefined = draft.entries.find(
+          (entry) => entry.id === id,
+        );
+        if (!target) return;
+        Object.assign(target, changes);
+        updated = { ...target };
       });
+
+      if (updated) {
+        setEntryErrors((prevErrors) => {
+          const nextError: EffortEntryError | null =
+            validateEffortEntry(updated as EffortEntry);
+          if (nextError) {
+            return { ...prevErrors, [id]: nextError };
+          }
+          if (!prevErrors[id]) return prevErrors;
+          const { [id]: _removed, ...rest } = prevErrors;
+          return rest;
+        });
+      }
     },
-    [setFormData],
+    [applyFormChange],
   );
 
   const handleReorder = useCallback(
     (activeId: string, overId: string) => {
       if (activeId === overId) return;
-      setFormData((prev) => {
-        const oldIndex: number = prev.entries.findIndex(
+      applyFormChange((draft) => {
+        const oldIndex: number = draft.entries.findIndex(
           (entry) => entry.id === activeId,
         );
-        const newIndex: number = prev.entries.findIndex(
+        const newIndex: number = draft.entries.findIndex(
           (entry) => entry.id === overId,
         );
-        if (oldIndex === -1 || newIndex === -1) return prev;
-        return {
-          ...prev,
-          entries: arrayMove(prev.entries, oldIndex, newIndex),
-        };
+        if (oldIndex === -1 || newIndex === -1) {
+          return;
+        }
+        draft.entries = arrayMove(draft.entries, oldIndex, newIndex);
       });
     },
-    [setFormData],
+    [applyFormChange],
   );
 
   const resetEntryErrors = useCallback(() => {

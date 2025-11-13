@@ -22,7 +22,10 @@ import type { ProjectWithTasks } from "@shared/schemas/projects";
 
 interface UseEffortSubmissionParams {
   formData: EffortFormData;
-  setFormData: React.Dispatch<React.SetStateAction<EffortFormData>>;
+  replaceFormState: (
+    nextState: EffortFormData,
+    options?: { resetHistory?: boolean },
+  ) => void;
   clearPersistedDraft: () => void;
   skipNextDraftSync: () => void;
   mutateDraft: KeyedMutator<EffortDraftResponse["draft"] | null>;
@@ -47,7 +50,7 @@ interface UseEffortSubmissionResult {
  */
 export function useEffortSubmission({
   formData,
-  setFormData,
+  replaceFormState,
   clearPersistedDraft,
   skipNextDraftSync,
   mutateDraft,
@@ -109,11 +112,14 @@ export function useEffortSubmission({
       showSuccessToast("工数を登録しました。");
 
       skipNextDraftSync();
-      setFormData({
-        date: new Date(),
-        entries: [],
-        memo: "",
-      });
+      replaceFormState(
+        {
+          date: new Date(),
+          entries: [],
+          memo: "",
+        },
+        { resetHistory: true },
+      );
       clearPersistedDraft();
       try {
         await removeEffortDraft();
@@ -137,7 +143,7 @@ export function useEffortSubmission({
     mutateDraft,
     mutateProjects,
     runValidation,
-    setFormData,
+    replaceFormState,
     skipNextDraftSync,
   ]);
 

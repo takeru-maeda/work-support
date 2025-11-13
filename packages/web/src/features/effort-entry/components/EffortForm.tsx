@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
 
@@ -9,7 +11,7 @@ import CardContainer from "@/components/shared/CardContainer";
 import EffortEntrySkeleton from "./skeleton/EffortEntrySkeleton";
 import EffortSummarySkeleton from "./skeleton/EffortSummarySkeleton";
 import { ConfirmEffortSubmitDialog } from "@/features/effort-entry/components/ConfirmEffortSubmitDialog";
-import { useState } from "react";
+import { UndoRedoControls } from "@/features/effort-entry/components/UndoRedoControls";
 
 export function EffortForm() {
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -34,7 +36,36 @@ export function EffortForm() {
     totalDifference,
     handleReorder,
     validateBeforeSubmit,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   } = useEffortFormManager();
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const key: string = event.key.toLowerCase();
+      const isUndo: boolean =
+        (event.metaKey || event.ctrlKey) && !event.shiftKey && key === "z";
+      const isRedo: boolean =
+        (event.metaKey || event.ctrlKey) &&
+        ((event.shiftKey && key === "z") || key === "y");
+
+      if (isUndo) {
+        event.preventDefault();
+        if (canUndo) undo();
+        return;
+      }
+
+      if (isRedo) {
+        event.preventDefault();
+        if (canRedo) redo();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [canRedo, canUndo, redo, undo]);
 
   const hasEntries = formData.entries.length > 0;
   const handleConfirmSubmit = (): void => {
@@ -53,7 +84,15 @@ export function EffortForm() {
         {isInitializing ? (
           <DatePicker />
         ) : (
-          <DatePicker date={formData.date} onDateChange={setDate} />
+          <div className="flex items-center justify-between">
+            <DatePicker date={formData.date} onDateChange={setDate} />
+            <UndoRedoControls
+              canUndo={canUndo}
+              canRedo={canRedo}
+              onUndo={undo}
+              onRedo={redo}
+            />
+          </div>
         )}
       </section>
 

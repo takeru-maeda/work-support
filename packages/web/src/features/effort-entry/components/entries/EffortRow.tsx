@@ -116,7 +116,7 @@ export function EffortRow({
             </div>
           </div>
 
-          <div className="grid items-center gap-2 sm:gap-4 grid-cols-2 sm:grid-cols-4">
+          <div className="grid items-center gap-2 sm:gap-4 grid-cols-4">
             <Input
               type="number"
               min="0"
@@ -131,7 +131,7 @@ export function EffortRow({
                   })(),
                 })
               }
-              placeholder="見積工数(h)"
+              placeholder="見積(h)"
               className="text-sm"
             />
 
@@ -149,7 +149,7 @@ export function EffortRow({
                   })(),
                 })
               }
-              placeholder="実績工数(h)"
+              placeholder="実績(h)"
               className={cn(
                 "text-sm",
                 errors?.actualHours && "border-destructive-foreground",
@@ -160,34 +160,26 @@ export function EffortRow({
               <DifferenceBadge difference={difference} />
             </div>
 
-            <div className="flex items-center">
-              <p className="text-xs text-destructive-foreground mr-auto sm:hidden self-start">
-                {errors?.actualHours}
-              </p>
-              <div className="ml-auto">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onRemove(entry.id)}
-                  className="h-10 text-destructive-foreground hover:text-destructive-foreground self-center"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+            <div className="ml-auto">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onRemove(entry.id)}
+                className="h-10 text-destructive-foreground hover:text-destructive-foreground self-center"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
-          <div
-            className={cn(
-              "grid items-center gap-2 sm:gap-4 grid-cols-2 sm:grid-cols-4 -mt-4",
-              errors?.actualHours ? "hidden sm:grid" : "hidden",
-            )}
-          >
-            <div />
-            <p className="text-xs text-destructive-foreground">
-              {errors?.actualHours}
-            </p>
-          </div>
+          {errors?.actualHours && (
+            <div className="grid items-center gap-2 sm:gap-4 grid-cols-4 -mt-2">
+              <div />
+              <p className="text-xs text-destructive-foreground">
+                {errors?.actualHours}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </section>

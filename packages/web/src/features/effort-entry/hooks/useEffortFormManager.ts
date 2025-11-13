@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type {
   EffortEntry,
   EffortEntryError,
@@ -10,6 +11,7 @@ import { useEffortDraftSync } from "@/features/effort-entry/hooks/modules/useEff
 import { useEffortSummaryMetrics } from "@/features/effort-entry/hooks/modules/useEffortSummaryMetrics";
 import { useEffortEntriesActions } from "@/features/effort-entry/hooks/modules/useEffortEntriesActions";
 import { useEffortSubmission } from "@/features/effort-entry/hooks/modules/useEffortSubmission";
+import { useEffortHistory } from "@/features/effort-entry/hooks/modules/useEffortHistory";
 
 interface UseEffortFormManagerResult {
   formData: EffortFormData;
@@ -32,6 +34,10 @@ interface UseEffortFormManagerResult {
   totalActual: number;
   totalDifference: number;
   handleReorder: (activeId: string, overId: string) => void;
+  undo: () => void;
+  redo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
 }
 
 /**
@@ -48,6 +54,26 @@ export function useEffortFormManager(): UseEffortFormManagerResult {
     clearPersistedDraft,
     mutateDraft,
   } = useEffortDraftSync();
+
+  const {
+    applyChange,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    replaceState,
+    resetHistory,
+  } = useEffortHistory(setFormData);
+
+  const historyInitializedRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (!isInitializing && !historyInitializedRef.current) {
+      resetHistory();
+      historyInitializedRef.current = true;
+    }
+  }, [isInitializing, resetHistory]);
+
   const { projectOptions, isProjectLoading, mutateProjects } =
     useEffortProjectsOptions();
 
@@ -69,18 +95,19 @@ export function useEffortFormManager(): UseEffortFormManagerResult {
     updateEntry,
     handleReorder,
     resetEntryErrors,
-  } = useEffortEntriesActions({ setFormData });
+  } = useEffortEntriesActions({ applyFormChange: applyChange });
 
-  const { handleSubmit, isSubmitting, validateBeforeSubmit } = useEffortSubmission({
-    formData,
-    setFormData,
-    clearPersistedDraft,
-    skipNextDraftSync,
-    mutateDraft,
-    mutateProjects,
-    setEntryErrors,
-    resetEntryErrors,
-  });
+  const { handleSubmit, isSubmitting, validateBeforeSubmit } =
+    useEffortSubmission({
+      formData,
+      replaceFormState: replaceState,
+      clearPersistedDraft,
+      skipNextDraftSync,
+      mutateDraft,
+      mutateProjects,
+      setEntryErrors,
+      resetEntryErrors,
+    });
 
   const canSubmit: boolean =
     formData.entries.length > 0 && !isSubmitting && !isInitializing;
@@ -106,5 +133,9 @@ export function useEffortFormManager(): UseEffortFormManagerResult {
     totalActual,
     totalDifference,
     handleReorder,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   };
 }

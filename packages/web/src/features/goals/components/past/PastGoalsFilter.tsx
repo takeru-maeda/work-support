@@ -42,7 +42,7 @@ export function PastGoalsFilter({
       triggerClassName="px-4 hover:no-underline"
       contentClassName="px-4 pb-4"
     >
-      <div className="space-y-3 pt-2">
+      <div className="space-y-2 sm:space-y-3 pt-2">
         <div className="w-full">
           <Input
             placeholder="目標で絞り込み"
