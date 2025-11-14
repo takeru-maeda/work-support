@@ -19,6 +19,7 @@ export type Database = {
           duration_ms: number | null;
           id: number;
           ip_address: unknown;
+          method: string;
           path: string;
           received_at: string;
           status_code: number | null;
@@ -28,6 +29,7 @@ export type Database = {
           duration_ms?: number | null;
           id?: never;
           ip_address?: unknown;
+          method: string;
           path: string;
           received_at?: string;
           status_code?: number | null;
@@ -37,6 +39,7 @@ export type Database = {
           duration_ms?: number | null;
           id?: never;
           ip_address?: unknown;
+          method?: string;
           path?: string;
           received_at?: string;
           status_code?: number | null;

@@ -1,16 +1,8 @@
 import { DatePicker } from "@/components/ui/date-picker";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { FilterAccordion } from "@/components/filter/FilterAccordion";
 import { FilterActionButtons } from "@/components/filter/FilterActionButtons";
 import { cn } from "@/lib/utils";
+import { CommandFilterSelect } from "@/features/effort-list/components/list/CommandFilterSelect";
 import type { JSX } from "react";
 
 interface EffortsFilterPanelProps {
@@ -22,6 +14,8 @@ interface EffortsFilterPanelProps {
   onTaskChange: (value: string) => void;
   projectOptions: { id: number; name: string }[];
   taskOptions: { id: number; name: string }[];
+  isProjectLoading?: boolean;
+  isTaskLoading?: boolean;
   onApply: () => void;
   onClear: () => void;
   className?: string;
@@ -38,6 +32,8 @@ export function EffortsFilterPanel({
   onTaskChange,
   projectOptions,
   taskOptions,
+  isProjectLoading = false,
+  isTaskLoading = false,
   onApply,
   onClear,
   className,
@@ -60,39 +56,25 @@ export function EffortsFilterPanel({
             />
           </div>
 
-          <Select value={projectValue} onValueChange={onProjectChange}>
-            <SelectTrigger className="w-full sm:flex-1">
-              <SelectValue placeholder="案件を選択" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>案件</SelectLabel>
-                <SelectItem value={allValue}>{allLabel}</SelectItem>
-                {projectOptions.map((project) => (
-                  <SelectItem key={project.id} value={String(project.id)}>
-                    {project.name}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <CommandFilterSelect
+            placeholder="案件を選択"
+            value={projectValue}
+            onChange={onProjectChange}
+            options={projectOptions}
+            allValue={allValue}
+            allLabel={allLabel}
+            isLoading={isProjectLoading}
+          />
 
-          <Select value={taskValue} onValueChange={onTaskChange}>
-            <SelectTrigger className="w-full sm:flex-1">
-              <SelectValue placeholder="タスクを選択" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>タスク</SelectLabel>
-                <SelectItem value={allValue}>{allLabel}</SelectItem>
-                {taskOptions.map((task) => (
-                  <SelectItem key={task.id} value={String(task.id)}>
-                    {task.name}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <CommandFilterSelect
+            placeholder="タスクを選択"
+            value={taskValue}
+            onChange={onTaskChange}
+            options={taskOptions}
+            allValue={allValue}
+            allLabel={allLabel}
+            isLoading={isTaskLoading}
+          />
         </div>
 
         <FilterActionButtons onApply={onApply} onClear={onClear} />

@@ -87,6 +87,7 @@ CREATE TABLE access_logs (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
     ip_address INET,
+    method TEXT NOT NULL,
     path TEXT NOT NULL,
     status_code INT,
     received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

@@ -116,7 +116,7 @@ export function MissionEditor({
         </div>
       ) : (
         <p
-          className={`whitespace-pre-line text-pretty leading-relaxed mb-2 ${mission ? "text-foreground" : "text-muted-foreground"}`}
+          className={`whitespace-pre-line text-pretty leading-relaxed mb-2 ${mission ? "text-foreground" : "text-muted-foreground"} text-sm`}
         >
           {mission?.content ?? "まだミッションが設定されていません。"}
         </p>

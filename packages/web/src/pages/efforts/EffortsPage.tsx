@@ -35,6 +35,7 @@ export default function EffortsPage(): JSX.Element {
     itemsPerPage,
     handleItemsPerPageChange,
     hasActiveFilters,
+    isProjectOptionsLoading,
   } = useEffortList();
 
   return (
@@ -55,6 +56,8 @@ export default function EffortsPage(): JSX.Element {
         }
         projectOptions={projectOptions}
         taskOptions={taskOptions}
+        isProjectLoading={isProjectOptionsLoading}
+        isTaskLoading={isProjectOptionsLoading}
         onApply={applyFilters}
         onClear={clearFilters}
         allValue={ALL_OPTION}

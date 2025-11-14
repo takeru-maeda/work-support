@@ -1,6 +1,7 @@
 import type { EffortListEntry } from "@/features/effort-list/types";
 import type { JSX } from "react";
 import { cn } from "@/lib/utils";
+import { formatWorkHours } from "@/features/effort-entry/utils/formatHours";
 
 interface EffortsSummaryProps {
   entries: EffortListEntry[];
@@ -31,13 +32,15 @@ export function EffortsSummary({
         <div>
           <p className="mb-1 text-sm text-muted-foreground">見積合計</p>
           <p className="text-xl sm:text-2xl font-bold tabular-nums">
-            {totals.hasEstimated ? `${totals.estimated.toFixed(1)}h` : "-"}
+            {totals.hasEstimated
+              ? `${formatWorkHours(totals.estimated)}h`
+              : "-"}
           </p>
         </div>
         <div>
           <p className="mb-1 text-sm text-muted-foreground">実績合計</p>
           <p className="text-xl sm:text-2xl font-bold tabular-nums">
-            {totals.actual.toFixed(1)}h
+            {formatWorkHours(totals.actual)}h
           </p>
         </div>
         <div>
@@ -49,7 +52,7 @@ export function EffortsSummary({
             )}
           >
             {totals.hasEstimated
-              ? `${totals.difference > 0 ? "+" : ""}${totals.difference.toFixed(1)}h`
+              ? `${totals.difference > 0 ? "+" : ""}${formatWorkHours(totals.difference)}h`
               : "-"}
           </p>
         </div>

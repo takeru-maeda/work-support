@@ -25,6 +25,7 @@ export const accessLogMiddleware = createMiddleware(async (c, next) => {
   const insertLog: TablesInsert<"access_logs"> = {
     ip_address: c.req.header("cf-connecting-ip"),
     path: c.req.path,
+    method: c.req.method,
   };
   const { data: accessLog, error } = await supabase
     .from("access_logs")

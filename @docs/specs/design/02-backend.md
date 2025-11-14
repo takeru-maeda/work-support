@@ -109,7 +109,7 @@ Googleフォームからのリクエスト (`POST /api/effort`) でエラーが�
 - **実装フロー:**
   1. 認証済みユーザー ID を取得する。
   2. Supabase Admin クライアントで `auth.admin.getUserById(userId)` を呼び出し、`user_metadata.avatarUrl` からプロファイル画像の Storage パスを推測する。
-  3. `auth.admin.deleteUser(userId)` を実行して Supabase Auth のユーザーを削除する（テーブルの `ON DELETE CASCADE` により関連データが削除される）。
-  4. 画像パスが特定できた場合は `storage.from("avatars").remove([`${userId}/`])` を実行し、ユーザー用フォルダごと削除する。
-  5. 成功したら `204 No Content` を返却する。
+　3. `auth.admin.deleteUser(userId)` を実行して Supabase Auth のユーザーを削除する（テーブルの `ON DELETE CASCADE` により関連データが削除される）。
+　4. 画像パスが特定できた場合は `storage.from("avatars").remove([`${userId}/`])` を実行し、ユーザー用フォルダごと削除する。
+　5. 成功したら `204 No Content` を返却する。
 - **エラー処理:** 各ステップで Supabase がエラーを返した場合は `AppError` をスローし、`500` として応答する。

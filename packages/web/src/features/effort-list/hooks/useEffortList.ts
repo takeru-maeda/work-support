@@ -9,6 +9,7 @@ import {
   type EffortListFiltersState,
 } from "@/features/effort-list/hooks/modules/useEffortListFilters";
 import { useEffortListData } from "@/features/effort-list/hooks/modules/useEffortListData";
+import { useEffortListProjects } from "@/features/effort-list/hooks/modules/useEffortListProjects";
 import type {
   EffortListEntry,
   EffortSortColumn,
@@ -28,6 +29,11 @@ const SORT_COLUMN_MAP: Record<EffortSortColumn, string> = {
   difference: "diff",
 };
 
+/**
+ * 工数一覧テーブルの状態とフィルタ操作を提供します。
+ *
+ * @returns フィルタ入力値・テーブルデータ・操作ハンドラ一式
+ */
 export function useEffortList() {
   const filters: EffortListFiltersState = useEffortListFilters();
 
@@ -68,55 +74,15 @@ export function useEffortList() {
     return data.items.map(mapWorkRecordToEntry);
   }, [data?.items]);
 
-  const projectOptions = useMemo(() => {
-    const map = new Map<number, string>();
-    for (const entry of entries) {
-      if (!map.has(entry.projectId)) {
-        map.set(entry.projectId, entry.project);
-      }
-    }
-    return Array.from(map.entries())
-      .map(([id, name]) => ({ id, name }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }, [entries]);
-
-  const taskOptions = useMemo(() => {
-    const projectTaskMap = new Map<number, Map<number, string>>();
-    for (const entry of entries) {
-      if (!projectTaskMap.has(entry.projectId)) {
-        projectTaskMap.set(entry.projectId, new Map());
-      }
-      projectTaskMap.get(entry.projectId)?.set(entry.taskId, entry.task);
-    }
-
-    const parsedProjectId: number = filters.tempFilterProject
+  const parsedProjectId: number | undefined =
+    filters.tempFilterProject &&
+    filters.tempFilterProject !== ALL_OPTION &&
+    !Number.isNaN(Number(filters.tempFilterProject))
       ? Number(filters.tempFilterProject)
-      : Number.NaN;
-    const selectedProjectId: number | null =
-      !filters.tempFilterProject ||
-      filters.tempFilterProject === ALL_OPTION ||
-      Number.isNaN(parsedProjectId)
-        ? null
-        : parsedProjectId;
+      : undefined;
 
-    const source: [number, string][] =
-      selectedProjectId === null
-        ? Array.from(
-            entries.reduce((map, entry) => {
-              if (!map.has(entry.taskId)) {
-                map.set(entry.taskId, entry.task);
-              }
-              return map;
-            }, new Map<number, string>()),
-          )
-        : Array.from(
-            projectTaskMap.get(selectedProjectId) ?? new Map<number, string>(),
-          );
-
-    return source
-      .map(([id, name]) => ({ id, name }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }, [entries, filters.tempFilterProject]);
+  const { projectOptions, taskOptions, isLoading: isProjectLoading } =
+    useEffortListProjects(parsedProjectId);
 
   const totalPages: number = data?.meta.totalPages ?? 1;
   const totalCount: number = data?.meta.total ?? entries.length;
@@ -152,6 +118,7 @@ export function useEffortList() {
     setTempFilterTask: filters.setTempFilterTask,
     projectOptions,
     taskOptions,
+    isProjectOptionsLoading: isProjectLoading,
     applyFilters: filters.applyFilters,
     clearFilters: filters.clearFilters,
     ALL_OPTION,
@@ -170,6 +137,13 @@ export function useEffortList() {
   };
 }
 
+/**
+ * 画面上のソート指定を API クエリ形式へ変換します。
+ *
+ * @param column UI で選択されたソート対象
+ * @param direction 昇順/降順
+ * @returns API に送信するソートキー
+ */
 function mapSortToApi(
   column: EffortSortColumn | null,
   direction: EffortSortDirection,
@@ -184,6 +158,12 @@ function mapSortToApi(
   return `${direction === "desc" ? "-" : ""}${apiField}` as WorkRecordSort;
 }
 
+/**
+ * API レスポンスのワークレコードを一覧用の表示データへ成形します。
+ *
+ * @param record API から取得した工数レコード
+ * @returns テーブル表示用エントリ
+ */
 function mapWorkRecordToEntry(record: {
   id: number;
   date: string;
