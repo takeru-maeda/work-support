@@ -67,6 +67,17 @@ export const updateUserSettings = async (
 };
 
 /**
+ * ユーザー設定が存在しない場合は作成し、必ず設定を返します。
+ *
+ * @returns 取得または作成したユーザー設定
+ */
+export const ensureUserSettings = async (): Promise<UserSettings> => {
+  const existing: UserSettings | null = await getUserSettings();
+  if (existing) return existing;
+  return createUserSettings();
+};
+
+/**
  * ユーザー設定を SWR で取得します。
  *
  * @param config SWR の設定

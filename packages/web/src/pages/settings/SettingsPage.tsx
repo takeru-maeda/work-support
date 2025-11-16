@@ -5,44 +5,37 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { reportUiError } from "@/services/logs";
-import {
-  createUserSettings,
-  getUserSettings,
-  updateUserSettings,
-} from "@/services/userSettings";
+import { updateUserSettings } from "@/services/userSettings";
+import { shallow } from "zustand/shallow";
 import { SettingsCard } from "./components/SettingsCard";
 import type { UserSettings } from "@shared/schemas/userSettings";
+import { useUserSettingsStore } from "@/store/userSettings";
 
 export default function SettingsPage() {
+  const { settings, initialized, setSettings } = useUserSettingsStore(
+    (state) => ({
+      settings: state.settings,
+      initialized: state.initialized,
+      setSettings: state.setSettings,
+    }),
+    shallow,
+  );
   const [emailNotification, setEmailNotification] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const settings: UserSettings | null = await getUserSettings();
-        if (settings) {
-          setEmailNotification(settings.notify_effort_email);
-        } else {
-          const created: UserSettings = await createUserSettings();
-          setEmailNotification(created.notify_effort_email);
-        }
-      } catch (error) {
-        setErrorMessage(
-          "設定の取得に失敗しました。時間を空けて再度お試しください。",
-        );
-        await reportUiError(error, {
-          message: "Failed to fetch user settings",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    void fetchSettings();
-  }, []);
+    if (settings) {
+      setEmailNotification(settings.notify_effort_email);
+      setErrorMessage(null);
+      return;
+    }
+    if (initialized && !settings) {
+      setErrorMessage(
+        "設定の取得に失敗しました。時間を空けて再度お試しください。",
+      );
+    }
+  }, [initialized, settings]);
 
   const handleToggle = async (checked: boolean) => {
     setErrorMessage(null);
@@ -51,7 +44,8 @@ export default function SettingsPage() {
     setIsSaving(true);
 
     try {
-      await updateUserSettings(checked);
+      const updated: UserSettings = await updateUserSettings(checked);
+      setSettings(updated);
     } catch (error) {
       setEmailNotification(previousValue);
       setErrorMessage(
@@ -65,6 +59,9 @@ export default function SettingsPage() {
       setIsSaving(false);
     }
   };
+
+  const isLoading: boolean = !initialized;
+  const disabled: boolean = isLoading || isSaving || !settings;
 
   return (
     <PageLayout pageTitle="設定" pageDescription="アプリケーションの設定を管理">
@@ -91,7 +88,7 @@ export default function SettingsPage() {
               id="email-notification"
               checked={emailNotification}
               onCheckedChange={handleToggle}
-              disabled={isLoading || isSaving}
+              disabled={disabled}
             />
           </div>
         </SettingsCard>

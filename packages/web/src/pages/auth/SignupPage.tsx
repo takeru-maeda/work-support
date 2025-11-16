@@ -11,8 +11,6 @@ import { signup, type AuthResult } from "@/lib/auth";
 import { AuthBrand } from "@/features/auth/components/AuthBrand";
 import { AuthErrorAlert } from "@/features/auth/components/AuthErrorAlert";
 import { AuthPageContainer } from "@/features/auth/components/AuthPageContainer";
-import { createUserSettings } from "@/services/userSettings";
-import { reportUiError } from "@/services/logs";
 import { showSuccessToast } from "@/lib/toast";
 import { PasswordInput } from "@/features/auth/components/PasswordInput";
 
@@ -44,13 +42,6 @@ export default function SignupPage() {
     const result: AuthResult = await signup(name, email, password);
 
     if (result.success) {
-      try {
-        await createUserSettings();
-      } catch (createError) {
-        reportUiError(createError, {
-          message: "Failed to initialize user settings",
-        });
-      }
       showSuccessToast(
         "確認メールをお送りしました。メール内の手順に従ってアカウントを有効化してください。",
       );
