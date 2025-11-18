@@ -80,7 +80,7 @@ CREATE TABLE goal_progress_histories (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     goal_id BIGINT NOT NULL REFERENCES goals(id) ON DELETE CASCADE,
     progress NUMERIC(5, 2) NOT NULL CHECK (progress >= 0 AND progress <= 100),
-    recorded_at DATE NOT NULL
+    recorded_at TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE access_logs (

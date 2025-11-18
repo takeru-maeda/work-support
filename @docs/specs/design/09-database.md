@@ -154,7 +154,7 @@ JOIN projects AS p ON p.id = t.project_id;
 | `id` | BIGINT | PK | N | Y | 識別子 | |
 | `goal_id` | BIGINT | FK | N | N | `goals.id` への参照 (削除時はCASCADE) | |
 | `progress` | NUMERIC(5, 2) | | N | N | 記録時の進捗率 (0-100) | `CHECK (progress >= 0 AND progress <= 100)` |
-| `recorded_at`| DATE | | N | N | 記録日 | |
+| `recorded_at`| TIMESTAMPTZ | | N | N | 記録日時 | |
 
 ### `access_logs` (アクセスログ)
 

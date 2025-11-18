@@ -1,4 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
+import dayjs from "dayjs";
+
 import {
   Database,
   Tables,
@@ -238,11 +240,12 @@ export const getGoalProgressHistoriesUntil = async (
   userId: string,
   endDate: string,
 ): Promise<GoalProgressHistoryMini[]> => {
+  const endDateTime: string = dayjs(endDate).endOf("day").toISOString();
   const { data, error } = await supabase
     .from("goal_progress_histories")
     .select("goal_id, progress, recorded_at, goals!inner(user_id)")
     .eq("goals.user_id", userId)
-    .lte("recorded_at", endDate)
+    .lte("recorded_at", endDateTime)
     .order("goal_id", { ascending: true })
     .order("recorded_at", { ascending: false });
 
