@@ -75,7 +75,7 @@ export function CommandFilterSelect({
       <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
         <Command>
           <CommandInput placeholder={`${placeholder}を検索...`} />
-          <CommandList>
+          <CommandList className="max-h-[calc(30vh)]">
             <CommandEmpty>
               {isLoading ? "読み込み中です..." : "候補が見つかりません"}
             </CommandEmpty>
