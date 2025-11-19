@@ -12,8 +12,10 @@ import TableAndFooterSkeleton from "@/components/skeleton/TableAndFooterSkeleton
 
 export default function EffortsPage(): JSX.Element {
   const {
-    tempFilterDate,
-    setTempFilterDate,
+    tempFilterStartDate,
+    setTempFilterStartDate,
+    tempFilterEndDate,
+    setTempFilterEndDate,
     tempFilterProject,
     setTempFilterProject,
     tempFilterTask,
@@ -44,8 +46,10 @@ export default function EffortsPage(): JSX.Element {
       pageDescription="登録された工数データの確認と検索"
     >
       <EffortsFilterPanel
-        date={tempFilterDate}
-        onDateChange={setTempFilterDate}
+        startDate={tempFilterStartDate}
+        endDate={tempFilterEndDate}
+        onStartDateChange={setTempFilterStartDate}
+        onEndDateChange={setTempFilterEndDate}
         projectValue={tempFilterProject}
         onProjectChange={(value) =>
           setTempFilterProject(value === ALL_OPTION ? undefined : value)
@@ -102,7 +106,7 @@ export default function EffortsPage(): JSX.Element {
             itemsPerPage={itemsPerPage}
             onPageChange={setCurrentPage}
             onItemsPerPageChange={handleItemsPerPageChange}
-            itemsPerPageOptions={[10, 20, 50, 100]}
+            itemsPerPageOptions={[10, 20, 50, 100, 200, 500]}
           />
         </div>
       )}

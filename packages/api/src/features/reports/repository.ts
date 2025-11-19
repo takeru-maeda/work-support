@@ -179,8 +179,12 @@ export const getWorkRecordList = async (
     )
     .eq("user_id", userId);
 
-  if (query.date) {
-    builder = builder.eq("work_date", query.date);
+  if (query.startDate) {
+    builder = builder.gte("work_date", query.startDate);
+  }
+
+  if (query.endDate) {
+    builder = builder.lte("work_date", query.endDate);
   }
 
   if (query.projectId) {

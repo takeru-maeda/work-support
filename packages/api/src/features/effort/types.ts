@@ -1,3 +1,4 @@
+import { Tables } from "shared";
 import { z } from "zod";
 
 export type {
@@ -38,4 +39,14 @@ export interface ParsedEffort {
   taskName: string;
   estimated_hours: number | null;
   hours: number | null;
+}
+
+export interface ProjectCreationResult {
+  project: Tables<"projects">;
+  created: boolean;
+}
+
+export interface TaskCreationResult {
+  task: Tables<"tasks">;
+  created: boolean;
 }

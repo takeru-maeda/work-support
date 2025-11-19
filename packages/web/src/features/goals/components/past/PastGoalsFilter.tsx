@@ -48,7 +48,7 @@ export function PastGoalsFilter({
             placeholder="目標で絞り込み"
             value={titleValue}
             onChange={(event) => onTitleChange(event.target.value)}
-            className="w-full text-sm"
+            className="w-full text-sm h-8"
           />
         </div>
         <GoalPeriodPicker

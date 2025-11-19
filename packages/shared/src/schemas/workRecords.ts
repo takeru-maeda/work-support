@@ -15,14 +15,31 @@ export const WorkRecordSortSchema = z.enum([
   "-diff",
 ]);
 
-export const WorkRecordListQuerySchema = z.object({
-  date: z.iso.date().optional(),
-  projectId: z.coerce.number().int().optional(),
-  taskId: z.coerce.number().int().optional(),
-  sort: WorkRecordSortSchema.optional().default("-date"),
-  page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(100).default(20),
-});
+export const WorkRecordListQuerySchema = z
+  .object({
+    startDate: z.iso.date().optional(),
+    endDate: z.iso.date().optional(),
+    projectId: z.coerce.number().int().optional(),
+    taskId: z.coerce.number().int().optional(),
+    sort: WorkRecordSortSchema.optional().default("-date"),
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(500).default(20),
+  })
+  .superRefine((value, ctx) => {
+    if (value.startDate && value.endDate) {
+      const start = new Date(value.startDate);
+      const end = new Date(value.endDate);
+      if (!Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime())) {
+        if (start > end) {
+          ctx.addIssue({
+            code: "custom",
+            message: "startDate must be before or equal to endDate",
+            path: ["endDate"],
+          });
+        }
+      }
+    }
+  });
 
 export const WorkRecordItemSchema = z.object({
   id: z.number(),

@@ -13,7 +13,9 @@ const DEFAULT_SORT_DIRECTION: EffortSortDirection = "desc";
 const DEFAULT_ITEMS_PER_PAGE = 10;
 
 interface StoredEffortFilters {
-  date?: string | null;
+  date?: string | null; // legacy single-date storage
+  startDate?: string | null;
+  endDate?: string | null;
   projectId?: number | null;
   taskId?: number | null;
   sortColumn?: EffortSortColumn | null;
@@ -22,13 +24,16 @@ interface StoredEffortFilters {
 }
 
 export interface EffortListFiltersState {
-  tempFilterDate?: Date;
-  setTempFilterDate: (date: Date | undefined) => void;
+  tempFilterStartDate?: Date;
+  setTempFilterStartDate: (date: Date | undefined) => void;
+  tempFilterEndDate?: Date;
+  setTempFilterEndDate: (date: Date | undefined) => void;
   tempFilterProject?: string;
   setTempFilterProject: (value: string | undefined) => void;
   tempFilterTask?: string;
   setTempFilterTask: (value: string | undefined) => void;
-  filterDate?: Date;
+  filterStartDate?: Date;
+  filterEndDate?: Date;
   filterProject?: number;
   filterTask?: number;
   sortColumn: EffortSortColumn | null;
@@ -47,13 +52,19 @@ export const useEffortListFilters = (): EffortListFiltersState => {
   const storageKey: string = getEffortListFilterStorageKey();
   const [filtersInitialized, setFiltersInitialized] = useState<boolean>(false);
 
-  const [filterDate, setFilterDate] = useState<Date | undefined>();
+  const [filterStartDate, setFilterStartDate] = useState<Date | undefined>();
+  const [filterEndDate, setFilterEndDate] = useState<Date | undefined>();
   const [filterProject, setFilterProject] = useState<number | undefined>(
     undefined,
   );
   const [filterTask, setFilterTask] = useState<number | undefined>();
 
-  const [tempFilterDate, setTempFilterDate] = useState<Date | undefined>();
+  const [tempFilterStartDate, setTempFilterStartDate] = useState<
+    Date | undefined
+  >();
+  const [tempFilterEndDate, setTempFilterEndDate] = useState<
+    Date | undefined
+  >();
   const [tempFilterProject, setTempFilterProject] = useState<
     string | undefined
   >(undefined);
@@ -88,11 +99,16 @@ export const useEffortListFilters = (): EffortListFiltersState => {
 
     try {
       const parsed = JSON.parse(raw) as StoredEffortFilters;
-      const date: Date | undefined = parsed.date
-        ? new Date(parsed.date)
+      const start: Date | undefined = parsed.startDate
+        ? new Date(parsed.startDate)
         : undefined;
-      setFilterDate(date);
-      setTempFilterDate(date);
+      const end: Date | undefined = parsed.endDate
+        ? new Date(parsed.endDate)
+        : undefined;
+      setFilterStartDate(start);
+      setTempFilterStartDate(start);
+      setFilterEndDate(end);
+      setTempFilterEndDate(end);
 
       const projectId: number | undefined =
         typeof parsed.projectId === "number" ? parsed.projectId : undefined;
@@ -120,7 +136,10 @@ export const useEffortListFilters = (): EffortListFiltersState => {
     if (!filtersInitialized || typeof window === "undefined") return;
 
     const stored: StoredEffortFilters = {
-      date: filterDate ? dayjs(filterDate).format("YYYY-MM-DD") : null,
+      startDate: filterStartDate
+        ? dayjs(filterStartDate).format("YYYY-MM-DD")
+        : null,
+      endDate: filterEndDate ? dayjs(filterEndDate).format("YYYY-MM-DD") : null,
       projectId: filterProject ?? null,
       taskId: filterTask ?? null,
       sortColumn,
@@ -130,7 +149,8 @@ export const useEffortListFilters = (): EffortListFiltersState => {
 
     window.localStorage.setItem(storageKey, JSON.stringify(stored));
   }, [
-    filterDate,
+    filterStartDate,
+    filterEndDate,
     filterProject,
     filterTask,
     filtersInitialized,
@@ -147,17 +167,35 @@ export const useEffortListFilters = (): EffortListFiltersState => {
       return Number.isFinite(parsed) ? parsed : undefined;
     };
 
-    setFilterDate(tempFilterDate);
+    let nextStart: Date | undefined = tempFilterStartDate;
+    let nextEnd: Date | undefined = tempFilterEndDate;
+    if (nextStart && nextEnd && nextStart.getTime() > nextEnd.getTime()) {
+      const swap = nextStart;
+      nextStart = nextEnd;
+      nextEnd = swap;
+      setTempFilterStartDate(nextStart);
+      setTempFilterEndDate(nextEnd);
+    }
+
+    setFilterStartDate(nextStart);
+    setFilterEndDate(nextEnd);
     setFilterProject(toId(tempFilterProject));
     setFilterTask(toId(tempFilterTask));
     setCurrentPage(1);
-  }, [tempFilterDate, tempFilterProject, tempFilterTask]);
+  }, [
+    tempFilterEndDate,
+    tempFilterProject,
+    tempFilterStartDate,
+    tempFilterTask,
+  ]);
 
   const clearFilters = useCallback(() => {
-    setTempFilterDate(undefined);
+    setTempFilterStartDate(undefined);
+    setTempFilterEndDate(undefined);
     setTempFilterProject(undefined);
     setTempFilterTask(undefined);
-    setFilterDate(undefined);
+    setFilterStartDate(undefined);
+    setFilterEndDate(undefined);
     setFilterProject(undefined);
     setFilterTask(undefined);
     setSortColumn(DEFAULT_SORT_COLUMN);
@@ -191,13 +229,16 @@ export const useEffortListFilters = (): EffortListFiltersState => {
   );
 
   return {
-    tempFilterDate,
-    setTempFilterDate,
+    tempFilterStartDate,
+    setTempFilterStartDate,
+    tempFilterEndDate,
+    setTempFilterEndDate,
     tempFilterProject,
     setTempFilterProject,
     tempFilterTask,
     setTempFilterTask,
-    filterDate,
+    filterStartDate,
+    filterEndDate,
     filterProject,
     filterTask,
     sortColumn,

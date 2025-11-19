@@ -255,3 +255,26 @@ JOIN projects AS p ON p.id = t.project_id;
     *   `access_log_id`: 親となるアクセスログからエラーログを引くため。
 *   **`user_settings`**
     *   `user_id`【ユニークインデックス】: ユーザーと設定を1対1に紐付けるため。
+  
+### マテリアライズドビュー: `projects_with_tasks_mv`
+
+ユーザーごとの案件およびタスクの候補を高速に取得するため、`projects` と `tasks` を結合したマテリアライズドビューを作成する。
+
+```sql
+CREATE MATERIALIZED VIEW projects_with_tasks_mv AS
+SELECT
+  p.user_id,
+  p.id AS project_id,
+  p.name AS project_name,
+  p.created_at AS project_created_at,
+  t.id AS task_id,
+  t.name AS task_name,
+  t.created_at AS task_created_at
+FROM projects AS p
+LEFT JOIN tasks AS t ON t.project_id = p.id;
+```
+
+- `GET /api/projects` からはこのビューを参照する。
+- ビューには `user_id`、`project_id` にそれぞれ B-Tree インデックスを付与し、さらに `UNIQUE (user_id, project_id, task_id)`（`task_id` が `NULL` の場合は `COALESCE` でダミー値に変換）を設定して `REFRESH MATERIALIZED VIEW CONCURRENTLY` が利用できるようにする。
+- `projects` または `tasks` に新規レコードが作成された場合（`POST /api/effort/entries` で案件／タスクを新規登録するケース）には同フロー内で `REFRESH MATERIALIZED VIEW CONCURRENTLY projects_with_tasks_mv` を実行し、ビューの内容を最新化する。これにより API が常に最新の案件・タスク情報を返せる。
+- 既存の `projects`/`tasks` テーブルに対する INSERT 以外の操作が行われない場合、バッチ更新ではなくオンデマンド更新で十分である。

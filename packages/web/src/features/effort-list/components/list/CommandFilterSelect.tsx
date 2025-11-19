@@ -57,7 +57,7 @@ export function CommandFilterSelect({
         <Button
           variant="outline"
           role="combobox"
-          className="w-full justify-between flex-1"
+          className="w-full justify-between flex-1 h-8"
         >
           <span
             className={cn(

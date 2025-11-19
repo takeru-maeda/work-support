@@ -71,7 +71,7 @@ export function EffortCombobox({
           className={cn(
             "w-full justify-between bg-transparent",
             isError &&
-              "border-destructive-foreground dark:border-destructive-foreground",
+              "border-destructive-foreground dark:border-destructive-foreground h-8",
           )}
           disabled={disabled}
         >

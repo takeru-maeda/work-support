@@ -41,8 +41,11 @@ export function useEffortList() {
     if (!filters.filtersInitialized) return null;
 
     return {
-      date: filters.filterDate
-        ? format(filters.filterDate, "yyyy-MM-dd")
+      startDate: filters.filterStartDate
+        ? format(filters.filterStartDate, "yyyy-MM-dd")
+        : undefined,
+      endDate: filters.filterEndDate
+        ? format(filters.filterEndDate, "yyyy-MM-dd")
         : undefined,
       projectId: filters.filterProject,
       taskId: filters.filterTask,
@@ -52,7 +55,8 @@ export function useEffortList() {
     };
   }, [
     filters.currentPage,
-    filters.filterDate,
+    filters.filterStartDate,
+    filters.filterEndDate,
     filters.filterProject,
     filters.filterTask,
     filters.filtersInitialized,
@@ -105,13 +109,16 @@ export function useEffortList() {
   };
 
   const hasActiveFilters: boolean =
-    Boolean(filters.filterDate) ||
+    Boolean(filters.filterStartDate) ||
+    Boolean(filters.filterEndDate) ||
     filters.filterProject !== undefined ||
     filters.filterTask !== undefined;
 
   return {
-    tempFilterDate: filters.tempFilterDate,
-    setTempFilterDate: filters.setTempFilterDate,
+    tempFilterStartDate: filters.tempFilterStartDate,
+    setTempFilterStartDate: filters.setTempFilterStartDate,
+    tempFilterEndDate: filters.tempFilterEndDate,
+    setTempFilterEndDate: filters.setTempFilterEndDate,
     tempFilterProject: filters.tempFilterProject,
     setTempFilterProject: filters.setTempFilterProject,
     tempFilterTask: filters.tempFilterTask,

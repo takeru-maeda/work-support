@@ -8,7 +8,13 @@ import { AppError } from "../../lib/errors";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { ParsedEffort } from "./types";
 import { Dayjs } from "dayjs";
-import type { EffortDraft, EffortDraftRecord, EffortEntry } from "./types";
+import type {
+  EffortDraft,
+  EffortDraftRecord,
+  EffortEntry,
+  ProjectCreationResult,
+  TaskCreationResult,
+} from "./types";
 
 /**
  * 案件を検索または作成します。
@@ -22,7 +28,7 @@ export async function findProject(
   supabase: SupabaseClient<Database>,
   userId: string,
   effort: ParsedEffort,
-): Promise<number> {
+): Promise<{ id: number; created: boolean }> {
   const { data: pj, error } = await supabase
     .from("projects")
     .select("id")
@@ -48,10 +54,10 @@ export async function findProject(
       const message = `Failed to create project: ${insertError.message}`;
       throw new AppError(500, message, insertError);
     }
-    return newPj.id;
+    return { id: newPj.id, created: true };
   }
 
-  return pj.id;
+  return { id: pj.id, created: false };
 }
 
 /**
@@ -66,7 +72,7 @@ export async function findOrCreateTask(
   supabase: SupabaseClient<Database>,
   projectId: number,
   taskName: string,
-): Promise<number> {
+): Promise<{ id: number; created: boolean }> {
   let { data: task, error } = await supabase
     .from("tasks")
     .select("id")
@@ -92,10 +98,10 @@ export async function findOrCreateTask(
       const message = `Failed to create task: ${insertError.message}`;
       throw new AppError(500, message, insertError);
     }
-    return newTask.id;
+    return { id: newTask.id, created: true };
   }
 
-  return task.id;
+  return { id: task.id, created: false };
 }
 
 /**
@@ -205,7 +211,7 @@ export const createProject = async (
   supabase: SupabaseClient<Database>,
   userId: string,
   name: string,
-): Promise<Tables<"projects">> => {
+): Promise<ProjectCreationResult> => {
   const { data, error } = await supabase
     .from("projects")
     .insert({ user_id: userId, name })
@@ -219,13 +225,13 @@ export const createProject = async (
         userId,
         name,
       );
-      if (existing) return existing;
+      if (existing) return { project: existing, created: false };
     }
     const message = `Failed to create project: ${error?.message}`;
     throw new AppError(500, message, error);
   }
 
-  return data;
+  return { project: data, created: true };
 };
 
 /**
@@ -268,7 +274,7 @@ export const createTask = async (
   supabase: SupabaseClient<Database>,
   projectId: number,
   name: string,
-): Promise<Tables<"tasks">> => {
+): Promise<TaskCreationResult> => {
   const { data, error } = await supabase
     .from("tasks")
     .insert({ project_id: projectId, name })
@@ -282,13 +288,13 @@ export const createTask = async (
         projectId,
         name,
       );
-      if (existing) return existing;
+      if (existing) return { task: existing, created: false };
     }
     const message = `Failed to create task: ${error?.message}`;
     throw new AppError(500, message, error);
   }
 
-  return data;
+  return { task: data, created: true };
 };
 
 /**
@@ -317,6 +323,21 @@ export const getTaskByName = async (
   }
 
   return data;
+};
+
+/**
+ * projects_with_tasks_mv を更新します。
+ *
+ * @param supabase Supabaseクライアント
+ */
+export const refreshProjectsWithTasksView = async (
+  supabase: SupabaseClient<Database>,
+): Promise<void> => {
+  const { error } = await supabase.rpc("refresh_projects_with_tasks_mv");
+  if (error) {
+    const message = `Failed to refresh projects_with_tasks_mv: ${error.message}`;
+    throw new AppError(500, message, error);
+  }
 };
 
 /**
@@ -436,8 +457,8 @@ export const deleteWorkEntryDraft = async (
   }
 };
 
-/** 
- * ドラフトのエントリを JSON に変換します。 
+/**
+ * ドラフトのエントリを JSON に変換します。
  */
 const draftEntriesToJson = (draft: EffortDraft): Json => {
   return {
@@ -446,8 +467,8 @@ const draftEntriesToJson = (draft: EffortDraft): Json => {
   } as unknown as Json;
 };
 
-/** 
- * ドラフトの行をパースします。 
+/**
+ * ドラフトの行をパースします。
  */
 const parseDraftRow = (row: Tables<"work_entry_drafts">): EffortDraftRecord => {
   const payload = row.entries as {

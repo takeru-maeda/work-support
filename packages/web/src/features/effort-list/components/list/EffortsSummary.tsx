@@ -61,29 +61,45 @@ export function EffortsSummary({
   );
 }
 
-function calculateTotals(entries: EffortListEntry[]): {
+function calculateTotals(
+  entries: EffortListEntry[],
+): {
   estimated: number;
   actual: number;
   difference: number;
   hasEstimated: boolean;
 } {
-  return entries.reduce(
+  const totals = entries.reduce(
     (acc, entry) => {
+      const actualHours: number = entry.actualHours;
+      acc.actual += actualHours;
+
       if (entry.estimatedHours != null) {
         acc.estimated += entry.estimatedHours;
+        acc.actualWithEstimate += actualHours;
         acc.hasEstimated = true;
-        acc.difference += entry.actualHours - entry.estimatedHours;
-      } else {
-        acc.difference += entry.actualHours;
       }
-      acc.actual += entry.actualHours;
       return acc;
     },
-    { estimated: 0, actual: 0, difference: 0, hasEstimated: false } as {
+    {
+      estimated: 0,
+      actual: 0,
+      actualWithEstimate: 0,
+      hasEstimated: false,
+    } as {
       estimated: number;
       actual: number;
-      difference: number;
+      actualWithEstimate: number;
       hasEstimated: boolean;
     },
   );
+
+  return {
+    estimated: totals.estimated,
+    actual: totals.actual,
+    hasEstimated: totals.hasEstimated,
+    difference: totals.hasEstimated
+      ? totals.actualWithEstimate - totals.estimated
+      : 0,
+  };
 }

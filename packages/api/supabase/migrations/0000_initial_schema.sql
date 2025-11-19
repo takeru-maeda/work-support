@@ -123,6 +123,18 @@ CREATE TABLE user_settings (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE MATERIALIZED VIEW projects_with_tasks_mv AS
+SELECT
+    p.user_id,
+    p.id AS project_id,
+    p.name AS project_name,
+    p.created_at AS project_created_at,
+    t.id AS task_id,
+    t.name AS task_name,
+    t.created_at AS task_created_at
+FROM projects AS p
+LEFT JOIN tasks AS t ON t.project_id = p.id;
+
 CREATE INDEX projects_user_id_idx ON projects (user_id);
 CREATE INDEX tasks_project_id_idx ON tasks (project_id);
 CREATE INDEX work_records_user_id_work_date_idx ON work_records (user_id, work_date);
@@ -136,3 +148,15 @@ CREATE INDEX access_logs_status_code_idx ON access_logs (status_code);
 CREATE INDEX info_logs_access_log_id_idx ON info_logs (access_log_id);
 CREATE INDEX error_logs_access_log_id_idx ON error_logs (access_log_id);
 CREATE UNIQUE INDEX user_settings_user_id_idx ON user_settings (user_id);
+CREATE INDEX projects_with_tasks_mv_user_id_idx ON projects_with_tasks_mv (user_id);
+CREATE INDEX projects_with_tasks_mv_project_id_idx ON projects_with_tasks_mv (project_id);
+CREATE UNIQUE INDEX projects_with_tasks_mv_unique_idx
+ON projects_with_tasks_mv (user_id, project_id, COALESCE(task_id, -1));
+
+CREATE OR REPLACE FUNCTION refresh_projects_with_tasks_mv()
+RETURNS void
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  REFRESH MATERIALIZED VIEW CONCURRENTLY projects_with_tasks_mv;
+$$;

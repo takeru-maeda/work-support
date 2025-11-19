@@ -266,6 +266,13 @@ export type Database = {
             referencedRelation: "projects";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "tasks_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "projects_with_tasks_mv";
+            referencedColumns: ["project_id"];
+          },
         ];
       };
       user_settings: {
@@ -349,6 +356,13 @@ export type Database = {
             foreignKeyName: "work_records_task_id_fkey";
             columns: ["task_id"];
             isOneToOne: false;
+            referencedRelation: "projects_with_tasks_mv";
+            referencedColumns: ["task_id"];
+          },
+          {
+            foreignKeyName: "work_records_task_id_fkey";
+            columns: ["task_id"];
+            isOneToOne: false;
             referencedRelation: "tasks";
             referencedColumns: ["id"];
           },
@@ -356,6 +370,18 @@ export type Database = {
       };
     };
     Views: {
+      projects_with_tasks_mv: {
+        Row: {
+          project_created_at: string | null;
+          project_id: number | null;
+          project_name: string | null;
+          task_created_at: string | null;
+          task_id: number | null;
+          task_name: string | null;
+          user_id: string | null;
+        };
+        Relationships: [];
+      };
       work_record_diffs: {
         Row: {
           created_at: string | null;
@@ -379,6 +405,20 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "tasks_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "projects_with_tasks_mv";
+            referencedColumns: ["project_id"];
+          },
+          {
+            foreignKeyName: "work_records_task_id_fkey";
+            columns: ["task_id"];
+            isOneToOne: false;
+            referencedRelation: "projects_with_tasks_mv";
+            referencedColumns: ["task_id"];
+          },
+          {
             foreignKeyName: "work_records_task_id_fkey";
             columns: ["task_id"];
             isOneToOne: false;
@@ -389,7 +429,7 @@ export type Database = {
       };
     };
     Functions: {
-      [_ in never]: never;
+      refresh_projects_with_tasks_mv: { Args: never; Returns: undefined };
     };
     Enums: {
       log_level: "DEBUG" | "INFO" | "WARNING" | "ERROR" | "CRITICAL";

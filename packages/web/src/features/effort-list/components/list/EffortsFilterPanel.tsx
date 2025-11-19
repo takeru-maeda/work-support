@@ -6,8 +6,10 @@ import { CommandFilterSelect } from "@/features/effort-list/components/list/Comm
 import type { JSX } from "react";
 
 interface EffortsFilterPanelProps {
-  date: Date | undefined;
-  onDateChange: (date: Date | undefined) => void;
+  startDate: Date | undefined;
+  endDate: Date | undefined;
+  onStartDateChange: (date: Date | undefined) => void;
+  onEndDateChange: (date: Date | undefined) => void;
   projectValue: string | undefined;
   onProjectChange: (value: string) => void;
   taskValue: string | undefined;
@@ -24,8 +26,10 @@ interface EffortsFilterPanelProps {
 }
 
 export function EffortsFilterPanel({
-  date,
-  onDateChange,
+  startDate,
+  endDate,
+  onStartDateChange,
+  onEndDateChange,
   projectValue,
   onProjectChange,
   taskValue,
@@ -48,11 +52,16 @@ export function EffortsFilterPanel({
     >
       <div className="space-y-3 pt-2">
         <div className="flex flex-col gap-2 sm:gap-3 sm:flex-row">
-          <div className="w-full shrink-0 sm:w-[150px]">
+          <div className="flex items-center space-x-2 sm:space-x-2">
             <DatePicker
-              date={date}
-              onDateChange={onDateChange}
-              placeholder="日付を選択"
+              date={startDate}
+              onDateChange={onStartDateChange}
+              placeholder="開始日"
+            />
+            <DatePicker
+              date={endDate}
+              onDateChange={onEndDateChange}
+              placeholder="終了日"
             />
           </div>
 

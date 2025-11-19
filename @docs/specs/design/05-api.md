@@ -18,7 +18,7 @@
 | `GET` | `/api/goals/progress/previous-week` | JWT | **前週進捗取得**: 前週末時点の最新進捗率を取得する。 |
 | `GET` | `/api/missions` | JWT | **ミッション取得**: 現在のミッションを取得する。 |
 | `PUT` | `/api/missions` | JWT | **ミッション更新**: ミッションを更新する。 |
-| `GET` | `/api/reports/work-records` | JWT | **工数一覧取得**: 工数一覧画面向けに工数データを取得する。日付・案件・タスクによる絞り込み、および日付・案件・タスク・見積・実績・差分での並び替えに対応する。 |
+| `GET` | `/api/reports/work-records` | JWT | **工数一覧取得**: 工数一覧画面向けに工数データを取得する。期間（開始日・終了日）・案件・タスクによる絞り込み、および日付・案件・タスク・見積・実績・差分での並び替えに対応する。 |
 | `GET` | `/api/reports/weekly` | JWT | **週報生成**: 指定された日付 (`?date=YYYY-MM-DD`) が属する週の月曜〜金曜の週報データを生成して返す。 |
 | `GET` | `/api/user-settings` | JWT | **ユーザー設定取得**: 認証ユーザーの設定を取得する。 |
 | `POST` | `/api/user-settings` | JWT | **ユーザー設定作成**: 新規ユーザーの通知設定を登録する。 |
@@ -196,7 +196,7 @@
 
 ### GET /api/projects
 
-**Description:** ユーザーに紐づく案件と関連タスクを取得します
+**Description:** ユーザーに紐づく案件と関連タスクを取得します。`projects_with_tasks_mv` マテリアライズドビューから読み出し、最新の案件・タスク情報を返します（`POST /api/effort/entries` で新規案件／タスクが作成された場合は同フロー内でビューを更新してから取得する）。
 
 **Responses:**
 
@@ -633,7 +633,8 @@
 
 **Query Parameters:**
 
-- `date` (string (date), optional) — 絞り込み対象の日付。指定すると該当日付の工数のみを返す。
+- `startDate` (string (date), optional) — 絞り込み対象期間の開始日。指定するとこの日付以降の工数のみを返す。
+- `endDate` (string (date), optional) — 絞り込み対象期間の終了日。指定するとこの日付以前の工数のみを返す。
 - `projectId` (number, optional) — 案件 ID。完全一致で絞り込む。
 - `taskId` (number, optional) — タスク ID。完全一致で絞り込む。
 - `sort` (string, optional) — 並び順を指定。以下の値を想定：
@@ -645,6 +646,8 @@
   - `diff`, `-diff`
 - `page` (number, optional, default: `1`) — ページ番号（1始まり）。
 - `pageSize` (number, optional, default: `20`, max: `100`) — 1ページ当たり件数。
+
+> **Note:** `startDate` と `endDate` はどちらか一方のみ指定してもよい。両方指定した場合は包括的な期間フィルタとして扱う。
 
 **Responses:**
 

@@ -14,6 +14,7 @@ import {
   getWorkEntryDraftByUser,
   insertWorkEntryDraft,
   insertWorkRecord,
+  refreshProjectsWithTasksView,
   updateWorkEntryDraft,
 } from "./repository";
 import { Dayjs } from "dayjs";
@@ -62,6 +63,7 @@ export async function saveEffortRecords(
 ): Promise<void> {
   const projectCache: Record<string, number> = {};
   const taskCache: Record<string, number> = {};
+  let shouldRefreshProjectsView = false;
 
   const parsedEfforts: ParsedEffort[] = parseEffortText(effortText);
   if (!parsedEfforts.length) {
@@ -69,13 +71,37 @@ export async function saveEffortRecords(
   }
 
   for (const effort of parsedEfforts) {
-    const projectId: number = (projectCache[effort.project_name] ??=
-      await findProject(supabase, userId, effort));
+    const projectKey: string = effort.project_name.toLowerCase();
+    let projectId: number | undefined = projectCache[projectKey];
+    if (projectId === undefined) {
+      const projectResult = await findProject(supabase, userId, effort);
+      projectId = projectResult.id;
+      projectCache[projectKey] = projectId;
+      if (projectResult.created) {
+        shouldRefreshProjectsView = true;
+      }
+    }
 
-    const taskId: number = (taskCache[effort.taskName] ??=
-      await findOrCreateTask(supabase, projectId, effort.taskName));
+    const taskKeyCache: string = taskKey(projectId, effort.taskName);
+    let taskId: number | undefined = taskCache[taskKeyCache];
+    if (taskId === undefined) {
+      const taskResult = await findOrCreateTask(
+        supabase,
+        projectId,
+        effort.taskName,
+      );
+      taskId = taskResult.id;
+      taskCache[taskKeyCache] = taskId;
+      if (taskResult.created) {
+        shouldRefreshProjectsView = true;
+      }
+    }
 
     await insertWorkRecord(supabase, userId, taskId, workDate, effort);
+  }
+
+  if (shouldRefreshProjectsView) {
+    await refreshProjectsWithTasksView(supabase);
   }
 }
 
@@ -108,13 +134,14 @@ export const saveStructuredEffortEntries = async (
   const taskCacheByName = new Map<string, Tables<"tasks">>();
 
   const savedRecords: StructuredEffortResult[] = [];
+  let shouldRefreshProjectsView = false;
 
   for (const entry of entries) {
     if (entry.estimated_hours != null && entry.estimated_hours < 0) {
       throw new AppError(400, "見積工数は0以上を指定してください。");
     }
 
-    const project: Tables<"projects"> = await resolveProject(
+    const projectResult: ResolvedProject = await resolveProject(
       supabase,
       userId,
       entry,
@@ -122,13 +149,20 @@ export const saveStructuredEffortEntries = async (
       projectCacheByName,
     );
 
-    const task: Tables<"tasks"> = await resolveTask(
+    const taskResult: ResolvedTask = await resolveTask(
       supabase,
-      project,
+      projectResult.project,
       entry,
       taskCacheById,
       taskCacheByName,
     );
+
+    if (projectResult.created || taskResult.created) {
+      shouldRefreshProjectsView = true;
+    }
+
+    const project: Tables<"projects"> = projectResult.project;
+    const task: Tables<"tasks"> = taskResult.task;
 
     const parsed: ParsedEffort = {
       project_name: project.name,
@@ -157,6 +191,10 @@ export const saveStructuredEffortEntries = async (
       estimated_hours: record.estimated_hours,
     })),
   };
+
+  if (shouldRefreshProjectsView) {
+    await refreshProjectsWithTasksView(supabase);
+  }
 
   return { savedRecords, response, date: workDate };
 };
@@ -329,8 +367,7 @@ export const buildEffortCompletionEmail = (
         projectActualWithEstimate += actual;
       }
 
-      const diffText =
-        estimated === null ? "" : formatDiff(actual - estimated);
+      const diffText = estimated === null ? "" : formatDiff(actual - estimated);
       lines.push(
         `・${item.task.name}`,
         `${INDENT}見積：${formatHoursOrDash(estimated)}   実績：${formatHoursValue(actual)}${diffText}`,
@@ -457,6 +494,16 @@ function parseTaskText(
   };
 }
 
+interface ResolvedProject {
+  project: Tables<"projects">;
+  created: boolean;
+}
+
+interface ResolvedTask {
+  task: Tables<"tasks">;
+  created: boolean;
+}
+
 /**
  * 案件を解決します。
  */
@@ -466,12 +513,12 @@ const resolveProject = async (
   entry: EffortEntry,
   cacheById: Map<number, Tables<"projects">>,
   cacheByName: Map<string, Tables<"projects">>,
-): Promise<Tables<"projects">> => {
+): Promise<ResolvedProject> => {
   if (entry.project_id !== null) {
     const cached: Tables<"projects"> | undefined = cacheById.get(
       entry.project_id,
     );
-    if (cached) return cached;
+    if (cached) return { project: cached, created: false };
 
     const project: Tables<"projects"> | null = await getProjectById(
       supabase,
@@ -483,7 +530,7 @@ const resolveProject = async (
     }
     cacheById.set(project.id, project);
     cacheByName.set(project.name.toLowerCase(), project);
-    return project;
+    return { project, created: false };
   }
 
   const name = entry.project_name?.trim();
@@ -493,7 +540,7 @@ const resolveProject = async (
 
   const key = name.toLowerCase();
   const cached: Tables<"projects"> | undefined = cacheByName.get(key);
-  if (cached) return cached;
+  if (cached) return { project: cached, created: false };
 
   const existing: Tables<"projects"> | null = await getProjectByName(
     supabase,
@@ -503,17 +550,17 @@ const resolveProject = async (
   if (existing) {
     cacheById.set(existing.id, existing);
     cacheByName.set(key, existing);
-    return existing;
+    return { project: existing, created: false };
   }
 
-  const created: Tables<"projects"> = await createProject(
+  const { project: createdProject, created } = await createProject(
     supabase,
     userId,
     name,
   );
-  cacheById.set(created.id, created);
-  cacheByName.set(key, created);
-  return created;
+  cacheById.set(createdProject.id, createdProject);
+  cacheByName.set(key, createdProject);
+  return { project: createdProject, created };
 };
 
 /**
@@ -525,7 +572,7 @@ const resolveTask = async (
   entry: EffortEntry,
   cacheById: Map<number, Tables<"tasks">>,
   cacheByName: Map<string, Tables<"tasks">>,
-): Promise<Tables<"tasks">> => {
+): Promise<ResolvedTask> => {
   if (typeof entry.hours !== "number" || Number.isNaN(entry.hours)) {
     throw new AppError(400, "工数の時間が不正です。");
   }
@@ -535,7 +582,7 @@ const resolveTask = async (
 
   if (entry.task_id !== null) {
     const cached: Tables<"tasks"> | undefined = cacheById.get(entry.task_id);
-    if (cached) return cached;
+    if (cached) return { task: cached, created: false };
 
     const task: Tables<"tasks"> | null = await getTaskById(
       supabase,
@@ -550,7 +597,7 @@ const resolveTask = async (
     }
     cacheById.set(task.id, task);
     cacheByName.set(taskKey(project.id, task.name), task);
-    return task;
+    return { task, created: false };
   }
 
   const name = entry.task_name?.trim();
@@ -560,7 +607,7 @@ const resolveTask = async (
 
   const key = taskKey(project.id, name);
   const cached: Tables<"tasks"> | undefined = cacheByName.get(key);
-  if (cached) return cached;
+  if (cached) return { task: cached, created: false };
 
   const existing: Tables<"tasks"> | null = await getTaskByName(
     supabase,
@@ -570,13 +617,17 @@ const resolveTask = async (
   if (existing) {
     cacheById.set(existing.id, existing);
     cacheByName.set(key, existing);
-    return existing;
+    return { task: existing, created: false };
   }
 
-  const created = await createTask(supabase, project.id, name);
-  cacheById.set(created.id, created);
-  cacheByName.set(key, created);
-  return created;
+  const { task: createdTask, created } = await createTask(
+    supabase,
+    project.id,
+    name,
+  );
+  cacheById.set(createdTask.id, createdTask);
+  cacheByName.set(key, createdTask);
+  return { task: createdTask, created };
 };
 
 /**
