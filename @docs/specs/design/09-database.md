@@ -275,6 +275,6 @@ LEFT JOIN tasks AS t ON t.project_id = p.id;
 ```
 
 - `GET /api/projects` からはこのビューを参照する。
-- ビューには `user_id`、`project_id` にそれぞれ B-Tree インデックスを付与し、さらに `UNIQUE (user_id, project_id, task_id)`（`task_id` が `NULL` の場合は `COALESCE` でダミー値に変換）を設定して `REFRESH MATERIALIZED VIEW CONCURRENTLY` が利用できるようにする。
-- `projects` または `tasks` に新規レコードが作成された場合（`POST /api/effort/entries` で案件／タスクを新規登録するケース）には同フロー内で `REFRESH MATERIALIZED VIEW CONCURRENTLY projects_with_tasks_mv` を実行し、ビューの内容を最新化する。これにより API が常に最新の案件・タスク情報を返せる。
+- ビューには `user_id`、`project_id` にそれぞれ B-Tree インデックスを付与し、さらに `UNIQUE (user_id, project_id, task_id)`（`task_id` が `NULL` の場合は `COALESCE` でダミー値に変換）を設定する。
+- `projects` または `tasks` に新規レコードが作成された場合（`POST /api/effort/entries` で案件／タスクを新規登録するケース）には同フロー内で `REFRESH MATERIALIZED VIEW projects_with_tasks_mv` を実行し、ビューの内容を最新化する。Cloudflare Workers から Supabase RPC を呼び出す際はトランザクション内で実行されるため `CONCURRENTLY` オプションが利用できない点に留意する。将来ビューのデータ量が増えてリフレッシュ時間が問題になった場合は、Supabase Edge Function や定期バッチで `REFRESH ... CONCURRENTLY` を実行するなど、更新処理をアプリ本体とは切り離す選択肢も検討する。
 - 既存の `projects`/`tasks` テーブルに対する INSERT 以外の操作が行われない場合、バッチ更新ではなくオンデマンド更新で十分である。
