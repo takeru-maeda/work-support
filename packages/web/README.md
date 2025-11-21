@@ -1,6 +1,6 @@
 # Work Support Web
 
-フロントエンドは React + Vite を基盤とした SPA として構築され、業務支援アプリ「仕事サポートアプリ」の UI レイヤーを担います。工数登録・目標管理・週報出力など、仕様は `@docs/specs` のドキュメントを参照して仕様駆動で実装します。
+フロントエンドは React + Vite を基盤とした SPA として構築され、業務支援アプリ「仕事サポートアプリ」の UI レイヤーを担います。工数登録・目標管理・週報出力など、仕様は `AI_AGENT_GUIDE.md` と `@docs/specs` に定義されたドキュメントを参照して仕様駆動で実装します。
 
 ## 主な画面
 - `/` ホーム：工数登録・目標管理・週報出力へのハブ。
@@ -66,21 +66,31 @@ packages/web/src/
 - 共有の Zod スキーマ/型は `packages/shared` からインポートして、フロントとバックで型整合性を保ちます。
 
 ## 実装方針とガイドライン
-- 仕様駆動開発：実装前に `@docs/specs` の要件・設計を必ず確認し、完了後は `@docs/specs/tasks.md` の該当タスクを更新します。
-- TypeScript ルール：全ての変数・関数に型注釈を付与し、文末にはセミコロンを必ず記述します。型のみのインポートは `import type` を使用します。
-- JSDoc：敬体の概要行と必要なタグを `@docs/guides/jsdoc-guidelines.md` に従って記述します。
-- エラーハンドリング：未捕捉例外は共通のエラーロガーを通じて `POST /api/logs/error` に送信し、UI で適切に通知します。
-- 認証後の初期化時には `GET /api/projects`（案件とタスクの取得）や `GET /api/effort/draft` など複数 API を並列に呼び出し、ドラフトの同期と候補リストを整えます。
+- 仕様駆動開発や TypeScript/JSDoc ルールの共通方針はルート `README.md` と `AI_AGENT_GUIDE.md` を参照してください。
+- フロントエンド固有の観点（例: `POST /api/logs/error` へのエラーレポートや API 並列取得のフロー）は `@docs/specs/design/03-frontend.md` で詳細を確認し、それに従って実装してください。
 
 ## テスト
 - テストフレームワークは Vitest を使用します。ファイル名は `*.test.ts(x)` に統一し、仕様の主要分岐をカバーしてください。
 - API モックやフックテストは `@testing-library/react` などを組み合わせて実施します。
 
+## デプロイ
+- `main` ブランチへのコミットが GitHub にプッシュされると、Vercel の自動デプロイが走ります。
+- デプロイ状況は Vercel プロジェクトのダッシュボードで確認できます。ローカルでのビルド確認（`pnpm --filter web build`）を行ってから `main` にマージしてください。
+
+## 状態管理 / 依存関係
+- Zustand ストア:
+  - `store/auth`: Supabase 由来のユーザー情報とトークンを保持し、API 呼び出しに利用します。
+  - `store/theme`: テーマや UI プリファレンスを `persist` ミドルウェアで保存します。
+  - `store/weeklyReport` など、機能別に小さなストアへ分割しています。
+- SWR:
+  - `lib/swrConfig.ts` で共通設定を定義し、`services/*` が提供する fetcher を利用してサーバー状態を取得します。
+
 ## 参考ドキュメント
-- プロジェクト全体の概要：`GEMINI.md`
-- 要件定義：`@docs/specs/requirements.md`
+- プロジェクト全体の概要：`AI_AGENT_GUIDE.md`
+- 要件定義：`@docs/specs/requirements/index.md`
 - 詳細設計インデックス：`@docs/specs/design/00-index.md`
 - フロントエンド設計詳細：`@docs/specs/design/03-frontend.md`
+- API 仕様：`@docs/specs/design/05-api.md`
 - データ構造：`@docs/specs/design/06-data-structures.md`
 
 ドキュメントと実装の差異が見つかった場合は、仕様を更新した上で README とコードを同期させてください。
