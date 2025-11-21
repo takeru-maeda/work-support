@@ -158,5 +158,5 @@ RETURNS void
 LANGUAGE sql
 SECURITY DEFINER
 AS $$
-  REFRESH MATERIALIZED VIEW CONCURRENTLY projects_with_tasks_mv;
+  REFRESH MATERIALIZED VIEW projects_with_tasks_mv;
 $$;
