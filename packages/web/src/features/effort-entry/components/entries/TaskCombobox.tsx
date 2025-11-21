@@ -33,6 +33,10 @@ export function TaskCombobox({
   const taskNames: string[] = project
     ? project.tasks.map((task) => task.name)
     : [];
+  const resolvedValue: string =
+    value.name.trim().length > 0
+      ? value.name
+      : project?.tasks.find((task) => task.id === value.id)?.name ?? "";
 
   const handleChange = (next: string) => {
     const matched: Task | undefined = project?.tasks.find(
@@ -46,7 +50,7 @@ export function TaskCombobox({
 
   return (
     <EffortCombobox
-      value={value.name}
+      value={resolvedValue}
       items={taskNames}
       placeholder="タスク"
       emptyLabel='"{value}" を追加'

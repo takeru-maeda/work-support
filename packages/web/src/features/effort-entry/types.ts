@@ -2,6 +2,7 @@ import type { ProjectWithTasks } from "@shared/schemas/projects";
 
 export interface EffortEntry {
   id: string;
+  projectGroupId: string;
   projectId: number | null;
   projectName: string;
   taskId: number | null;

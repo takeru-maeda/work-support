@@ -34,7 +34,6 @@ export function EffortForm() {
     totalEstimated,
     totalActual,
     totalDifference,
-    handleReorder,
     validateBeforeSubmit,
     undo,
     redo,
@@ -109,7 +108,6 @@ export function EffortForm() {
             onAdd={addEntry}
             onUpdate={updateEntry}
             onRemove={removeEntry}
-            onReorder={handleReorder}
           />
         )}
       </section>

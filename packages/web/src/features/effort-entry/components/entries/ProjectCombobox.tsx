@@ -20,6 +20,10 @@ export function ProjectCombobox({
   onChange,
 }: Readonly<ProjectComboboxProps>) {
   const projectNames: string[] = options.map((option) => option.name);
+  const resolvedValue: string =
+    value.name.trim().length > 0
+      ? value.name
+      : options.find((option) => option.id === value.id)?.name ?? "";
 
   const handleChange = (next: string) => {
     const matched: EffortProjectOption | undefined = options.find(
@@ -33,7 +37,7 @@ export function ProjectCombobox({
 
   return (
     <EffortCombobox
-      value={value.name}
+      value={resolvedValue}
       items={projectNames}
       placeholder="案件"
       emptyLabel='"{value}" を追加'

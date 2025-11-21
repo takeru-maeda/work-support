@@ -12,6 +12,7 @@ import type {
 } from "@/features/effort-entry/types";
 import {
   createInitialFormData,
+  ensureProjectGroupId,
   formatDateOnly,
   mapDraftEntryToFormEntry,
   mapFormEntryToRequest,
@@ -23,14 +24,14 @@ const DRAFT_SYNC_DELAY_MS = 800;
 
 interface DraftSource {
   formData: EffortFormData;
-  timestamp: string;
+  timestamp: string | null;
 }
 
 interface PersistedFormPayload {
   date: string;
   memo: string;
   entries: EffortEntry[];
-  clientUpdatedAt: string;
+  clientUpdatedAt?: string | null;
 }
 
 export interface EffortDraftSyncResult {
@@ -85,9 +86,11 @@ export function useEffortDraftSync(): EffortDraftSyncResult {
           formData: {
             date: remoteDraft.date ? new Date(remoteDraft.date) : new Date(),
             memo: remoteDraft.memo ?? "",
-            entries: remoteDraft.entries.map(mapDraftEntryToFormEntry),
+            entries: remoteDraft.entries
+              .map(mapDraftEntryToFormEntry)
+              .map(ensureProjectGroupId),
           },
-          timestamp: remoteDraft.client_updated_at,
+          timestamp: remoteDraft.client_updated_at ?? null,
         }
       : null;
 
@@ -96,9 +99,9 @@ export function useEffortDraftSync(): EffortDraftSyncResult {
           formData: {
             date: localDraft.date ? new Date(localDraft.date) : new Date(),
             memo: localDraft.memo ?? "",
-            entries: localDraft.entries ?? [],
+            entries: (localDraft.entries ?? []).map(ensureProjectGroupId),
           },
-          timestamp: localDraft.clientUpdatedAt,
+          timestamp: localDraft.clientUpdatedAt ?? null,
         }
       : null;
 
@@ -241,9 +244,25 @@ function pickLatestDraft(
   local: DraftSource | null,
 ): DraftSource | null {
   if (server && local) {
-    const serverTime = new Date(server.timestamp).getTime();
-    const localTime = new Date(local.timestamp).getTime();
+    const serverTime = normalizeTimestamp(server.timestamp);
+    const localTime = normalizeTimestamp(local.timestamp);
+
+    if (serverTime === null && localTime === null) {
+      return server;
+    }
+    if (serverTime === null) {
+      return local;
+    }
+    if (localTime === null) {
+      return server;
+    }
     return serverTime >= localTime ? server : local;
   }
   return server ?? local;
+}
+
+function normalizeTimestamp(value?: string | null): number | null {
+  if (!value) return null;
+  const timestamp: number = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? null : timestamp;
 }

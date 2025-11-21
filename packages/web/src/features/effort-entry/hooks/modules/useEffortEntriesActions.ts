@@ -1,6 +1,4 @@
 import { useCallback, useState } from "react";
-import { arrayMove } from "@dnd-kit/sortable";
-
 import type {
   EffortEntry,
   EffortEntryError,
@@ -19,10 +17,9 @@ interface UseEffortEntriesActionsResult {
   entryErrors: Record<string, EffortEntryError | undefined>;
   setDate: (date?: Date) => void;
   setMemo: (value: string) => void;
-  addEntry: () => void;
+  addEntry: (initial?: Partial<EffortEntry>) => void;
   removeEntry: (id: string) => void;
   updateEntry: (id: string, changes: Partial<EffortEntry>) => void;
-  handleReorder: (activeId: string, overId: string) => void;
   resetEntryErrors: () => void;
   setEntryErrors: React.Dispatch<
     React.SetStateAction<Record<string, EffortEntryError | undefined>>
@@ -60,17 +57,18 @@ export function useEffortEntriesActions({
     [applyFormChange],
   );
 
-  const addEntry = useCallback(() => {
-    applyFormChange((draft) => {
-      const newEntry: EffortEntry = createEmptyEntry();
-      if (draft.entries.length > 0) {
-        const lastEntry: EffortEntry = draft.entries.at(-1)!;
-        newEntry.projectId = lastEntry.projectId ?? null;
-        newEntry.projectName = lastEntry.projectName;
-      }
-      draft.entries.push(newEntry);
-    });
-  }, [applyFormChange]);
+  const addEntry = useCallback(
+    (initial?: Partial<EffortEntry>) => {
+      applyFormChange((draft) => {
+        const newEntry: EffortEntry = {
+          ...createEmptyEntry(),
+          ...(initial ?? {}),
+        };
+        draft.entries.push(newEntry);
+      });
+    },
+    [applyFormChange],
+  );
 
   const removeEntry = useCallback(
     (id: string) => {
@@ -114,25 +112,6 @@ export function useEffortEntriesActions({
     [applyFormChange],
   );
 
-  const handleReorder = useCallback(
-    (activeId: string, overId: string) => {
-      if (activeId === overId) return;
-      applyFormChange((draft) => {
-        const oldIndex: number = draft.entries.findIndex(
-          (entry) => entry.id === activeId,
-        );
-        const newIndex: number = draft.entries.findIndex(
-          (entry) => entry.id === overId,
-        );
-        if (oldIndex === -1 || newIndex === -1) {
-          return;
-        }
-        draft.entries = arrayMove(draft.entries, oldIndex, newIndex);
-      });
-    },
-    [applyFormChange],
-  );
-
   const resetEntryErrors = useCallback(() => {
     setEntryErrors({});
   }, []);
@@ -145,7 +124,6 @@ export function useEffortEntriesActions({
     addEntry,
     removeEntry,
     updateEntry,
-    handleReorder,
     resetEntryErrors,
   };
 }

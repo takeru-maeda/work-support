@@ -10,15 +10,19 @@ import type { EffortEntry as EffortEntryDto } from "@shared/schemas/effort";
  *
  * @returns 新規エントリ
  */
-export const createEmptyEntry = (): EffortEntry => ({
-  id: createEntryId(),
-  projectId: null,
-  projectName: "",
-  taskId: null,
-  taskName: "",
-  estimatedHours: null,
-  actualHours: null,
-});
+export const createEmptyEntry = (): EffortEntry => {
+  const entryId = createEntryId();
+  return {
+    id: entryId,
+    projectGroupId: entryId,
+    projectId: null,
+    projectName: "",
+    taskId: null,
+    taskName: "",
+    estimatedHours: null,
+    actualHours: null,
+  };
+};
 
 /**
  * 初期フォームデータを生成します。
@@ -74,6 +78,7 @@ export const mapDraftEntryToFormEntry = (
   entry: EffortEntryDto,
 ): EffortEntry => ({
   id: createEntryId(),
+  projectGroupId: deriveProjectGroupId(entry),
   projectId: entry.project_id,
   projectName: entry.project_name ?? "",
   taskId: entry.task_id,
@@ -117,4 +122,30 @@ const createEntryId = (): string => {
     return crypto.randomUUID();
   }
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+};
+
+const deriveProjectGroupId = (entry: EffortEntryDto): string => {
+  if (entry.project_id !== null) {
+    return `project:${entry.project_id}`;
+  }
+  if (entry.project_name && entry.project_name.trim().length > 0) {
+    return `name:${entry.project_name.trim().toLowerCase()}`;
+  }
+  return createEntryId();
+};
+
+export const ensureProjectGroupId = (entry: EffortEntry): EffortEntry => {
+  if (entry.projectGroupId) {
+    return entry;
+  }
+  if (entry.projectId !== null) {
+    return { ...entry, projectGroupId: `project:${entry.projectId}` };
+  }
+  if (entry.projectName.trim().length > 0) {
+    return {
+      ...entry,
+      projectGroupId: `name:${entry.projectName.trim().toLowerCase()}`,
+    };
+  }
+  return { ...entry, projectGroupId: entry.id };
 };

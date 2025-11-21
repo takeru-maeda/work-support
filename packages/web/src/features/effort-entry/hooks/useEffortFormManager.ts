@@ -24,7 +24,7 @@ interface UseEffortFormManagerResult {
   hasTotalEstimated: boolean;
   setDate: (date?: Date) => void;
   setMemo: (value: string) => void;
-  addEntry: () => void;
+  addEntry: (initial?: Partial<EffortEntry>) => void;
   removeEntry: (id: string) => void;
   updateEntry: (id: string, changes: Partial<EffortEntry>) => void;
   handleSubmit: () => Promise<void>;
@@ -33,7 +33,6 @@ interface UseEffortFormManagerResult {
   totalEstimated: number;
   totalActual: number;
   totalDifference: number;
-  handleReorder: (activeId: string, overId: string) => void;
   undo: () => void;
   redo: () => void;
   canUndo: boolean;
@@ -93,7 +92,6 @@ export function useEffortFormManager(): UseEffortFormManagerResult {
     addEntry,
     removeEntry,
     updateEntry,
-    handleReorder,
     resetEntryErrors,
   } = useEffortEntriesActions({ applyFormChange: applyChange });
 
@@ -132,7 +130,6 @@ export function useEffortFormManager(): UseEffortFormManagerResult {
     totalEstimated,
     totalActual,
     totalDifference,
-    handleReorder,
     undo,
     redo,
     canUndo,
