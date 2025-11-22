@@ -124,6 +124,12 @@ const createEntryId = (): string => {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
 
+/**
+ * API ドラフトエントリから案件グループIDを導出します。
+ *
+ * @param entry API ドラフトエントリ
+ * @returns グループID
+ */
 const deriveProjectGroupId = (entry: EffortEntryDto): string => {
   if (entry.project_id !== null) {
     return `project:${entry.project_id}`;
@@ -134,6 +140,12 @@ const deriveProjectGroupId = (entry: EffortEntryDto): string => {
   return createEntryId();
 };
 
+/**
+ * 案件グループIDを必ず持つようエントリを正規化します。
+ *
+ * @param entry 対象エントリ
+ * @returns グループIDを補完したエントリ
+ */
 export const ensureProjectGroupId = (entry: EffortEntry): EffortEntry => {
   if (entry.projectGroupId) {
     return entry;

@@ -10,9 +10,9 @@ import type {
 } from "@/features/effort-entry/types";
 import { ProjectCombobox } from "./ProjectCombobox";
 import { TaskRow } from "./TaskRow";
-import { projectErrorMessage } from "./utils";
+import { projectErrorMessage } from "@/features/effort-entry/utils/projectErrors";
 
-interface ProjectGroupCardProps {
+export interface ProjectGroupCardProps {
   entries: EffortEntry[];
   projectOptions: EffortProjectOption[];
   isProjectLoading: boolean;
@@ -20,6 +20,8 @@ interface ProjectGroupCardProps {
   onAddTask: (initial?: Partial<EffortEntry>) => void;
   onUpdate: (id: string, changes: Partial<EffortEntry>) => void;
   onRemove: (id: string) => void;
+  excludedProjectIds?: number[];
+  excludedTaskIds?: number[];
 }
 
 export const ProjectGroupCard = ({
@@ -30,8 +32,13 @@ export const ProjectGroupCard = ({
   onAddTask,
   onUpdate,
   onRemove,
+  excludedProjectIds = [],
+  excludedTaskIds = [],
 }: Readonly<ProjectGroupCardProps>): JSX.Element => {
-  const projectError = projectErrorMessage(entries, entryErrors);
+  const projectError: string | undefined = projectErrorMessage(
+    entries,
+    entryErrors,
+  );
 
   const handleProjectChange = (selection: EffortSelectionValue): void => {
     for (const entry of entries) {
@@ -45,7 +52,7 @@ export const ProjectGroupCard = ({
   };
 
   const handleAddTask = (): void => {
-    const base = entries[0];
+    const base: EffortEntry = entries[0];
     onAddTask({
       projectId: base.projectId,
       projectName: base.projectName,
@@ -89,6 +96,7 @@ export const ProjectGroupCard = ({
               isError={Boolean(projectError)}
               isLoading={isProjectLoading}
               onChange={handleProjectChange}
+              excludedProjectIds={excludedProjectIds}
             />
             {projectError && (
               <p className="mt-1 text-xs text-destructive-foreground">
@@ -107,6 +115,7 @@ export const ProjectGroupCard = ({
                 isProjectLoading={isProjectLoading}
                 onUpdate={onUpdate}
                 onRemove={onRemove}
+                excludedTaskIds={excludedTaskIds}
               />
             ))}
           </div>

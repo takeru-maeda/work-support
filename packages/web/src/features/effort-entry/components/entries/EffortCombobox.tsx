@@ -1,5 +1,5 @@
 import { ChevronsUpDown, Check, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -40,6 +40,7 @@ export function EffortCombobox({
 }: Readonly<EffortComboboxProps>) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState(value);
+  const scrollPositionRef = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     setInputValue(value);
@@ -52,6 +53,21 @@ export function EffortCombobox({
   };
 
   const handleInputChange = (next: string) => {
+    if (open && next === "") {
+      scrollPositionRef.current = {
+        x: window.scrollX,
+        y: window.scrollY,
+      };
+      requestAnimationFrame(() => {
+        if (scrollPositionRef.current) {
+          window.scrollTo(
+            scrollPositionRef.current.x,
+            scrollPositionRef.current.y,
+          );
+          scrollPositionRef.current = null;
+        }
+      });
+    }
     setInputValue(next);
     onChange(next);
   };

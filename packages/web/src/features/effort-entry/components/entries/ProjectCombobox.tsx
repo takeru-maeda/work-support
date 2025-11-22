@@ -10,6 +10,7 @@ interface ProjectComboboxProps {
   isError: boolean;
   isLoading: boolean;
   onChange: (value: EffortSelectionValue) => void;
+  excludedProjectIds?: number[];
 }
 
 export function ProjectCombobox({
@@ -18,15 +19,22 @@ export function ProjectCombobox({
   isError,
   isLoading,
   onChange,
+  excludedProjectIds = [],
 }: Readonly<ProjectComboboxProps>) {
-  const projectNames: string[] = options.map((option) => option.name);
+  const availableOptions: EffortProjectOption[] = options.filter((option) => {
+    if (option.id === value.id) return true;
+    return option.id === undefined
+      ? true
+      : !excludedProjectIds.includes(option.id);
+  });
+  const projectNames: string[] = availableOptions.map((option) => option.name);
   const resolvedValue: string =
     value.name.trim().length > 0
       ? value.name
-      : options.find((option) => option.id === value.id)?.name ?? "";
+      : availableOptions.find((option) => option.id === value.id)?.name ?? "";
 
   const handleChange = (next: string) => {
-    const matched: EffortProjectOption | undefined = options.find(
+    const matched: EffortProjectOption | undefined = availableOptions.find(
       (option) => option.name === next,
     );
     onChange({

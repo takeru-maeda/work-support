@@ -544,7 +544,11 @@ const getUpDownFormat = (differenceFromExpected: number): string => {
  * @returns フォーマット化した文字列
  */
 function formatNumber(value: number, fractionDigits: number = 1): string {
-  return Number.isInteger(value)
-    ? value.toString()
-    : value.toFixed(fractionDigits);
+  if (Number.isInteger(value)) {
+    return value.toString();
+  }
+  const roundedValue: number = Number(
+    value.toFixed(Math.min(fractionDigits, 2)),
+  );
+  return roundedValue.toString();
 }

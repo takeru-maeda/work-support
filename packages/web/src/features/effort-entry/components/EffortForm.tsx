@@ -29,6 +29,7 @@ export function EffortForm() {
     addEntry,
     removeEntry,
     updateEntry,
+    reorderProjectGroups,
     handleSubmit,
     projectBreakdown,
     totalEstimated,
@@ -108,6 +109,7 @@ export function EffortForm() {
             onAdd={addEntry}
             onUpdate={updateEntry}
             onRemove={removeEntry}
+            onReorderProjects={reorderProjectGroups}
           />
         )}
       </section>

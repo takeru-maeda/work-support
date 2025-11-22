@@ -11,6 +11,7 @@ import type {
   EffortProjectOption,
 } from "@/features/effort-entry/types";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 interface TaskRowProps {
   entry: EffortEntry;
@@ -19,6 +20,7 @@ interface TaskRowProps {
   isProjectLoading: boolean;
   onUpdate: (id: string, changes: Partial<EffortEntry>) => void;
   onRemove: (id: string) => void;
+  excludedTaskIds?: number[];
 }
 
 export const TaskRow = ({
@@ -28,14 +30,15 @@ export const TaskRow = ({
   isProjectLoading,
   onUpdate,
   onRemove,
+  excludedTaskIds = [],
 }: Readonly<TaskRowProps>): JSX.Element => {
-  const difference =
+  const difference: number | null =
     entry.estimatedHours !== null && entry.actualHours !== null
       ? entry.actualHours - entry.estimatedHours
       : null;
 
-  const taskError = entryError?.task;
-  const actualError = entryError?.actualHours;
+  const taskError: string | undefined = entryError?.task;
+  const actualError: string | undefined = entryError?.actualHours;
 
   return (
     <>
@@ -58,6 +61,7 @@ export const TaskRow = ({
                 taskName: selection.name,
               })
             }
+            excludedTaskIds={excludedTaskIds}
           />
           {taskError && (
             <p className="mt-1 ml-1 text-xs text-destructive-foreground">
@@ -101,7 +105,10 @@ export const TaskRow = ({
                 })
               }
               placeholder="実績(h)"
-              className="text-sm"
+              className={cn(
+                "text-sm",
+                actualError && "border-destructive-foreground",
+              )}
             />
             {actualError && (
               <p className="mt-1 ml-1 text-xs text-destructive-foreground">

@@ -13,6 +13,7 @@ interface TaskComboboxProps {
   isError: boolean;
   isLoading: boolean;
   onChange: (value: EffortSelectionValue) => void;
+  excludedTaskIds?: number[];
 }
 
 export function TaskCombobox({
@@ -23,6 +24,7 @@ export function TaskCombobox({
   isError,
   isLoading,
   onChange,
+  excludedTaskIds = [],
 }: Readonly<TaskComboboxProps>) {
   const normalizedName: string = projectName.trim();
   const project: EffortProjectOption | undefined = options.find((option) =>
@@ -30,16 +32,20 @@ export function TaskCombobox({
       ? option.id === projectId
       : option.name.toLowerCase() === normalizedName.toLowerCase(),
   );
-  const taskNames: string[] = project
-    ? project.tasks.map((task) => task.name)
+  const availableTasks: Task[] = project
+    ? project.tasks.filter((task) => {
+        if (task.id === value.id) return true;
+        return !excludedTaskIds.includes(task.id);
+      })
     : [];
+  const taskNames: string[] = availableTasks.map((task) => task.name);
   const resolvedValue: string =
     value.name.trim().length > 0
       ? value.name
       : project?.tasks.find((task) => task.id === value.id)?.name ?? "";
 
   const handleChange = (next: string) => {
-    const matched: Task | undefined = project?.tasks.find(
+    const matched: Task | undefined = availableTasks.find(
       (task) => task.name === next,
     );
     onChange({

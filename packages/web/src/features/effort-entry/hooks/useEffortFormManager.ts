@@ -27,6 +27,7 @@ interface UseEffortFormManagerResult {
   addEntry: (initial?: Partial<EffortEntry>) => void;
   removeEntry: (id: string) => void;
   updateEntry: (id: string, changes: Partial<EffortEntry>) => void;
+  reorderProjectGroups: (sourceKey: string, targetKey: string) => void;
   handleSubmit: () => Promise<void>;
   validateBeforeSubmit: () => boolean;
   projectBreakdown: ProjectBreakdownItem[];
@@ -92,6 +93,7 @@ export function useEffortFormManager(): UseEffortFormManagerResult {
     addEntry,
     removeEntry,
     updateEntry,
+    reorderProjectGroups,
     resetEntryErrors,
   } = useEffortEntriesActions({ applyFormChange: applyChange });
 
@@ -124,6 +126,7 @@ export function useEffortFormManager(): UseEffortFormManagerResult {
     addEntry,
     removeEntry,
     updateEntry,
+    reorderProjectGroups,
     handleSubmit,
     validateBeforeSubmit,
     projectBreakdown,

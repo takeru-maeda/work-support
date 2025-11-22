@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { arrayMove } from "@dnd-kit/sortable";
 import type {
   EffortEntry,
   EffortEntryError,
@@ -8,6 +9,7 @@ import {
   createEmptyEntry,
   validateEffortEntry,
 } from "@/features/effort-entry/utils/form-helpers";
+import { getProjectGroupKey } from "@/features/effort-entry/utils/projectGrouping";
 
 interface UseEffortEntriesActionsParams {
   applyFormChange: (recipe: (draft: EffortFormData) => void) => void;
@@ -20,6 +22,7 @@ interface UseEffortEntriesActionsResult {
   addEntry: (initial?: Partial<EffortEntry>) => void;
   removeEntry: (id: string) => void;
   updateEntry: (id: string, changes: Partial<EffortEntry>) => void;
+  reorderProjectGroups: (sourceKey: string, targetKey: string) => void;
   resetEntryErrors: () => void;
   setEntryErrors: React.Dispatch<
     React.SetStateAction<Record<string, EffortEntryError | undefined>>
@@ -98,8 +101,9 @@ export function useEffortEntriesActions({
 
       if (updated) {
         setEntryErrors((prevErrors) => {
-          const nextError: EffortEntryError | null =
-            validateEffortEntry(updated as EffortEntry);
+          const nextError: EffortEntryError | null = validateEffortEntry(
+            updated as EffortEntry,
+          );
           if (nextError) {
             return { ...prevErrors, [id]: nextError };
           }
@@ -116,6 +120,33 @@ export function useEffortEntriesActions({
     setEntryErrors({});
   }, []);
 
+  const reorderProjectGroups = useCallback(
+    (sourceKey: string, targetKey: string) => {
+      if (sourceKey === targetKey) return;
+      applyFormChange((draft) => {
+        const order: string[] = [];
+        const grouped = new Map<string, EffortEntry[]>();
+
+        for (const entry of draft.entries) {
+          const key: string = getProjectGroupKey(entry);
+          if (!grouped.has(key)) {
+            grouped.set(key, []);
+            order.push(key);
+          }
+          grouped.get(key)!.push(entry);
+        }
+
+        const sourceIndex = order.indexOf(sourceKey);
+        const targetIndex = order.indexOf(targetKey);
+        if (sourceIndex === -1 || targetIndex === -1) return;
+
+        const reordered: string[] = arrayMove(order, sourceIndex, targetIndex);
+        draft.entries = reordered.flatMap((key) => grouped.get(key) ?? []);
+      });
+    },
+    [applyFormChange],
+  );
+
   return {
     entryErrors,
     setEntryErrors,
@@ -124,6 +155,7 @@ export function useEffortEntriesActions({
     addEntry,
     removeEntry,
     updateEntry,
+    reorderProjectGroups,
     resetEntryErrors,
   };
 }
