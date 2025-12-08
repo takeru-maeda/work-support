@@ -1,4 +1,5 @@
 export const ROUTES = {
+  landing: "/landing",
   home: "/",
   efforts: "/efforts",
   effortsNew: "/efforts/new",

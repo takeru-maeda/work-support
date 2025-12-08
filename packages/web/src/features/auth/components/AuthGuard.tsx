@@ -39,7 +39,7 @@ export function AuthGuard({ children }: Readonly<AuthGuardProps>) {
         if (!currentUser) {
           clearUser();
           clearUserSettings();
-          navigate(ROUTES.login, { replace: true });
+          navigate(ROUTES.landing, { replace: true });
           return;
         }
 

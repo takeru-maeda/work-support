@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { ThemeProvider } from "@/app/providers/ThemeProvider";
 import { AuthenticatedLayout } from "@/components/layout/AuthenticatedLayout";
 import { ROUTES } from "@/config/routes";
+import LandingPage from "@/pages/landing/LandingPage";
 import EffortsPage from "@/pages/efforts/EffortsPage";
 import EffortsNewPage from "@/pages/efforts/EffortsNewPage";
 import LoginPage from "@/pages/auth/LoginPage";
@@ -27,6 +28,7 @@ const App = (): JSX.Element => {
         <div className="pt-16">
           <Toaster position="top-center" theme={theme} />
           <Routes>
+            <Route path={ROUTES.landing} element={<LandingPage />} />
             <Route element={<AuthenticatedLayout />}>
               <Route path={ROUTES.home} element={<HomePage />} />
               <Route path={ROUTES.effortsNew} element={<EffortsNewPage />} />
@@ -46,7 +48,7 @@ const App = (): JSX.Element => {
               path={ROUTES.resetPassword}
               element={<ResetPasswordPage />}
             />
-            <Route path="*" element={<Navigate to={ROUTES.home} replace />} />
+            <Route path="*" element={<Navigate to={ROUTES.landing} replace />} />
           </Routes>
         </div>
       </div>
