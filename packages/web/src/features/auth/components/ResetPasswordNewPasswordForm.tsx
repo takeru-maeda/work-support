@@ -1,9 +1,8 @@
 import type { FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { AuthErrorAlert } from "@/features/auth/components/AuthErrorAlert";
+import { PasswordInput } from "@/features/auth/components/PasswordInput";
 
 interface ResetPasswordNewPasswordFormProps {
   newPassword: string;
@@ -30,29 +29,23 @@ export function ResetPasswordNewPasswordForm({
     <form onSubmit={onSubmit} className="space-y-6">
       <AuthErrorAlert message={error} />
 
-      <div className="space-y-2">
-        <Label htmlFor="newPassword">新しいパスワード</Label>
-        <Input
-          id="newPassword"
-          type="password"
-          placeholder="••••••••"
-          value={newPassword}
-          onChange={(event) => onNewPasswordChange(event.target.value)}
-          required
-        />
-      </div>
+      <PasswordInput
+        id="newPassword"
+        label="新しいパスワード"
+        placeholder="••••••••"
+        value={newPassword}
+        onChange={(event) => onNewPasswordChange(event.target.value)}
+        required
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="confirmPassword">パスワード確認</Label>
-        <Input
-          id="confirmPassword"
-          type="password"
-          placeholder="••••••••"
-          value={confirmPassword}
-          onChange={(event) => onConfirmPasswordChange(event.target.value)}
-          required
-        />
-      </div>
+      <PasswordInput
+        id="confirmPassword"
+        label="パスワード確認"
+        placeholder="••••••••"
+        value={confirmPassword}
+        onChange={(event) => onConfirmPasswordChange(event.target.value)}
+        required
+      />
 
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "リセット中..." : "パスワードをリセット"}
