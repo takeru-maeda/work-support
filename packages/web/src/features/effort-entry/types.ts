@@ -17,7 +17,7 @@ export interface EffortSelectionValue {
 }
 
 export interface EffortFormData {
-  date: Date;
+  date: Date | null;
   entries: EffortEntry[];
   memo: string;
 }

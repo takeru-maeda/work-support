@@ -61,6 +61,11 @@ export function useEffortSubmission({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const runValidation = useCallback((): EffortEntryDto[] | null => {
+    if (!formData.date) {
+      showErrorToast("日付を選択してください。");
+      return null;
+    }
+
     if (!formData.entries.length) {
       showErrorToast("工数エントリーを追加してください。");
       return null;
@@ -87,7 +92,7 @@ export function useEffortSubmission({
 
     resetEntryErrors();
     return payload;
-  }, [formData.entries, resetEntryErrors, setEntryErrors]);
+  }, [formData.date, formData.entries, resetEntryErrors, setEntryErrors]);
 
   const validateBeforeSubmit = useCallback((): boolean => {
     return runValidation() !== null;
@@ -95,7 +100,7 @@ export function useEffortSubmission({
 
   const handleSubmit = useCallback(async () => {
     const payload: EffortEntryDto[] | null = runValidation();
-    if (!payload) {
+    if (!payload || !formData.date) {
       return;
     }
 
@@ -103,7 +108,7 @@ export function useEffortSubmission({
 
     try {
       const requestBody: EffortEntriesRequest = {
-        date: formatDateOnly(formData.date),
+        date: formatDateOnly(formData.date) as string,
         entries: payload,
         memo: formData.memo.trim().length > 0 ? formData.memo : null,
       };
@@ -114,7 +119,7 @@ export function useEffortSubmission({
       skipNextDraftSync();
       replaceFormState(
         {
-          date: new Date(),
+          date: null,
           entries: [],
           memo: "",
         },

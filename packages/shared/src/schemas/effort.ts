@@ -27,7 +27,9 @@ export const EffortEntriesResponseSchema = z.object({
   ),
 });
 
-export const EffortDraftSchema = EffortEntriesRequestSchema.extend({
+export const EffortDraftSchema = z.object({
+  date: z.iso.date().nullable(),
+  entries: z.array(EffortEntrySchema),
   memo: z.string().nullable().optional(),
   clientUpdatedAt: z.iso.datetime({ offset: true }),
 });
