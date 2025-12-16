@@ -19,15 +19,20 @@ export const calculateGoalSummaries = <T extends GoalProgressLike>(
 ): GoalProgressSummary | null => {
   if (!goals || goals.length === 0) return null;
 
-  const totalWeight: number = goals.reduce((sum, goal) => sum + goal.weight, 0);
+  let totalWeight = 0;
+  let totalProgress = 0;
+  let weightedProgress = 0;
+
+  for (const goal of goals) {
+    totalWeight += goal.weight;
+    totalProgress += goal.progress;
+    weightedProgress += goal.progress * goal.weight;
+  }
+
   if (totalWeight === 0) return null;
 
-  const simpleAverageProgress: number =
-    goals.reduce((sum, goal) => sum + goal.progress, 0) / goals.length;
-
-  const weightedAchievementRate: number =
-    goals.reduce((sum, goal) => sum + goal.progress * goal.weight, 0) /
-    totalWeight;
+  const simpleAverageProgress: number = totalProgress / goals.length;
+  const weightedAchievementRate: number = weightedProgress / totalWeight;
 
   return {
     simpleAverageProgress: Number.parseFloat(simpleAverageProgress.toFixed(1)),
