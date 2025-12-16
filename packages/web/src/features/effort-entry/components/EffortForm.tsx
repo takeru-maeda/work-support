@@ -85,7 +85,7 @@ export function EffortForm() {
           <DatePicker />
         ) : (
           <div className="flex items-center justify-between">
-            <DatePicker date={formData.date} onDateChange={setDate} />
+            <DatePicker date={formData.date ?? undefined} onDateChange={setDate} />
             <UndoRedoControls
               canUndo={canUndo}
               canRedo={canRedo}

@@ -30,8 +30,8 @@ export const createEmptyEntry = (): EffortEntry => {
  * @returns 初期フォーム状態
  */
 export const createInitialFormData = (): EffortFormData => ({
-  date: new Date(),
-  entries: [createEmptyEntry()],
+  date: null,
+  entries: [],
   memo: "",
 });
 
@@ -39,9 +39,10 @@ export const createInitialFormData = (): EffortFormData => ({
  * 日付をローカルタイムゾーンの yyyy-MM-dd 形式に整形します。
  *
  * @param date 対象日付
- * @returns ローカル基準の文字列
+ * @returns ローカル基準の文字列。日付が null の場合は null
  */
-export const formatDateOnly = (date: Date): string => {
+export const formatDateOnly = (date: Date | null): string | null => {
+  if (date === null) return null;
   const localDate = new Date(date);
   localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset());
   return localDate.toISOString().split("T")[0];

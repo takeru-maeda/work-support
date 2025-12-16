@@ -28,7 +28,7 @@ interface DraftSource {
 }
 
 interface PersistedFormPayload {
-  date: string;
+  date: string | null;
   memo: string;
   entries: EffortEntry[];
   clientUpdatedAt?: string | null;
@@ -84,7 +84,7 @@ export function useEffortDraftSync(): EffortDraftSyncResult {
     const remoteSource: DraftSource | null = remoteDraft
       ? {
           formData: {
-            date: remoteDraft.date ? new Date(remoteDraft.date) : new Date(),
+            date: remoteDraft.date ? new Date(remoteDraft.date) : null,
             memo: remoteDraft.memo ?? "",
             entries: remoteDraft.entries
               .map(mapDraftEntryToFormEntry)
@@ -97,7 +97,7 @@ export function useEffortDraftSync(): EffortDraftSyncResult {
     const localSource: DraftSource | null = localDraft
       ? {
           formData: {
-            date: localDraft.date ? new Date(localDraft.date) : new Date(),
+            date: localDraft.date ? new Date(localDraft.date) : null,
             memo: localDraft.memo ?? "",
             entries: (localDraft.entries ?? []).map(ensureProjectGroupId),
           },
@@ -112,7 +112,7 @@ export function useEffortDraftSync(): EffortDraftSyncResult {
     if (latest) {
       setFormData(latest.formData);
     } else {
-      setFormData({ ...createInitialFormData(), date: new Date() });
+      setFormData(createInitialFormData());
     }
 
     setIsInitializing(false);

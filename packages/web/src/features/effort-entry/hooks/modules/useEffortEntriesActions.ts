@@ -45,7 +45,7 @@ export function useEffortEntriesActions({
   const setDate = useCallback(
     (date?: Date) => {
       applyFormChange((draft) => {
-        draft.date = date ?? new Date();
+        draft.date = date ?? null;
       });
     },
     [applyFormChange],
