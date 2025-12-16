@@ -236,6 +236,11 @@ export async function updatePassword(
   };
 }
 
+/**
+ * 現在のアクセストークンを取得します。
+ *
+ * @returns アクセストークン。セッションがない場合は null
+ */
 export async function getAccessToken(): Promise<string | null> {
   const { data, error } = await supabase.auth.getSession();
 

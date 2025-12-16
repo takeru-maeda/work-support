@@ -1,8 +1,14 @@
 const DEFAULT_API_BASE_URL = "http://localhost:8787";
 
+/**
+ * API のベース URL です。
+ */
 export const API_BASE_URL: string =
   import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL;
 
+/**
+ * API エンドポイントの定義です。
+ */
 export const API_ENDPOINTS = {
   missions: "/api/missions",
   goals: "/api/goals",

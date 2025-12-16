@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 
 const MOBILE_BREAKPOINT = 768;
 
+/**
+ * モバイル表示かどうかを判定します。
+ *
+ * @returns モバイル幅の場合は true
+ */
 export function useIsMobile() {
   const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined);
 

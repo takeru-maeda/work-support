@@ -1,5 +1,8 @@
 import { ContentfulStatusCode } from "hono/utils/http-status";
 
+/**
+ * アプリケーション固有のエラーを表します。
+ */
 export class AppError extends Error {
   constructor(
     public statusCode: ContentfulStatusCode,

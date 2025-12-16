@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+/**
+ * 工数エントリのスキーマです。
+ *
+ * POST /api/effort および POST /api/effort/entries のリクエスト/レスポンスで使用されます。
+ */
 export const EffortEntrySchema = z.object({
   project_id: z.number().nullable(),
   project_name: z.string().nullable(),
@@ -9,12 +14,22 @@ export const EffortEntrySchema = z.object({
   hours: z.number(),
 });
 
+/**
+ * 工数登録リクエストのスキーマです。
+ *
+ * POST /api/effort/entries
+ */
 export const EffortEntriesRequestSchema = z.object({
   date: z.iso.date(),
   entries: z.array(EffortEntrySchema),
   memo: z.string().nullable().optional(),
 });
 
+/**
+ * 工数登録レスポンスのスキーマです。
+ *
+ * POST /api/effort/entries
+ */
 export const EffortEntriesResponseSchema = z.object({
   saved: z.array(
     z.object({
@@ -27,6 +42,9 @@ export const EffortEntriesResponseSchema = z.object({
   ),
 });
 
+/**
+ * 工数ドラフトのスキーマです。
+ */
 export const EffortDraftSchema = z.object({
   date: z.iso.date().nullable(),
   entries: z.array(EffortEntrySchema),
@@ -34,6 +52,9 @@ export const EffortDraftSchema = z.object({
   clientUpdatedAt: z.iso.datetime({ offset: true }),
 });
 
+/**
+ * 工数ドラフトレコードのスキーマです。
+ */
 export const EffortDraftRecordSchema = z.object({
   entries: z.array(EffortEntrySchema),
   memo: z.string().nullable(),
@@ -43,6 +64,11 @@ export const EffortDraftRecordSchema = z.object({
   user_id: z.uuid(),
 });
 
+/**
+ * 工数ドラフト取得レスポンスのスキーマです。
+ *
+ * GET /api/effort/draft
+ */
 export const EffortDraftResponseSchema = z.object({
   draft: z.object({
     entries: z.array(EffortEntrySchema),
@@ -53,6 +79,11 @@ export const EffortDraftResponseSchema = z.object({
   }),
 });
 
+/**
+ * 工数ドラフト更新レスポンスのスキーマです。
+ *
+ * PUT /api/effort/draft
+ */
 export const EffortDraftUpsertResponseSchema = z.object({
   applied: z.boolean(),
   reason: z.string().optional(),
