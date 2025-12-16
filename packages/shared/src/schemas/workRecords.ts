@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+/**
+ * 作業記録ソートのスキーマです。
+ */
 export const WorkRecordSortSchema = z.enum([
   "date",
   "-date",
@@ -15,6 +18,9 @@ export const WorkRecordSortSchema = z.enum([
   "-diff",
 ]);
 
+/**
+ * 作業記録一覧クエリのスキーマです。
+ */
 export const WorkRecordListQuerySchema = z
   .object({
     startDate: z.iso.date().optional(),
@@ -41,6 +47,9 @@ export const WorkRecordListQuerySchema = z
     }
   });
 
+/**
+ * 作業記録アイテムのスキーマです。
+ */
 export const WorkRecordItemSchema = z.object({
   id: z.number(),
   date: z.iso.date(),
@@ -53,6 +62,9 @@ export const WorkRecordItemSchema = z.object({
   diff: z.number().nullable(),
 });
 
+/**
+ * 作業記録一覧レスポンスのスキーマです。
+ */
 export const WorkRecordListResponseSchema = z.object({
   items: z.array(WorkRecordItemSchema),
   meta: z.object({

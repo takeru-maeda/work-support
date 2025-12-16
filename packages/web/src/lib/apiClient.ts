@@ -3,6 +3,9 @@ import axios, { AxiosHeaders, type AxiosInstance } from "axios";
 import { API_BASE_URL } from "@/config/api";
 import { getAccessToken } from "@/lib/auth";
 
+/**
+ * 認証トークンを自動付与する API クライアントです。
+ */
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
 });

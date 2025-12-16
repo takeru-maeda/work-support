@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+/**
+ * 目標のスキーマです。
+ */
 export const GoalSchema = z.object({
   id: z.number(),
   user_id: z.uuid(),
@@ -13,10 +16,16 @@ export const GoalSchema = z.object({
   updated_at: z.iso.datetime({ offset: true }),
 });
 
+/**
+ * 目標取得レスポンスのスキーマです。
+ */
 export const GetGoalResponseSchema = z.object({
   goals: GoalSchema.array(),
 });
 
+/**
+ * 目標作成リクエストのスキーマです。
+ */
 export const CreateGoalRequestSchema = z.object({
   title: z.string().min(1),
   start_date: z.iso.date(),
@@ -25,10 +34,16 @@ export const CreateGoalRequestSchema = z.object({
   content: z.string(),
 });
 
+/**
+ * 目標作成レスポンスのスキーマです。
+ */
 export const CreateGoalResponseSchema = z.object({
   created: GoalSchema,
 });
 
+/**
+ * 目標更新リクエストのスキーマです。
+ */
 export const UpdateGoalRequestSchema = z.object({
   title: z.string().min(1).optional(),
   start_date: z.iso.date().optional(),
@@ -38,10 +53,16 @@ export const UpdateGoalRequestSchema = z.object({
   content: z.string().optional(),
 });
 
+/**
+ * 目標更新レスポンスのスキーマです。
+ */
 export const UpdateGoalResponseSchema = z.object({
   updated: GoalSchema,
 });
 
+/**
+ * 進捗率のオプショナルスキーマです。
+ */
 const optionalProgressSchema = z
   .preprocess(
     (value) =>
@@ -50,6 +71,9 @@ const optionalProgressSchema = z
   )
   .optional();
 
+/**
+ * 目標履歴のソートオプションです。
+ */
 export const GOAL_HISTORY_SORT_OPTIONS = [
   "title",
   "-title",
@@ -63,6 +87,9 @@ export const GOAL_HISTORY_SORT_OPTIONS = [
   "-end_date",
 ] as const;
 
+/**
+ * 目標履歴検索クエリのスキーマです。
+ */
 export const GoalHistoryQuerySchema = z
   .object({
     query: z.string().optional(),
@@ -88,8 +115,14 @@ export const GoalHistoryQuerySchema = z
     }
   });
 
+/**
+ * 目標履歴アイテムのスキーマです。
+ */
 export const GoalHistoryItemSchema = GoalSchema;
 
+/**
+ * 目標履歴レスポンスのスキーマです。
+ */
 export const GoalHistoryResponseSchema = z.object({
   items: GoalHistoryItemSchema.array(),
   meta: z.object({
@@ -103,12 +136,21 @@ export const GoalHistoryResponseSchema = z.object({
   }),
 });
 
+/**
+ * 目標進捗ソースの値です。
+ */
 export const GOAL_PROGRESS_SOURCE_VALUES = ["history", "goal"] as const;
 
+/**
+ * 前週進捗クエリのスキーマです。
+ */
 export const GoalPreviousWeekQuerySchema = z.object({
   referenceDate: z.iso.date(),
 });
 
+/**
+ * 前週進捗レスポンスのスキーマです。
+ */
 export const GoalPreviousWeekProgressSchema = z.object({
   referenceDate: z.iso.date(),
   previousWeekEnd: z.iso.date(),

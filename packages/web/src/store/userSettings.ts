@@ -9,6 +9,9 @@ interface UserSettingsState {
   clearSettings: () => void;
 }
 
+/**
+ * ユーザー設定を管理するストアです。
+ */
 export const useUserSettingsStore = createWithEqualityFn<UserSettingsState>(
   (set) => ({
     settings: null,

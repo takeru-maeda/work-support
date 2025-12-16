@@ -18,6 +18,12 @@ const DEFAULT_OPTIONS: Required<UseTableResizeOptions> = {
   maxHeight: 720,
 };
 
+/**
+ * テーブルの高さをドラッグでリサイズする機能を提供します。
+ *
+ * @param options リサイズオプション
+ * @returns テーブル高さとリサイズ操作用ハンドラ
+ */
 export function useTableResize(
   options: UseTableResizeOptions = {},
 ): UseTableResizeResult {

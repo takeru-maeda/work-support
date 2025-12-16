@@ -9,8 +9,14 @@ interface ThemeStore {
   toggleTheme: () => void;
 }
 
+/**
+ * テーマ設定の永続化に使用するストレージキーです。
+ */
 export const themeStorageKey = "work-support-theme";
 
+/**
+ * テーマ設定を管理するストアです。
+ */
 export const useThemeStore = create<ThemeStore>()(
   persist(
     (set, get) => ({

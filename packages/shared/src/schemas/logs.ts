@@ -1,9 +1,18 @@
 import { z } from "zod";
 
+/**
+ * ログレベルのスキーマです。
+ */
 const LogLevelSchema = z.enum(["WARNING", "ERROR", "CRITICAL"]);
 
+/**
+ * ログソースのスキーマです。
+ */
 const LogSourceSchema = z.enum(["API", "UI"]);
 
+/**
+ * エラーログ作成リクエストのスキーマです。
+ */
 export const ErrorLogCreateRequestSchema = z.object({
   message: z.string().min(1),
   stackTrace: z.string().nullable().optional(),
@@ -15,6 +24,9 @@ export const ErrorLogCreateRequestSchema = z.object({
   clientContext: z.record(z.string(), z.unknown()).nullish(),
 });
 
+/**
+ * エラーログ作成レスポンスのスキーマです。
+ */
 export const ErrorLogCreateResponseSchema = z.object({
   id: z.number(),
   recordedAt: z.iso.datetime({ offset: true }),

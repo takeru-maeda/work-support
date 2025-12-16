@@ -8,6 +8,9 @@ interface UserState {
   clearUser: () => void;
 }
 
+/**
+ * 認証ユーザー情報を管理するストアです。
+ */
 export const useUserStore = create<UserState>((set) => ({
   user: null,
   setUser: (user) => set({ user }),

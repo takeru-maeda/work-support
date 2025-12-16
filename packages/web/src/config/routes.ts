@@ -1,3 +1,6 @@
+/**
+ * アプリケーションのルート定義です。
+ */
 export const ROUTES = {
   landing: "/landing",
   home: "/",
