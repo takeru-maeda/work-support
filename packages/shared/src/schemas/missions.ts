@@ -12,6 +12,8 @@ export const MissionSchema = z.object({
 
 /**
  * ミッション取得レスポンスのスキーマです。
+ *
+ * GET /api/missions
  */
 export const GetMissionResponseSchema = z.object({
   mission: MissionSchema.nullable(),
@@ -19,6 +21,8 @@ export const GetMissionResponseSchema = z.object({
 
 /**
  * ミッション更新リクエストのスキーマです。
+ *
+ * PUT /api/missions
  */
 export const UpdateMissionRequestSchema = z.object({
   content: z.string().min(1),
@@ -26,6 +30,8 @@ export const UpdateMissionRequestSchema = z.object({
 
 /**
  * ミッション更新レスポンスのスキーマです。
+ *
+ * PUT /api/missions
  */
 export const UpdateMissionResponseSchema = z.object({
   mission: MissionSchema,

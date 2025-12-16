@@ -11,6 +11,12 @@ interface UserSettingsState {
 
 /**
  * ユーザー設定を管理するストアです。
+ *
+ * - settings: ユーザー設定（通知設定など）。未取得時は null
+ * - initialized: 設定の初期化が完了したかどうか
+ * - setSettings: 設定を更新し、初期化完了フラグを立てる
+ * - markInitialized: 設定取得を試みたことを記録する（設定が存在しない場合も含む）
+ * - clearSettings: 設定をクリアし、初期化状態をリセットする（ログアウト時に使用）
  */
 export const useUserSettingsStore = createWithEqualityFn<UserSettingsState>(
   (set) => ({

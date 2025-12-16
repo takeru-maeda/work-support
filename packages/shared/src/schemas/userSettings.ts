@@ -11,6 +11,8 @@ export const UserSettingsSchema = z.object({
 
 /**
  * ユーザー設定レスポンスのスキーマです。
+ *
+ * GET /api/user-settings
  */
 export const UserSettingsResponseSchema = z.object({
   user_settings: UserSettingsSchema,
@@ -18,6 +20,8 @@ export const UserSettingsResponseSchema = z.object({
 
 /**
  * ユーザー設定更新リクエストのスキーマです。
+ *
+ * PUT /api/user-settings
  */
 export const UpdateUserSettingsRequestSchema = z.object({
   notifyEffortEmail: z.boolean(),

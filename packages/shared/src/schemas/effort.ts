@@ -2,6 +2,8 @@ import { z } from "zod";
 
 /**
  * 工数エントリのスキーマです。
+ *
+ * POST /api/effort および POST /api/effort/entries のリクエスト/レスポンスで使用されます。
  */
 export const EffortEntrySchema = z.object({
   project_id: z.number().nullable(),
@@ -14,6 +16,8 @@ export const EffortEntrySchema = z.object({
 
 /**
  * 工数登録リクエストのスキーマです。
+ *
+ * POST /api/effort/entries
  */
 export const EffortEntriesRequestSchema = z.object({
   date: z.iso.date(),
@@ -23,6 +27,8 @@ export const EffortEntriesRequestSchema = z.object({
 
 /**
  * 工数登録レスポンスのスキーマです。
+ *
+ * POST /api/effort/entries
  */
 export const EffortEntriesResponseSchema = z.object({
   saved: z.array(
@@ -60,6 +66,8 @@ export const EffortDraftRecordSchema = z.object({
 
 /**
  * 工数ドラフト取得レスポンスのスキーマです。
+ *
+ * GET /api/effort/draft
  */
 export const EffortDraftResponseSchema = z.object({
   draft: z.object({
@@ -73,6 +81,8 @@ export const EffortDraftResponseSchema = z.object({
 
 /**
  * 工数ドラフト更新レスポンスのスキーマです。
+ *
+ * PUT /api/effort/draft
  */
 export const EffortDraftUpsertResponseSchema = z.object({
   applied: z.boolean(),

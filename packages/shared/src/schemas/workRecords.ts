@@ -20,6 +20,8 @@ export const WorkRecordSortSchema = z.enum([
 
 /**
  * 作業記録一覧クエリのスキーマです。
+ *
+ * GET /api/reports/work-records
  */
 export const WorkRecordListQuerySchema = z
   .object({
@@ -64,6 +66,8 @@ export const WorkRecordItemSchema = z.object({
 
 /**
  * 作業記録一覧レスポンスのスキーマです。
+ *
+ * GET /api/reports/work-records
  */
 export const WorkRecordListResponseSchema = z.object({
   items: z.array(WorkRecordItemSchema),

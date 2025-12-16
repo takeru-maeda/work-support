@@ -27,6 +27,8 @@ export const ProjectWithTasksSchema = ProjectSchema.extend({
 
 /**
  * プロジェクト一覧レスポンスのスキーマです。
+ *
+ * GET /api/projects
  */
 export const ProjectsResponseSchema = z.object({
   projects: z.array(ProjectWithTasksSchema),

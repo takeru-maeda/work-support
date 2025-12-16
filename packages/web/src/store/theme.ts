@@ -16,6 +16,12 @@ export const themeStorageKey = "work-support-theme";
 
 /**
  * テーマ設定を管理するストアです。
+ *
+ * - theme: 現在のテーマ設定（"light" または "dark"）
+ * - setTheme: テーマを指定した値に変更する
+ * - toggleTheme: ライト/ダークテーマを切り替える
+ *
+ * localStorage に永続化され、ページリロード後も設定が維持されます。
  */
 export const useThemeStore = create<ThemeStore>()(
   persist(

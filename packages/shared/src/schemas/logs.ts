@@ -12,6 +12,8 @@ const LogSourceSchema = z.enum(["API", "UI"]);
 
 /**
  * エラーログ作成リクエストのスキーマです。
+ *
+ * POST /api/logs
  */
 export const ErrorLogCreateRequestSchema = z.object({
   message: z.string().min(1),
@@ -26,6 +28,8 @@ export const ErrorLogCreateRequestSchema = z.object({
 
 /**
  * エラーログ作成レスポンスのスキーマです。
+ *
+ * POST /api/logs
  */
 export const ErrorLogCreateResponseSchema = z.object({
   id: z.number(),

@@ -18,6 +18,8 @@ export const GoalSchema = z.object({
 
 /**
  * 目標取得レスポンスのスキーマです。
+ *
+ * GET /api/goals/current
  */
 export const GetGoalResponseSchema = z.object({
   goals: GoalSchema.array(),
@@ -25,6 +27,8 @@ export const GetGoalResponseSchema = z.object({
 
 /**
  * 目標作成リクエストのスキーマです。
+ *
+ * POST /api/goals
  */
 export const CreateGoalRequestSchema = z.object({
   title: z.string().min(1),
@@ -36,6 +40,8 @@ export const CreateGoalRequestSchema = z.object({
 
 /**
  * 目標作成レスポンスのスキーマです。
+ *
+ * POST /api/goals
  */
 export const CreateGoalResponseSchema = z.object({
   created: GoalSchema,
@@ -43,6 +49,8 @@ export const CreateGoalResponseSchema = z.object({
 
 /**
  * 目標更新リクエストのスキーマです。
+ *
+ * PUT /api/goals/:id
  */
 export const UpdateGoalRequestSchema = z.object({
   title: z.string().min(1).optional(),
@@ -55,6 +63,8 @@ export const UpdateGoalRequestSchema = z.object({
 
 /**
  * 目標更新レスポンスのスキーマです。
+ *
+ * PUT /api/goals/:id
  */
 export const UpdateGoalResponseSchema = z.object({
   updated: GoalSchema,
@@ -89,6 +99,8 @@ export const GOAL_HISTORY_SORT_OPTIONS = [
 
 /**
  * 目標履歴検索クエリのスキーマです。
+ *
+ * GET /api/goals/history
  */
 export const GoalHistoryQuerySchema = z
   .object({
@@ -122,6 +134,8 @@ export const GoalHistoryItemSchema = GoalSchema;
 
 /**
  * 目標履歴レスポンスのスキーマです。
+ *
+ * GET /api/goals/history
  */
 export const GoalHistoryResponseSchema = z.object({
   items: GoalHistoryItemSchema.array(),
@@ -143,6 +157,8 @@ export const GOAL_PROGRESS_SOURCE_VALUES = ["history", "goal"] as const;
 
 /**
  * 前週進捗クエリのスキーマです。
+ *
+ * GET /api/goals/progress/previous-week
  */
 export const GoalPreviousWeekQuerySchema = z.object({
   referenceDate: z.iso.date(),
@@ -150,6 +166,8 @@ export const GoalPreviousWeekQuerySchema = z.object({
 
 /**
  * 前週進捗レスポンスのスキーマです。
+ *
+ * GET /api/goals/progress/previous-week
  */
 export const GoalPreviousWeekProgressSchema = z.object({
   referenceDate: z.iso.date(),
