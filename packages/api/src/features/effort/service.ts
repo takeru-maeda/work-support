@@ -345,7 +345,7 @@ export const buildEffortCompletionEmail = (
   }
 
   const lines: string[] = [];
-  lines.push("--- 日付 ---", formattedDate, "", "--- エントリ ---");
+  lines.push("【日付】", formattedDate, "", "【工数】");
 
   let totalEstimated = 0;
   let totalActual = 0;
@@ -380,7 +380,7 @@ export const buildEffortCompletionEmail = (
     lines.push("");
   }
 
-  lines.push("", "--- 集計 ---", "■案件別");
+  lines.push("", "【集計】", "■案件別");
 
   for (const { project, items } of grouped.values()) {
     const projectHasEstimate = items.some(
@@ -417,7 +417,7 @@ export const buildEffortCompletionEmail = (
   );
 
   if (memo && memo.trim().length > 0) {
-    lines.push("", "--- メモ ---", memo.trim());
+    lines.push("", "【メモ】", memo.trim());
   }
 
   return {

@@ -174,10 +174,10 @@ function onSubmit(e) {
    送信例:
 
    ```
-   --- 日付 ---
+   【日付】
    2025/01/10
 
-   --- エントリ ---
+   【工数】
    ■案件A
    ・タスクA
    　見積：2h   実績：2h（±0h）
@@ -190,7 +190,7 @@ function onSubmit(e) {
    ・タスクB
    　見積：-   実績：1h
 
-   --- 集計 ---
+   【集計】
    ■案件別
    ・案件A
    　見積：6h   実績：4h（-2h）
@@ -200,7 +200,7 @@ function onSubmit(e) {
    ■全体
    見積：8h   実績：8h（-1h）
 
-   --- メモ ---
+   【メモ】
    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
