@@ -52,11 +52,11 @@ packages/web/src/
 ## 環境変数
 `packages/web/.env`（または `.env.local`）に以下を設定してください。
 
-| 変数名 | 必須 | 説明 | 例 |
-| --- | --- | --- | --- |
-| `VITE_SUPABASE_URL` | 必須 | Supabase プロジェクトの URL。`https://<project>.supabase.co` 形式。 | `https://xyzcompany.supabase.co` |
-| `VITE_SUPABASE_ANON_KEY` | 必須 | Supabase の anon 公開キー。ブラウザから Supabase API を呼び出す際に使用。 | `eyJhbGciOi...` |
-| `VITE_API_BASE_URL` | 任意 | バックエンド API のベース URL。未設定時は `http://localhost:8787` を利用。 | `https://work-support.noreply-work-s-dev.workers.dev` |
+| 変数名                   | 必須 | 説明                                                                       | 例                               |
+| ------------------------ | ---- | -------------------------------------------------------------------------- | -------------------------------- |
+| `VITE_SUPABASE_URL`      | 必須 | Supabase プロジェクトの URL。`https://<project>.supabase.co` 形式。        | `https://xyzcompany.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | 必須 | Supabase の anon 公開キー。ブラウザから Supabase API を呼び出す際に使用。  | `eyJhbGciOi...`                  |
+| `VITE_API_BASE_URL`      | 任意 | バックエンド API のベース URL。未設定時は `http://localhost:8787` を利用。 | `https://work-support-api.com`   |
 
 > `.env` に記述した値は Vite のビルド時に注入されます。機密情報を Git 管理から除外するため、`.env` ファイルはコミットしないでください。
 

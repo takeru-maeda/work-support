@@ -16,11 +16,11 @@
 
 ### パッケージ役割サマリ
 
-| パッケージ | 役割 | 詳細 README |
-| --- | --- | --- |
-| `packages/api` | Cloudflare Workers + Hono のバックエンド実装。API 仕様と Supabase 永続化を担当します。 | `packages/api/README.md` |
-| `packages/web` | React + Vite のフロントエンド実装。BalletProof 構成で UI/状態管理/サービスを分離しています。 | `packages/web/README.md` |
-| `packages/shared` | API スキーマやユーティリティを共有し、型整合性を保つためのパッケージです。 | 該当モジュールをコード参照 |
+| パッケージ        | 役割                                                                                         | 詳細 README                |
+| ----------------- | -------------------------------------------------------------------------------------------- | -------------------------- |
+| `packages/api`    | Cloudflare Workers + Hono のバックエンド実装。API 仕様と Supabase 永続化を担当します。       | `packages/api/README.md`   |
+| `packages/web`    | React + Vite のフロントエンド実装。BalletProof 構成で UI/状態管理/サービスを分離しています。 | `packages/web/README.md`   |
+| `packages/shared` | API スキーマやユーティリティを共有し、型整合性を保つためのパッケージです。                   | 該当モジュールをコード参照 |
 
 ## ドキュメントの読み順
 
@@ -31,8 +31,8 @@
 
 ## デプロイ URL
 - フロントエンド: https://work-support-app.com
-- バックエンド (Cloudflare Workers): https://work-support.noreply-work-s-dev.workers.dev/
-- API 仕様 (Swagger UI): https://work-support.noreply-work-s-dev.workers.dev/ui
+- バックエンド (Cloudflare Workers): https://work-support-api.com
+- API 仕様 (Swagger UI): https://work-support-api.com/ui
 
 ## セットアップ
 1. ルートで依存関係をインストールします。

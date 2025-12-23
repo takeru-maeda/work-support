@@ -74,8 +74,8 @@ API 一覧とスキーマ詳細は `@docs/specs/design/05-api.md` および `pac
   - Swagger UI: `http://localhost:8787/ui`
   - OpenAPI JSON: `http://localhost:8787/openapi`
 - 本番（Cloudflare Workers）:
-  - Swagger UI: `https://work-support.noreply-work-s-dev.workers.dev/ui`
-  - OpenAPI JSON: `https://work-support.noreply-work-s-dev.workers.dev/openapi`
+  - Swagger UI: `https://work-support-api.com/ui`
+  - OpenAPI JSON: `https://work-support-api.com/openapi`
 
 `hono-openapi` がルート定義の Zod スキーマから仕様を生成します。ドキュメントの更新が必要な場合は、ルートの `docsRoute` 設定を調整してください。
 
