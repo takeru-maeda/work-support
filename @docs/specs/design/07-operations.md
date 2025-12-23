@@ -49,7 +49,7 @@
 ### 設定オプション
 
 - **`origin`:**
-  - **本番環境:** フロントエンドがデプロイされるVercelのドメイン（例: `https://your-frontend-app.vercel.app`）。
+  - **本番環境:** フロントエンドがデプロイされるドメイン（例: `https://work-support-app.com`）。
   - **開発環境:** ローカル開発サーバーのオリジン（例: `http://localhost:5173` など）。複数のオリジンを許可する場合は配列で指定する。
 - **`credentials`:** JWT認証でCookieを使用する場合や、認証情報（Authorizationヘッダーなど）を伴うリクエストを許可する場合は `true` に設定する。
 - **`methods`, `headers`:** 許可するHTTPメソッド（`GET`, `POST`, `PUT`, `DELETE` など）やヘッダーを適切に設定する。
@@ -64,7 +64,7 @@ const app = new Hono();
 
 // 環境変数から許可するオリジンを取得
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? ['https://your-frontend-app.vercel.app']
+  ? ['https://work-support-app.com']
   : ['http://localhost:5173', 'http://localhost:3000']; // 開発環境
 
 app.use(

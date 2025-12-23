@@ -30,7 +30,7 @@
 4. 実装対象タスクを `@docs/specs/tasks/index.md` で確認し、進捗を更新する。
 
 ## デプロイ URL
-- フロントエンド (Vercel): https://work-support-web.vercel.app
+- フロントエンド: https://work-support-app.com
 - バックエンド (Cloudflare Workers): https://work-support.noreply-work-s-dev.workers.dev/
 - API 仕様 (Swagger UI): https://work-support.noreply-work-s-dev.workers.dev/ui
 

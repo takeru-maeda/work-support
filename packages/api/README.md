@@ -45,15 +45,15 @@ API 一覧とスキーマ詳細は `@docs/specs/design/05-api.md` および `pac
 ## 環境変数
 `packages/api/.dev.vars`（ローカル開発）や Cloudflare Workers の Secrets に次の変数を設定してください。
 
-| 変数名 | 必須 | 説明 | 例 |
-| --- | --- | --- | --- |
-| `SUPABASE_URL` | 必須 | Supabase プロジェクトの URL。 | `https://xyzcompany.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | 必須 | Supabase Service Role キー（DB への管理操作用）。 | `eyJhbGciOi...` |
-| `SUPABASE_JWT_SECRET` | 必須 | Supabase が発行する JWT を検証するための秘密鍵。 | `super-secret-jwt-key` |
-| `API_KEY` | 必須 | Google Apps Script など外部サービスからの API 認証に利用する固定キー。 | `my-secure-api-key` |
-| `GAS_EMAIL_ENDPOINT` | 必須 | 工数登録完了メールを送信する Google Apps Script のエンドポイント。 | `https://script.google.com/macros/s/.../exec` |
-| `PROD_FRONTEND_URL` | 必須 | 本番フロントエンドのオリジン（CORS 許可対象）。 | `https://work-support-web.vercel.app` |
-| `DEV_FRONTEND_URL` | 任意 | 開発時に許可するフロントエンドのオリジン。未設定時は `http://localhost:5173` を使用。 | `http://localhost:5173` |
+| 変数名                      | 必須 | 説明                                                                                  | 例                                            |
+| --------------------------- | ---- | ------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `SUPABASE_URL`              | 必須 | Supabase プロジェクトの URL。                                                         | `https://xyzcompany.supabase.co`              |
+| `SUPABASE_SERVICE_ROLE_KEY` | 必須 | Supabase Service Role キー（DB への管理操作用）。                                     | `eyJhbGciOi...`                               |
+| `SUPABASE_JWT_SECRET`       | 必須 | Supabase が発行する JWT を検証するための秘密鍵。                                      | `super-secret-jwt-key`                        |
+| `API_KEY`                   | 必須 | Google Apps Script など外部サービスからの API 認証に利用する固定キー。                | `my-secure-api-key`                           |
+| `GAS_EMAIL_ENDPOINT`        | 必須 | 工数登録完了メールを送信する Google Apps Script のエンドポイント。                    | `https://script.google.com/macros/s/.../exec` |
+| `PROD_FRONTEND_URL`         | 必須 | 本番フロントエンドのオリジン（CORS 許可対象）。                                       | `https://work-support-app.com`                |
+| `DEV_FRONTEND_URL`          | 任意 | 開発時に許可するフロントエンドのオリジン。未設定時は `http://localhost:5173` を使用。 | `http://localhost:5173`                       |
 
 > `.dev.vars` は Git 管理下に置かないでください。Cloudflare では `wrangler secret put` を利用して本番値を登録します。
 

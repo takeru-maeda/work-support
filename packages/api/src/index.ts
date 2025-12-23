@@ -21,13 +21,21 @@ app.use(
   "*",
   cors({
     origin: (origin, c) => {
+      // プリフライトリクエストの場合、Originヘッダーから取得
+      const requestOrigin: string | undefined =
+        origin || c.req.header("Origin");
+
       const allowedOrigins = [
         c.env.PROD_FRONTEND_URL,
         c.env.DEV_FRONTEND_URL || "http://localhost:5173",
       ].filter(Boolean);
 
-      if (allowedOrigins.includes(origin)) {
-        return origin;
+      if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+        return requestOrigin;
+      }
+      // プリフライトリクエストでoriginが未指定の場合でも、許可されたオリジンがあれば最初のものを返す
+      if (!requestOrigin && allowedOrigins.length > 0) {
+        return allowedOrigins[0];
       }
       return undefined; // 許可しない
     },

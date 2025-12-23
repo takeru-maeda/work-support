@@ -16,6 +16,12 @@ import { jwtVerify, type JWTPayload } from "jose";
  * @returns 認証後に実行される処理
  */
 export const jwtAuthMiddleware = createMiddleware(async (c, next) => {
+  // OPTIONSリクエスト（CORSプリフライト）は認証をスキップ
+  if (c.req.method === "OPTIONS") {
+    await next();
+    return;
+  }
+
   const authHeader: string | undefined = c.req.header("Authorization");
   if (authHeader?.startsWith("Bearer ") !== true) {
     throw new AppError(401, "Unauthorized");
