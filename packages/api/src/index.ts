@@ -21,11 +21,10 @@ app.use(
   "*",
   cors({
     origin: (origin, c) => {
-      // プリフライトリクエストの場合、Originヘッダーから取得
       const requestOrigin: string | undefined =
-        origin || c.req.header("Origin");
+        origin || c.req.header("Origin") || undefined;
 
-      const allowedOrigins = [
+      const allowedOrigins: string[] = [
         c.env.PROD_FRONTEND_URL,
         c.env.DEV_FRONTEND_URL || "http://localhost:5173",
       ].filter(Boolean);
@@ -33,15 +32,12 @@ app.use(
       if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
         return requestOrigin;
       }
-      // プリフライトリクエストでoriginが未指定の場合でも、許可されたオリジンがあれば最初のものを返す
-      if (!requestOrigin && allowedOrigins.length > 0) {
-        return allowedOrigins[0];
-      }
-      return undefined; // 許可しない
+      return undefined;
     },
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["POST", "GET", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
+    maxAge: 86400, // プリフライトリクエストのキャッシュ時間（24時間）
   }),
 );
 

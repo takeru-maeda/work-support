@@ -20,6 +20,12 @@ import { createLogger } from "../lib/logger";
  * @returns 記録後に実行される処理
  */
 export const accessLogMiddleware = createMiddleware(async (c, next) => {
+  // OPTIONSリクエスト（CORSプリフライト）はアクセスログ記録をスキップ
+  if (c.req.method === "OPTIONS") {
+    await next();
+    return;
+  }
+
   c.set("start", Date.now());
   const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
   const insertLog: TablesInsert<"access_logs"> = {
