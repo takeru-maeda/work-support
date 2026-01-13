@@ -13,7 +13,7 @@ export function MobileBottomNav() {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background pb-3 md:hidden">
       <div className="flex items-center justify-around">
         {MAIN_NAVIGATION.map((item) => {
           const Icon = item.icon;
