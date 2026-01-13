@@ -1,6 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppHeaderHomeLink } from "@/components/layout/header/AppHeaderHomeLink";
-import { Menu } from "lucide-react";
 
 export function HeaderSkeleton() {
   return (
@@ -20,10 +19,6 @@ export function HeaderSkeleton() {
 
           {/* テーマアイコンスケルトン */}
           <Skeleton className="h-10 w-10 rounded-full" />
-
-          <div className="size-9 flex items-center justify-center md:hidden">
-            <Menu className="size-4" />
-          </div>
         </div>
       </div>
     </header>
