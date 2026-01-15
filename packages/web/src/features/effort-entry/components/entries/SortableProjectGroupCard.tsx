@@ -33,14 +33,12 @@ export const SortableProjectGroupCard = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={cn(
-        "touch-none cursor-move",
-        isDragging && "opacity-80 shadow-lg",
-      )}
-      {...attributes}
-      {...listeners}
+      className={cn(isDragging && "opacity-80 shadow-lg")}
     >
-      <ProjectGroupCard {...props} />
+      <ProjectGroupCard
+        {...props}
+        dragHandleProps={{ ...attributes, ...listeners }}
+      />
     </div>
   );
 };

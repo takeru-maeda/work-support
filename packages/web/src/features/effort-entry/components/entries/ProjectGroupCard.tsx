@@ -22,6 +22,7 @@ export interface ProjectGroupCardProps {
   onRemove: (id: string) => void;
   excludedProjectIds?: number[];
   excludedTaskIds?: number[];
+  dragHandleProps?: Record<string, unknown>;
 }
 
 export const ProjectGroupCard = ({
@@ -34,6 +35,7 @@ export const ProjectGroupCard = ({
   onRemove,
   excludedProjectIds = [],
   excludedTaskIds = [],
+  dragHandleProps = {},
 }: Readonly<ProjectGroupCardProps>): JSX.Element => {
   const projectError: string | undefined = projectErrorMessage(
     entries,
@@ -60,7 +62,7 @@ export const ProjectGroupCard = ({
       taskId: null,
       taskName: "",
       estimatedHours: null,
-      actualHours: null,
+      actualHours: 0,
     });
   };
 
@@ -83,7 +85,13 @@ export const ProjectGroupCard = ({
       </Button>
       <div className="flex">
         <div className="hidden shrink-0 py-2 pr-2 text-muted-foreground sm:block">
-          <GripVertical className="h-5 w-5" />
+          <button
+            type="button"
+            className="cursor-grab active:cursor-grabbing touch-none"
+            {...dragHandleProps}
+          >
+            <GripVertical className="h-5 w-5" />
+          </button>
         </div>
         <div className="flex-1 space-y-3">
           <div className="flex-1">
@@ -122,15 +130,36 @@ export const ProjectGroupCard = ({
         </div>
       </div>
 
+      {/* Desktop: Full width button */}
       <Button
         variant="ghost"
         size="sm"
         onClick={handleAddTask}
-        className="w-full gap-2 bg-transparent mt-3"
+        className="hidden sm:flex w-full gap-2 bg-transparent mt-3"
       >
         <Plus className="h-4 w-4" />
         タスクを追加
       </Button>
+
+      {/* Mobile: Drag handle + shorter button */}
+      <div className="flex sm:hidden gap-2 mt-3">
+        <button
+          type="button"
+          className="shrink-0 flex items-center justify-center w-10 h-9 rounded-md hover:bg-accent cursor-grab active:cursor-grabbing touch-none"
+          {...dragHandleProps}
+        >
+          <GripVertical className="h-5 w-5 text-muted-foreground" />
+        </button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleAddTask}
+          className="flex-1 gap-2 bg-transparent mr-10"
+        >
+          <Plus className="h-4 w-4" />
+          タスクを追加
+        </Button>
+      </div>
     </div>
   );
 };

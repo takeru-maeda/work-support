@@ -99,7 +99,10 @@ export function EffortCombobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 max-w-[calc(80vw)]" align="start">
+      <PopoverContent
+        className="w-auto p-0 max-w-[calc(70vw)] sm:max-w-[calc(80vw)]"
+        align="start"
+      >
         <Command>
           <CommandInput
             placeholder={`${placeholder}を検索または入力...`}
@@ -107,7 +110,7 @@ export function EffortCombobox({
             onValueChange={handleInputChange}
             disabled={disabled}
           />
-          <CommandList className="max-h-[calc(30vh)]">
+          <CommandList className="max-h-[calc(20vh)] sm:max-h-[calc(30vh)]">
             <CommandEmpty className="py-0">
               {isLoading ? (
                 <div className="p-3 text-sm text-muted-foreground">
