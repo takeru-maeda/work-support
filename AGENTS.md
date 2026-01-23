@@ -1,46 +1,45 @@
-# Repository Guidelines
+# AI-DLC and Spec-Driven Development
 
-本ドキュメントは、本リポジトリで作業するコントリビューター向けの簡潔なガイドです（目標: 約300語以内）。作業開始時に必ず `AI_AGENT_GUIDE.md` と `@docs/` 配下の全ドキュメントを読み込み、規約と仕様を把握してください。回答は日本語で行ってください。
+Kiro-style Spec Driven Development implementation on AI-DLC (AI Development Life Cycle)
 
-## プロジェクト構成
-- ルート: pnpm モノレポ。コードは `packages/` 配下に集約。
-- `packages/api`: Hono + Cloudflare Workers のバックエンド。機能ごとに `features/<feature>/{index,service,repository}.ts`。
-- `packages/web`: Vite + React フロント。Balletproof への移行中。ページは `pages/`、機能別 UI/ロジックは `features/`。
-- `packages/shared`: バックエンド/フロント共通の型・ユーティリティ。
-- ドキュメント: `@docs/`（仕様・設計・ガイド）。
+## Project Context
 
-## 開発・ビルド・テスト
-- 依存インストール: `pnpm install`（ルート）。
-- 開発サーバー: `pnpm dev:api`（API）、`pnpm dev:web`（Web）。
-- テスト: `pnpm test` または各パッケージで `pnpm vitest`。Vitest を使用。
-- 型チェック/ビルドは各パッケージの `build`/`typecheck` スクリプトを利用（必要に応じて `pnpm --filter <pkg> <script>`）。
+### Paths
+- Steering: `.kiro/steering/`
+- Specs: `.kiro/specs/`
 
-## コーディングスタイル & 命名
-- 言語は TypeScript。**全てに型注釈**を付与し、文末セミコロン必須。
-- 型専用 import は `import type { Foo } from "...";` を使用。
-- エクスポートは原則名前付き。主役1つなら `export default` 可。
-- ファイル命名: ユーティリティは `kebab-case.ts`、React コンポーネントは `PascalCase.tsx`、型専用は `xxx.types.ts`、フックは `useXxx.ts`。
-- インポート順: 外部 → エイリアス → 相対。グループ間に空行。
-- 実装後、対象関数に JSDoc を付与（1行目は敬体、@param/@returns を順序通り）。
+### Steering vs Specification
 
-## テスト指針
-- テスト名/ファイル: `*.test.ts` / `*.test.tsx`（または `.spec`）。
-- 仕様駆動開発: 実装前に `@docs/specs` を参照。追加機能は該当仕様とテストをセットで更新。
-- Undo/Redo、ドラフト保存、API バリデーションなど副作用箇所はユースケース単位でテストを追加。
+**Steering** (`.kiro/steering/`) - Guide AI with project-wide rules and context
+**Specs** (`.kiro/specs/`) - Formalize development process for individual features
 
-## コミット & PR
-- コミットメッセージ: 簡潔に目的を述べる（例: `feat: add goals history filter`）。
-- PR では以下を記載:
-  - 目的と変更概要（箇条書き推奨）。
-  - 影響範囲（API/DB/UI）。
-  - テスト結果（実行コマンドと要約）。
-  - UI変更がある場合はスクリーンショットや簡易動画。
-- 仕様タスクを進めた場合は `@docs/specs/tasks/index.md` のチェックボックスを更新。
+### Active Specifications
+- Check `.kiro/specs/` for active specifications
+- Use `/kiro/spec-status [feature-name]` to check progress
 
-## セキュリティ & 環境変数
-- 秘密情報はコードに含めない。Cloudflare Workers では Secrets、Vercel では環境変数設定を使用。フロントで公開する値は `VITE_` 接頭辞。
-- GAS 連携用 API キーはバックエンドの環境変数で管理し、フロントには置かない。
+## Development Guidelines
+- Think in English, generate responses in Japanese. All Markdown content written to project files (e.g., requirements.md, design.md, tasks.md, research.md, validation reports) MUST be written in the target language configured for this specification (see spec.json.language).
 
-## アーキテクチャ上の注意
-- バックエンドは Vertical Slice。ビジネスロジックは `service`, DB I/O は `repository` に分離。
-- フロントは SWR + axios、Zustand で状態管理。複合フックは関心ごとに分割し、モジュール化（詳細: `@docs/guides/hook-refactoring-guide.md`）。
+## Minimal Workflow
+- Phase 0 (optional): `/kiro/steering`, `/kiro/steering-custom`
+- Phase 1 (Specification):
+  - `/kiro/spec-init "description"`
+  - `/kiro/spec-requirements {feature}`
+  - `/kiro/validate-gap {feature}` (optional: for existing codebase)
+  - `/kiro/spec-design {feature} [-y]`
+  - `/kiro/validate-design {feature}` (optional: design review)
+  - `/kiro/spec-tasks {feature} [-y]`
+- Phase 2 (Implementation): `/kiro/spec-impl {feature} [tasks]`
+  - `/kiro/validate-impl {feature}` (optional: after implementation)
+- Progress check: `/kiro/spec-status {feature}` (use anytime)
+
+## Development Rules
+- 3-phase approval workflow: Requirements → Design → Tasks → Implementation
+- Human review required each phase; use `-y` only for intentional fast-track
+- Keep steering current and verify alignment with `/kiro/spec-status`
+- Follow the user's instructions precisely, and within that scope act autonomously: gather the necessary context and complete the requested work end-to-end in this run, asking questions only when essential information is missing or the instructions are critically ambiguous.
+
+## Steering Configuration
+- Load entire `.kiro/steering/` as project memory
+- Default files: `product.md`, `tech.md`, `structure.md`
+- Custom files are supported (managed via `/kiro/steering-custom`)
