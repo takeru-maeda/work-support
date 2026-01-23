@@ -25,7 +25,7 @@ const App = (): JSX.Element => {
   return (
     <ThemeProvider defaultTheme="light">
       <div className="min-h-screen bg-background text-foreground">
-        <div className="pt-16">
+        <div>
           <Toaster position="top-center" theme={theme} />
           <Routes>
             <Route path={ROUTES.landing} element={<LandingPage />} />
@@ -48,7 +48,10 @@ const App = (): JSX.Element => {
               path={ROUTES.resetPassword}
               element={<ResetPasswordPage />}
             />
-            <Route path="*" element={<Navigate to={ROUTES.landing} replace />} />
+            <Route
+              path="*"
+              element={<Navigate to={ROUTES.landing} replace />}
+            />
           </Routes>
         </div>
       </div>

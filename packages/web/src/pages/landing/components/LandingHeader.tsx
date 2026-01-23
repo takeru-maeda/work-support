@@ -16,7 +16,7 @@ export const LandingHeader = ({
   loginHref,
   signupHref,
 }: LandingHeaderProps): JSX.Element => (
-  <header className="fixed top-0 w-full z-50 border-b bg-background/80 backdrop-blur-xl shadow-lg">
+  <header className="fixed top-0 w-full z-50 bg-background/70 backdrop-blur-xl shadow-sm">
     <div className="container mx-auto px-4 sm:px-6 h-14 flex items-center justify-between max-w-7xl">
       <Link
         to={logoHref}
@@ -59,4 +59,3 @@ export const LandingHeader = ({
     </div>
   </header>
 );
-

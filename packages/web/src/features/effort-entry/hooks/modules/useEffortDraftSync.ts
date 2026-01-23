@@ -81,6 +81,18 @@ export function useEffortDraftSync(): EffortDraftSyncResult {
     setIsInitializing(true);
 
     const localDraft: PersistedFormPayload | null = readLocalDraft(storageKey);
+
+    // サーバーに下書きがなく、LocalStorageに下書きがある場合
+    // → 別デバイスで登録が完了した可能性が高いため、LocalStorageの古い下書きをクリア
+    // ただし、ネットワークエラー時はLocalStorageを保持する
+    if (!remoteDraft && localDraft && !draftError) {
+      clearLocalDraft(storageKey);
+      setFormData(createInitialFormData());
+      setIsInitializing(false);
+      setCanSyncDraft(true);
+      return;
+    }
+
     const remoteSource: DraftSource | null = remoteDraft
       ? {
           formData: {
@@ -117,7 +129,7 @@ export function useEffortDraftSync(): EffortDraftSyncResult {
 
     setIsInitializing(false);
     setCanSyncDraft(true);
-  }, [draftLoading, remoteDraft, storageKey]);
+  }, [draftError, draftLoading, remoteDraft, storageKey]);
 
   useEffect(() => {
     if (!storageKey || !canSyncDraft) return;

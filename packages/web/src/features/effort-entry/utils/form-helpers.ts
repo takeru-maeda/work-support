@@ -20,7 +20,7 @@ export const createEmptyEntry = (): EffortEntry => {
     taskId: null,
     taskName: "",
     estimatedHours: null,
-    actualHours: null,
+    actualHours: 0,
   };
 };
 
