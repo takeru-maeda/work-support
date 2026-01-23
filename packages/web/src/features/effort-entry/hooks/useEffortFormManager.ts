@@ -51,6 +51,7 @@ export function useEffortFormManager(): UseEffortFormManagerResult {
     setFormData,
     isInitializing,
     skipNextDraftSync,
+    cancelSync,
     clearPersistedDraft,
     mutateDraft,
   } = useEffortDraftSync();
@@ -103,6 +104,7 @@ export function useEffortFormManager(): UseEffortFormManagerResult {
       replaceFormState: replaceState,
       clearPersistedDraft,
       skipNextDraftSync,
+      cancelSync,
       mutateDraft,
       mutateProjects,
       setEntryErrors,

@@ -28,6 +28,7 @@ interface UseEffortSubmissionParams {
   ) => void;
   clearPersistedDraft: () => void;
   skipNextDraftSync: () => void;
+  cancelSync: () => void;
   mutateDraft: KeyedMutator<EffortDraftResponse["draft"] | null>;
   mutateProjects: KeyedMutator<ProjectWithTasks[]>;
   setEntryErrors: React.Dispatch<
@@ -53,6 +54,7 @@ export function useEffortSubmission({
   replaceFormState,
   clearPersistedDraft,
   skipNextDraftSync,
+  cancelSync,
   mutateDraft,
   mutateProjects,
   setEntryErrors,
@@ -99,6 +101,8 @@ export function useEffortSubmission({
   }, [runValidation]);
 
   const handleSubmit = useCallback(async () => {
+    cancelSync();
+
     const payload: EffortEntryDto[] | null = runValidation();
     if (!payload || !formData.date) {
       return;

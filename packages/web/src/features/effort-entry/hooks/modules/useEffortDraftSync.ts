@@ -39,6 +39,7 @@ export interface EffortDraftSyncResult {
   setFormData: React.Dispatch<React.SetStateAction<EffortFormData>>;
   isInitializing: boolean;
   skipNextDraftSync: () => void;
+  cancelSync: () => void;
   clearPersistedDraft: () => void;
   mutateDraft: KeyedMutator<EffortDraftResponse["draft"] | null>;
 }
@@ -140,6 +141,20 @@ export function useEffortDraftSync(): EffortDraftSyncResult {
     }
 
     const nextTimestamp: string = new Date().toISOString();
+
+    // フォームが空の場合は保存しない（登録完了後のリセット時など）
+    const isEmpty =
+      formData.entries.length === 0 &&
+      (!formData.memo || formData.memo.trim().length === 0) &&
+      !formData.date;
+
+    if (isEmpty) {
+      if (storageKey) {
+        clearLocalDraft(storageKey);
+      }
+      return;
+    }
+
     const draftPayload: EffortDraft = {
       date: formatDateOnly(formData.date),
       entries: formData.entries.map(mapFormEntryToRequest),
@@ -177,8 +192,16 @@ export function useEffortDraftSync(): EffortDraftSyncResult {
     };
   }, [canSyncDraft, formData, mutate, storageKey]);
 
+  const cancelSync = (): void => {
+    if (draftSyncTimeoutRef.current !== null) {
+      window.clearTimeout(draftSyncTimeoutRef.current);
+      draftSyncTimeoutRef.current = null;
+    }
+  };
+
   const skipNextDraftSync = (): void => {
     skipDraftSyncRef.current = true;
+    cancelSync();
   };
 
   const clearPersistedDraft = (): void => {
@@ -191,6 +214,7 @@ export function useEffortDraftSync(): EffortDraftSyncResult {
     setFormData,
     isInitializing,
     skipNextDraftSync,
+    cancelSync,
     clearPersistedDraft,
     mutateDraft: mutate,
   };
