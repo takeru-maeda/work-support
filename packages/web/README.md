@@ -1,6 +1,6 @@
 # Work Support Web
 
-フロントエンドは React + Vite を基盤とした SPA として構築され、業務支援アプリ「仕事サポートアプリ」の UI レイヤーを担います。工数登録・目標管理・週報出力など、仕様は `AI_AGENT_GUIDE.md` と `@docs/specs` に定義されたドキュメントを参照して仕様駆動で実装します。
+フロントエンドは React + Vite を基盤とした SPA として構築され、業務支援アプリ「仕事サポートアプリ」の UI レイヤーを担います。工数登録・目標管理・週報出力など、仕様は機能ごとの仕様書 `docs/specs/` を正とします（未作成の機能は旧設計書 `docs/legacy/specs/` を参考にします）。
 
 ## 主な画面
 - `/` ホーム：工数登録・目標管理・週報出力へのハブ。
@@ -11,7 +11,7 @@
 - `/login` / `/signup` / `/reset-password` 認証関連：Supabase 認証フローを提供。
 - `/profile` / `/settings`：プロフィール更新と通知設定の同期を扱う。
 
-詳細な画面要件は `@docs/specs/design/03-frontend.md`、API 仕様は `@docs/specs/design/05-api.md` を参照してください。
+詳細な画面要件は `docs/legacy/specs/design/03-frontend.md`、API 仕様は `docs/legacy/specs/design/05-api.md` を参照してください。
 
 ## 技術スタック
 - React + TypeScript + Vite
@@ -62,12 +62,12 @@ packages/web/src/
 
 ## API との連携
 - 全 API は JWT 認証が必要です。Supabase のアクセストークンを `Authorization: Bearer <jwt>` で送信します。
-- 工数・目標・週報などの API コントラクトは `@docs/specs/design/05-api.md` に定義されている OpenAPI 相当の仕様に従います。
+- 工数・目標・週報などの API コントラクトは `docs/legacy/specs/design/05-api.md` に定義されている OpenAPI 相当の仕様に従います。
 - 共有の Zod スキーマ/型は `packages/shared` からインポートして、フロントとバックで型整合性を保ちます。
 
 ## 実装方針とガイドライン
-- 仕様駆動開発や TypeScript/JSDoc ルールの共通方針はルート `README.md` と `AI_AGENT_GUIDE.md` を参照してください。
-- フロントエンド固有の観点（例: `POST /api/logs/error` へのエラーレポートや API 並列取得のフロー）は `@docs/specs/design/03-frontend.md` で詳細を確認し、それに従って実装してください。
+- 仕様駆動開発や TypeScript/JSDoc ルールの共通方針はルート `README.md` と `CLAUDE.md` を参照してください。
+- フロントエンド固有の観点（例: `POST /api/logs/error` へのエラーレポートや API 並列取得のフロー）は `docs/legacy/specs/design/03-frontend.md` で詳細を確認し、それに従って実装してください。
 
 ## テスト
 - テストフレームワークは Vitest を使用します。ファイル名は `*.test.ts(x)` に統一し、仕様の主要分岐をカバーしてください。
@@ -86,11 +86,11 @@ packages/web/src/
   - `lib/swrConfig.ts` で共通設定を定義し、`services/*` が提供する fetcher を利用してサーバー状態を取得します。
 
 ## 参考ドキュメント
-- プロジェクト全体の概要：`AI_AGENT_GUIDE.md`
-- 要件定義：`@docs/specs/requirements/index.md`
-- 詳細設計インデックス：`@docs/specs/design/00-index.md`
-- フロントエンド設計詳細：`@docs/specs/design/03-frontend.md`
-- API 仕様：`@docs/specs/design/05-api.md`
-- データ構造：`@docs/specs/design/06-data-structures.md`
+- プロジェクト全体の概要：`CLAUDE.md`
+- 要件定義：`docs/legacy/specs/requirements/index.md`
+- 詳細設計インデックス：`docs/legacy/specs/design/00-index.md`
+- フロントエンド設計詳細：`docs/legacy/specs/design/03-frontend.md`
+- API 仕様：`docs/legacy/specs/design/05-api.md`
+- データ構造：`docs/legacy/specs/design/06-data-structures.md`
 
 ドキュメントと実装の差異が見つかった場合は、仕様を更新した上で README とコードを同期させてください。

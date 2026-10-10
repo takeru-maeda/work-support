@@ -1,6 +1,8 @@
 # 仕事サポートアプリ（Work Support）
 
-このリポジトリは、工数記録・目標管理・週報出力など日々の業務を支援する Web アプリケーションのモノレポです。`pnpm` ワークスペースを利用し、バックエンド（Cloudflare Workers + Hono）、フロントエンド（React + Vite）、共有ライブラリを単一リポジトリで管理します。仕様は `@docs/specs` に集約されており、仕様駆動開発を前提に進めます。AI エージェント向けの概要は `AI_AGENT_GUIDE.md` を参照してください。
+このリポジトリは、工数記録・目標管理・週報出力など日々の業務を支援する Web アプリケーションのモノレポです。`pnpm` ワークスペースを利用し、バックエンド（Cloudflare Workers + Hono）、フロントエンド（React + Vite）、共有ライブラリを単一リポジトリで管理します。
+
+機能ごとの仕様書（`docs/specs/`）を現在の姿の正とし、改修のたびに「改修の記録」を作って人間が承認してから実装します。AI エージェント（Claude Code）向けの入口は `CLAUDE.md` です。
 
 ## パッケージ構成
 ```
@@ -8,26 +10,23 @@
 ├── packages/
 │   ├── api/      # Cloudflare Workers (Hono) バックエンド
 │   ├── web/      # React + Vite フロントエンド
-│   └── shared/   # 共通の型・ユーティリティ
-└── @docs/        # 仕様・設計ドキュメント群
+│   └── shared/   # 共通の型・スキーマ・ユーティリティ
+├── docs/         # 仕様書、規約（steering）、計画書など（索引: docs/README.md）
+└── CHANGELOG.md  # 変更履歴
 ```
 
-各パッケージの詳細は `packages/api/README.md` と `packages/web/README.md` を参照してください。
-
-### パッケージ役割サマリ
-
-| パッケージ        | 役割                                                                                         | 詳細 README                |
-| ----------------- | -------------------------------------------------------------------------------------------- | -------------------------- |
-| `packages/api`    | Cloudflare Workers + Hono のバックエンド実装。API 仕様と Supabase 永続化を担当します。       | `packages/api/README.md`   |
-| `packages/web`    | React + Vite のフロントエンド実装。BalletProof 構成で UI/状態管理/サービスを分離しています。 | `packages/web/README.md`   |
-| `packages/shared` | API スキーマやユーティリティを共有し、型整合性を保つためのパッケージです。                   | 該当モジュールをコード参照 |
+| パッケージ        | 役割                                                                                   | 詳細                                                 |
+| ----------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `packages/api`    | Cloudflare Workers + Hono のバックエンド。API と Supabase への永続化を担当します。     | `packages/api/README.md`、`packages/api/CLAUDE.md`   |
+| `packages/web`    | React + Vite のフロントエンド。機能単位で UI・状態・API 呼び出しを分けています。       | `packages/web/README.md`、`packages/web/CLAUDE.md`   |
+| `packages/shared` | API の入出力スキーマ（Zod）とユーティリティを共有し、型の整合性を保ちます。            | コードを参照                                         |
 
 ## ドキュメントの読み順
 
-1. `AI_AGENT_GUIDE.md` でプロジェクトの目的と開発ルールを把握する。
-2. `@docs/specs/requirements/index.md` で要件を確認する。
-3. `@docs/specs/design/00-index.md` から設計各論（`01-system-overview.md` 〜 `09-database.md`）を順番にたどる。
-4. 実装対象タスクを `@docs/specs/tasks/index.md` で確認し、進捗を更新する。
+1. `CLAUDE.md` で全体の地図と開発の進め方を把握する
+2. `docs/steering/`（product / tech / structure）で目的、技術、構成の規約を確認する
+3. 対象の機能の仕様書 `docs/specs/<feature>/spec.md` を読む（一覧は `docs/specs/README.md`）
+4. 改修するときは、`docs/specs/<feature>/changes/` に改修の記録を作って承認を得る
 
 ## デプロイ URL
 - フロントエンド: https://work-support-app.com
@@ -41,34 +40,20 @@
    ```
 2. バックエンド固有の環境変数や wrangler 設定は `packages/api/README.md` を参照してください。
 3. フロントエンドの `.env` 設定や Vite 起動手順は `packages/web/README.md` を参照してください。
-4. 共通の開発サーバー起動コマンド例:
+4. 開発サーバーの起動:
    ```bash
    pnpm dev:api   # Workers (wrangler dev)
    pnpm dev:web   # Vite
    ```
 
 ## テスト
-- すべてのパッケージで Vitest を利用します。実行方法やカバレッジ方針は各 README を参照してください。
-  ```bash
-  pnpm --filter api test
-  pnpm --filter web test
-  ```
-- 仕様に紐づく重要フロー（工数ドラフト制御、目標計算、週報生成など）をユニットテストでカバーする点は共通です。
+- すべてのパッケージで Vitest を利用します（テスト基盤は整備中。方針は `docs/steering/testing.md`）。
+- 仕様書の受け入れ基準（`AC-<feature>-NN`）をテストの単位にします。
 
 ## 開発指針
-- 仕様駆動開発：実装前に `@docs/specs` を確認し、タスク完了時は `@docs/specs/tasks/index.md` を更新します。
-- TypeScript ルール：全ての変数・関数に型注釈を付与し、文末にセミコロンを記述します。型のみのインポートは `import type` を使用します。
-- JSDoc：敬体の概要行と必要なタグを `@docs/guides/jsdoc-guidelines.md` に従って記述します。
-- バックエンドはフィーチャーベースの Vertical Slice アーキテクチャ、フロントエンドは BalletProof（Bulletproof React ベース）の構成に倣って実装します。
-- クライアント／サーバー共通のスキーマやロジックは `packages/shared` に集約し、型整合性を保ちます。
-
-## 主要ドキュメント
-- プロジェクト概要 / AI エージェント向けガイド: `AI_AGENT_GUIDE.md`
-- 要件定義: `@docs/specs/requirements/index.md`
-- 詳細設計インデックス: `@docs/specs/design/00-index.md`
-- バックエンド設計: `@docs/specs/design/02-backend.md`
-- フロントエンド設計: `@docs/specs/design/03-frontend.md`
-- API 仕様: `@docs/specs/design/05-api.md`
-- データ構造・DB 設計: `@docs/specs/design/06-data-structures.md`, `@docs/specs/design/09-database.md`
-
-ドキュメントと実装に差異が発生した場合は、仕様書・タスクリスト・README を同時に更新し、常に最新の状態を維持してください。
+- 改修は「改修の記録の作成 → 承認 → 実装 → 検証 → 仕様書の更新」の流れで行います（`CLAUDE.md`）。
+- TypeScript strict。型のみのインポートは `import type` を使用します。
+- JSDoc は `docs/guides/jsdoc-guidelines.md` に従って記述します。
+- バックエンドは機能単位の Vertical Slice、フロントエンドは Bulletproof React を下敷きにした機能単位の構成です（`docs/steering/structure.md`）。
+- クライアント／サーバー共通のスキーマやロジックは `packages/shared` に集約します。
+- 変更は `CHANGELOG.md` に記録します。

@@ -1,0 +1,44 @@
+# セキュリティ
+
+## 方針
+
+- 認証を先に済ませる
+- 権限は最小にする
+- シークレットは環境変数で管理し、コードやログに出さない
+
+## 認証と CORS
+
+- JWT: Supabase の JWT を `jose` で検証する
+- API キー: 外部システム（GAS）を固定のキーで認証する
+- CORS: 許可したオリジンだけを通す
+
+詳しくは `authentication.md`。
+
+## シークレット
+
+ローカルは `packages/api/.dev.vars`、本番は Cloudflare のシークレットで管理する。項目の一覧は `.dev.vars.example`。
+
+| 変数 | 用途 |
+| --- | --- |
+| `SUPABASE_URL` / `SUPABASE_ID` | Supabase のプロジェクト |
+| `SUPABASE_SERVICE_ROLE_KEY` | DB を操作するキー（全権限があるので特に注意） |
+| `SUPABASE_JWT_SECRET` | JWT の検証 |
+| `API_KEY` | 外部システムの認証 |
+| `APP_EMAIL` / `GAS_EMAIL_ENDPOINT` | メール送信 |
+| `PROD_FRONTEND_URL` / `DEV_FRONTEND_URL` | CORS |
+
+- `.dev.vars` と `.env` は git に入れない
+- **エージェントはシークレットのファイルを読まない・表示しない**（`.claude/settings.json` で、Read ツールと、ファイル名を含むシェルのコマンドを禁止している。抜け道があり得るので、禁止に頼らず自分でも避ける）
+
+## 入力の検証
+
+すべての入力を Zod スキーマで検証する（`validator("json", Schema)` / `validator("query", Schema)`）。
+
+## 認可
+
+- バックエンドは service role キーで DB を操作するため、RLS に守られない。**どのクエリにも `user_id` の条件を必ず入れる**
+- ユーザー ID は `c.get("user")` から取る（リクエストの値を信用しない）
+- 他のユーザーのデータを返さないことを、テストで確かめる
+
+---
+_パターンと判断を書く_

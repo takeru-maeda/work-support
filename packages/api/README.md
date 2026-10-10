@@ -1,6 +1,6 @@
 # Work Support API
 
-仕事サポートアプリのバックエンドは Cloudflare Workers 上で動作する Hono.js アプリケーションです。工数登録・目標管理・週報出力などフロントエンドが利用する API を提供し、仕様は `@docs/specs` に定義された設計を唯一の参照源とします。モノレポ全体の概要は `AI_AGENT_GUIDE.md` とルート `README.md` を参照してください。
+仕事サポートアプリのバックエンドは Cloudflare Workers 上で動作する Hono.js アプリケーションです。工数登録・目標管理・週報出力などフロントエンドが利用する API を提供し、仕様は機能ごとの仕様書 `docs/specs/` を正とします（未作成の機能は旧設計書 `docs/legacy/specs/` を参考にします）。モノレポ全体の概要は `CLAUDE.md` とルート `README.md` を参照してください。
 
 ## 技術スタック
 - Hono.js (Cloudflare Workers)
@@ -32,7 +32,7 @@ packages/api/src/
 - `features/**/repository.ts`: Supabase への永続化ロジックを提供。
 - `middleware/logger.ts`: アクセスログ／エラーログを `access_logs`・`info_logs`・`error_logs` へ記録。
 
-詳細は `@docs/specs/design/02-backend.md` と `@docs/specs/design/08-logic.md` を参照してください。
+詳細は `docs/legacy/specs/design/02-backend.md` と `docs/legacy/specs/design/08-logic.md` を参照してください。
 
 ## 認証とセキュリティ
 - フロントエンドからのリクエストは `jwtAuthMiddleware` を通じ、Supabase の JWT を検証してユーザーを特定します。
@@ -40,7 +40,7 @@ packages/api/src/
 - すべてのルートで CORS 設定を適切に行い、許可されたオリジンのみアクセスできるようにします。
 
 ## エンドポイント
-API 一覧とスキーマ詳細は `@docs/specs/design/05-api.md` および `packages/shared` の Zod 定義を参照してください。
+API 一覧とスキーマ詳細は `docs/legacy/specs/design/05-api.md` および `packages/shared` の Zod 定義を参照してください。
 
 ## 環境変数
 `packages/api/.dev.vars`（ローカル開発）や Cloudflare Workers の Secrets に次の変数を設定してください。
@@ -62,7 +62,7 @@ API 一覧とスキーマ詳細は `@docs/specs/design/05-api.md` および `pac
    ```bash
    pnpm install
    ```
-2. 上記の環境変数を `packages/api/.dev.vars` に設定します（詳細は `@docs/specs/design/07-operations.md` を参照）。
+2. 上記の環境変数を `packages/api/.dev.vars` に設定します（詳細は `docs/legacy/specs/design/07-operations.md` を参照）。
 3. 開発サーバーを起動します。
    ```bash
    pnpm run dev:api
@@ -82,7 +82,7 @@ API 一覧とスキーマ詳細は `@docs/specs/design/05-api.md` および `pac
 ## ログとオペレーション
 - リクエストごとに `accessLogMiddleware` が `access_logs` に記録し、コンテキストに `access_log_id` を渡します。
 - アプリ内で `AppError` などのカスタムエラーを投げると、グローバルエラーハンドラが `error_logs` に記録し、UI から送信されたログは `source = 'UI'` として保存されます。
-- クリティカルなエラー時はメール通知を行う設計です。詳細は `@docs/specs/design/07-operations.md` を参照してください。
+- クリティカルなエラー時はメール通知を行う設計です。詳細は `docs/legacy/specs/design/07-operations.md` を参照してください。
 
 ## テスト
 - Vitest を使用します。テストファイルは `*.test.ts` に統一し、Hono のテストクライアント (`app.request`) を用いてルートごとの振る舞いを検証します。
@@ -96,11 +96,11 @@ API 一覧とスキーマ詳細は `@docs/specs/design/05-api.md` および `pac
 - GitHub Actions などの CI を利用する場合も、同等のコマンドでデプロイします。
 
 ## 参考ドキュメント
-- プロジェクト概要: `AI_AGENT_GUIDE.md`
-- 要件定義: `@docs/specs/requirements/index.md`
-- バックエンド設計: `@docs/specs/design/02-backend.md`
-- API 詳細: `@docs/specs/design/05-api.md`
-- データベース設計: `@docs/specs/design/09-database.md`
-- ロジック詳細: `@docs/specs/design/08-logic.md`
+- プロジェクト概要: `CLAUDE.md`
+- 要件定義: `docs/legacy/specs/requirements/index.md`
+- バックエンド設計: `docs/legacy/specs/design/02-backend.md`
+- API 詳細: `docs/legacy/specs/design/05-api.md`
+- データベース設計: `docs/legacy/specs/design/09-database.md`
+- ロジック詳細: `docs/legacy/specs/design/08-logic.md`
 
 仕様やデータモデルに変更を加える際は、該当ドキュメントとこの README を同時に更新して整合性を保ってください。
