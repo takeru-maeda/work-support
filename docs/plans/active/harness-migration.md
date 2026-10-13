@@ -15,8 +15,8 @@ scope:                 # P2 の lint の一括修正と依存の整理、P4 の�
 
 ## 現在地
 
-- **フェーズ**: P4（テスト基盤）の作業が完了。人間のレビュー待ち。CI の db ジョブ（ローカルの Supabase、結合テスト、E2E）は、push して初めて動く
-- **次にやること**: P4 のレビューとコミット、push して CI の db ジョブが緑になることの確認（人間）。その後、avatars の storage ポリシーの改修（P3 の残り）と P5（仕様書への変換）
+- **フェーズ**: P4（テスト基盤）まで完了。CI の db ジョブ（ローカルの Supabase、結合テスト、E2E）が GitHub の上で通ることを確かめた（2026-10-14）
+- **次にやること**: avatars の storage ポリシーの改修（P3 の残り）と P5（仕様書への変換）
 - **ブロッカー**: なし（Context7 は `mcp__context7__resolve-library-id` / `mcp__context7__query-docs` で使えることを 2026-10-10 に確認した）
 
 ---
@@ -327,7 +327,7 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 - [x] web: Vitest、Testing Library、MSW（`packages/web/src/test/`。手本は MissionEditor のテスト。Node 24 と jsdom の AbortSignal の食い違いは、独自の環境 `src/test/environment.ts` で回避）
 - [x] E2E: Playwright（`packages/e2e`。テストごとに一意なユーザー、ログイン、工数の登録から一覧、主な 5 画面の表示と横はみ出し、を 3 幅で）。API は `.dev.vars` を読まない場所で起動する（wrangler は `.dev.vars` を `--env-file` より優先する）
 - [x] Playwright MCP で画面を確認する手順を `packages/web/CLAUDE.md` に書く（`pnpm dev:local`。ローカルの Supabase だけにつながり、確認用のアカウントを用意する）
-- [x] CI に単体・結合テストと E2E を追加する（`.github/workflows/ci.yml` の db ジョブ。push 後に動作を確かめる）
+- [x] CI に単体・結合テストと E2E を追加する（`.github/workflows/ci.yml` の db ジョブ。2026-10-14 に GitHub の上で通ることを確かめた）
 - [x] `docs/reference/api.md` を作る（D20。`pnpm api:docs`。生成とずれの検出は api の単体テスト `scripts/apiReference.test.ts` が行い、`describeRoute` の無いルートも失敗にする）。テストの仕組みの中で API の OpenAPI 定義を取り出し、エンドポイントの一覧をスクリプトで作る。`describeRoute` が無いルートは一覧に出ないので、漏れを検出する。ずれは自己点検と CI で検出する
 - [x] `impl-docs`（工程 7）とパッケージの CLAUDE.md の「ドキュメントの更新先」に、「DB のスキーマか API を変えたら `docs/reference/` を作り直す」を加える
 
