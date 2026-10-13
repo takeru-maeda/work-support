@@ -15,8 +15,8 @@ scope:                 # P2 の lint の一括修正と依存の整理、P4 の�
 
 ## 現在地
 
-- **フェーズ**: P1（指示系の一本化とドキュメントの移設）の作業が完了。人間のレビュー待ち
-- **次にやること**: P1 のレビューとコミット（人間）。その後 P2（機械的強制の土台）
+- **フェーズ**: P4（テスト基盤）の作業が完了。人間のレビュー待ち。CI の db ジョブ（ローカルの Supabase、結合テスト、E2E）は、push して初めて動く
+- **次にやること**: P4 のレビューとコミット、push して CI の db ジョブが緑になることの確認（人間）。その後、avatars の storage ポリシーの改修（P3 の残り）と P5（仕様書への変換）
 - **ブロッカー**: なし（Context7 は `mcp__context7__resolve-library-id` / `mcp__context7__query-docs` で使えることを 2026-10-10 に確認した）
 
 ---
@@ -322,14 +322,14 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 
 ### P4. テスト基盤
 - [x] api: Vitest と `app.request` で結合テストを書けるようにする（認証ヘルパー、データの用意と後片付け）。`*.int.test.ts` をローカルの Supabase で回す（`pnpm db:start` → `pnpm test:int`）。ローカルの Supabase は ES256 で署名するため、API の認証を公開鍵方式にも対応させた（[v1.1.0](../../specs/platform/changes/v1.1.0-auth-asymmetric-jwt.md)）。ローカルの Supabase のポートは、ほかのプロジェクトと共存できるよう 55xxx 番台にした
-- [ ] マイグレーションの検査（テストは `packages/api/test/fresh-user.int.test.ts` で作成済み。CI への組み込みが残り）: ローカルの Supabase（Docker）にマイグレーションからまっさらな DB を作り、新規ユーザーで主な API（案件の一覧、工数の登録、目標、週報）を通すテストを CI で回す（H-010。基準のマイグレーションでマテリアライズドビューが未更新のまま作られ、案件の一覧が 500 になった）
-- [ ] shared: 単体テスト
-- [ ] web: Vitest、Testing Library、MSW
-- [ ] E2E: Playwright（テストアカウント、主要な画面の通し動作、3 幅）
-- [ ] Playwright MCP で開発サーバーの画面を確認する手順を `packages/web/CLAUDE.md` に書く（ログイン方法も含む）
-- [ ] CI に単体・結合テストと E2E を追加する
-- [ ] `docs/reference/api.md` を作る（D20）。テストの仕組みの中で API の OpenAPI 定義を取り出し、エンドポイントの一覧をスクリプトで作る。`describeRoute` が無いルートは一覧に出ないので、漏れを検出する。ずれは自己点検と CI で検出する
-- [ ] `impl-docs`（工程 7）とパッケージの CLAUDE.md の「ドキュメントの更新先」に、「DB のスキーマか API を変えたら `docs/reference/` を作り直す」を加える
+- [x] マイグレーションの検査（`packages/api/test/fresh-user.int.test.ts`。CI の db ジョブで回す）: ローカルの Supabase（Docker）にマイグレーションからまっさらな DB を作り、新規ユーザーで主な API（案件の一覧、工数の登録、目標、週報）を通すテストを CI で回す（H-010。基準のマイグレーションでマテリアライズドビューが未更新のまま作られ、案件の一覧が 500 になった）
+- [x] shared: 単体テスト（目標の進捗の計算、絞り込みのスキーマ。特性化テストで、潜在的な不具合 1 件を `it.fails` で固定し P6 へ）
+- [x] web: Vitest、Testing Library、MSW（`packages/web/src/test/`。手本は MissionEditor のテスト。Node 24 と jsdom の AbortSignal の食い違いは、独自の環境 `src/test/environment.ts` で回避）
+- [x] E2E: Playwright（`packages/e2e`。テストごとに一意なユーザー、ログイン、工数の登録から一覧、主な 5 画面の表示と横はみ出し、を 3 幅で）。API は `.dev.vars` を読まない場所で起動する（wrangler は `.dev.vars` を `--env-file` より優先する）
+- [x] Playwright MCP で画面を確認する手順を `packages/web/CLAUDE.md` に書く（`pnpm dev:local`。ローカルの Supabase だけにつながり、確認用のアカウントを用意する）
+- [x] CI に単体・結合テストと E2E を追加する（`.github/workflows/ci.yml` の db ジョブ。push 後に動作を確かめる）
+- [x] `docs/reference/api.md` を作る（D20。`pnpm api:docs`。生成とずれの検出は api の単体テスト `scripts/apiReference.test.ts` が行い、`describeRoute` の無いルートも失敗にする）。テストの仕組みの中で API の OpenAPI 定義を取り出し、エンドポイントの一覧をスクリプトで作る。`describeRoute` が無いルートは一覧に出ないので、漏れを検出する。ずれは自己点検と CI で検出する
+- [x] `impl-docs`（工程 7）とパッケージの CLAUDE.md の「ドキュメントの更新先」に、「DB のスキーマか API を変えたら `docs/reference/` を作り直す」を加える
 
 ### P5. 仕様書への変換（機能ごと）
 旧要件定義書、旧詳細設計書、**実際のコード**を照らし合わせて `spec-backfill` スキルで作る。食い違いがあるときはコードを正とし、気になる点は「要確認」として人間に聞く。各機能の `changes/` には、移行時点の基準となる `v1.0.7-baseline.md` を置き、それまでの経緯を git log から要約する。
@@ -359,6 +359,8 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 
 ### P6. 既存機能のテスト（仕様書の AC をテストにする）
 - [ ] 機能ごとに AC からテストへの対応表を埋める（優先順: effort-ingest-gas → effort-draft → goals → weekly-report → その他）
+- [ ] P4 の E2E で見つけた不具合: 工数登録の画面を開いてすぐ（下書きの `GET /api/effort/draft` が返る前に）入力すると、読み込みのあとでフォームが下書きか空の状態で上書きされ、入力が消える（`useEffortDraftSync` の初期化の effect）。通信が遅いと利用者にも起きうる。effort-draft の仕様書を作ってから、改修の記録を通して直す（初期化が終わるまで入力を止める、など）。直したら `packages/e2e/tests/effort.spec.ts` の待ち合わせ（`TODO(P6)`）を外す
+- [ ] P4 で見つけた潜在的な不具合: 目標の履歴の検索で `minProgress` / `maxProgress` に空文字か null を渡すと、「指定なし」にならず 400 になる（`GoalHistoryQuerySchema` の前処理のあとで `z.coerce.number()` が NaN にする）。web は値があるときだけ送るので画面からは起きない。`packages/shared/src/schemas/goals.test.ts` の `it.fails` を `it` に戻す形で、改修の記録を通して直す
 - [ ] P2 で保留にしたフックの依存配列の 2 件を、テストを書いてから改修の記録を通して直す（コードに `TODO(P6)` の印）
   - `useEffortSummaryMetrics`: `projectOptions` の読み込みが終わっても案件名が更新されない可能性
   - `useEffortSubmission`: `cancelSync`（`useEffortDraftSync` で毎回作り直される）が依存に無い
@@ -420,3 +422,6 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 | 2026-10-13 | D6 を変更: 開発用 Supabase は削除せずに DB の中身だけ作り直す。Supabase Branching は使わない | ユーザーの判断。プロジェクトを作り直すと、認証の設定や URL・キーの差し替えが必要になる。Branching は有料で、データも複製されない |
 | 2026-10-13 | P3: 本番のスキーマは `db pull` ではなく `db dump --db-url` で取り込む。接続文字列（パスワード）は人間がターミナルで扱う | `db pull` は本番の migration 履歴テーブルへの書き込みを求める。dump は読み取りのみ |
 | 2026-10-13 | D6 を再変更: 自動テストはローカルの Supabase で回す。クラウドの開発用は人の確認用 | ユーザーの選択。H-010（まっさらな DB から作って動くかを確かめていなかった）を、毎回マイグレーションから DB を作ることで防ぐ。接続情報が公開の固定値になり、GitHub Secrets も要らない |
+| 2026-10-13 | P4: E2E は独立したパッケージ `packages/e2e` に置き、`@playwright/test` をルートから移した。`@types/node` は catalog にまとめ、web と e2e から参照する | ユーザーの選択。E2E のコードも型チェックと lint の対象にする |
+| 2026-10-13 | P4: `docs/reference/api.md` は、OpenAPI の定義（`generateSpecs`）と Hono のルーターの照合（認証のミドルウェア）から、api の単体テストの中で作る。ずれは `pnpm test` で止める | TypeScript のルートを読み込むには Vitest の仕組みが要る。単体テストにすると、CI に新しい手順を足さずにずれを検出できる |
+| 2026-10-13 | P4: エージェントが画面を確かめる環境は `pnpm dev:local`（ローカルの Supabase だけにつながる）。`pnpm dev:api` / `dev:web` は人が開発用のクラウドで確かめる用 | H-009（動作確認で DB に書き込んだ）の再発防止。確認用のアカウントもローカルにだけ作る |

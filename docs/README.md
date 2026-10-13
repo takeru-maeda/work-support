@@ -6,6 +6,7 @@
 | [specs/](specs/README.md) | 機能ごとの仕様書（`<feature>/spec.md`）と改修の記録（`<feature>/changes/`） | 改修のたびに読み、更新する |
 | [specs/incidents.md](specs/incidents.md) | 症状から原因へたどる索引 | バグ調査の最初に読む |
 | [reference/database.md](reference/database.md) | テーブルの全体像（ER 図、列、ビュー）。大部分はコードから自動生成 | DB に触れる改修の前に読む |
+| [reference/api.md](reference/api.md) | API のエンドポイントの一覧（認証、入力、応答）。大部分はルートの定義から自動生成 | API に触れる改修の前に読む |
 | [plans/](plans/) | 大きなタスクの計画書（`active/` / `completed/`） | 複数の機能にまたがる作業、基盤の整備 |
 | [harness/](harness/) | ハーネスの改善記録、外部スキルの管理 | ハーネスの不具合や穴を見つけたとき |
 | [testing/manual-checklist.md](testing/manual-checklist.md) | 手動でしか確かめられない挙動 | リリース前、関係する機能を変えたとき |

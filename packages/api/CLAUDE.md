@@ -47,6 +47,7 @@ rg '<トークン>' packages/api/src packages/shared/src packages/web/src
 4. `CHANGELOG.md` の Unreleased
 5. steering（新しいパターンや技術の変更があるときだけ。`steering` スキルの差分モード）
 6. `docs/testing/manual-checklist.md`（手動でしか確かめられない挙動が増減したとき）
+7. `docs/reference/`（自動生成。API のルート、説明、入力、応答を変えたら `pnpm api:docs`、DB のスキーマを変えたら `pnpm db:types`。作り直し忘れは `pnpm check` と CI が止める）
 
 ## 注意事項
 

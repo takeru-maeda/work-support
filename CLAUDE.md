@@ -10,6 +10,7 @@
 - `packages/api/` — Hono + Cloudflare Workers の API。**正本: `packages/api/CLAUDE.md`**
 - `packages/web/` — React 19 + Vite の SPA。**正本: `packages/web/CLAUDE.md`**
 - `packages/shared/` — Zod スキーマ（API 契約）と Supabase の生成型。api の規約に準ずる
+- `packages/e2e/` — Playwright の E2E と、ローカルの Supabase だけにつながる確認用の環境（`pnpm dev:local`）。手順は `docs/steering/testing.md` と `packages/web/CLAUDE.md`
 - `docs/` — 索引は `docs/README.md`
   - `docs/steering/` — 全体の規約と判断の軸
   - `docs/specs/<feature>/spec.md` — 機能ごとの仕様書（現在の姿）。`changes/` に改修の記録

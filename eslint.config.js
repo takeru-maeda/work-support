@@ -107,4 +107,9 @@ export default defineConfig([
     files: ["packages/web/src/components/ui/**/*.tsx"],
     rules: { "react-refresh/only-export-components": "off" },
   },
+  {
+    // テストのコードは開発サーバーの Fast Refresh で読み込まれない
+    files: ["packages/web/src/test/**", "packages/web/**/*.test.{ts,tsx}"],
+    rules: { "react-refresh/only-export-components": "off" },
+  },
 ]);

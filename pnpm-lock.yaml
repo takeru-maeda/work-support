@@ -9,6 +9,9 @@ catalogs:
     '@supabase/supabase-js':
       specifier: ^2.58.0
       version: 2.80.0
+    '@types/node':
+      specifier: ^24.7.0
+      version: 24.10.0
     dayjs:
       specifier: ^1.11.18
       version: 1.11.19
@@ -29,9 +32,6 @@ importers:
       '@eslint/js':
         specifier: ^9.36.0
         version: 9.39.1
-      '@playwright/test':
-        specifier: ^1.64.0
-        version: 1.64.0
       eslint:
         specifier: ^9.36.0
         version: 9.39.1(jiti@2.6.1)
@@ -105,6 +105,18 @@ importers:
       wrangler:
         specifier: ^4.4.0
         version: 4.46.0
+
+  packages/e2e:
+    devDependencies:
+      '@playwright/test':
+        specifier: ^1.64.0
+        version: 1.64.0
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   packages/shared:
     dependencies:
@@ -297,7 +309,7 @@ importers:
         specifier: ^14.6.8
         version: 14.6.8(@testing-library/dom@10.4.2)
       '@types/node':
-        specifier: ^24.7.0
+        specifier: 'catalog:'
         version: 24.10.0
       '@types/react':
         specifier: ^19.1.13

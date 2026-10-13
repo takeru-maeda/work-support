@@ -76,6 +76,8 @@ export async function createTestUser(): Promise<TestUser> {
 interface ApiRequest {
   method?: "GET" | "POST" | "PUT" | "DELETE";
   user?: TestUser;
+  /** `user` の代わりに送る Bearer トークン（GAS 用の API キーなど） */
+  bearer?: string;
   body?: unknown;
 }
 
@@ -85,7 +87,7 @@ interface ApiRequest {
  */
 export async function callApi(
   path: string,
-  { method = "GET", user, body }: ApiRequest = {},
+  { method = "GET", user, bearer, body }: ApiRequest = {},
 ): Promise<Response> {
   const pending: Promise<unknown>[] = [];
   const executionCtx = {
@@ -94,7 +96,8 @@ export async function callApi(
     props: {},
   };
   const headers: Record<string, string> = {};
-  if (user) headers.Authorization = `Bearer ${user.accessToken}`;
+  const token: string | undefined = bearer ?? user?.accessToken;
+  if (token) headers.Authorization = `Bearer ${token}`;
   if (body !== undefined) headers["Content-Type"] = "application/json";
 
   const res = await app.request(

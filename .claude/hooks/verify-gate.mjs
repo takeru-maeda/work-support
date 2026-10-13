@@ -64,8 +64,14 @@ for (const [pkg, pkgFiles] of groups) {
   const tc = run("pnpm", ["--filter", pkg, "run", "typecheck"], root);
   if (tc.code !== 0) problems.push(`== 型チェック（${pkg}） ==\n${tc.out}`);
 
-  // 触ったファイルに関係する単体テストだけを実行する
-  const rels = pkgFiles
+  // 触ったファイルに関係する単体テストだけを実行する（Vitest を使わないパッケージ、例えば e2e は除く）
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(root, "packages", pkg, "package.json"), "utf8"),
+  );
+  const usesVitest = Boolean(
+    manifest.devDependencies?.vitest ?? manifest.dependencies?.vitest,
+  );
+  const rels = (usesVitest ? pkgFiles : [])
     .filter((f) => /\.(ts|tsx)$/.test(f))
     .map((f) => path.relative(`packages/${pkg}`, f));
   if (rels.length > 0) {

@@ -1,5 +1,6 @@
-# lint、整形、型チェック、単体テスト、ハーネスの自己点検。DB につながるテストと E2E は、
-# テスト用 DB の整備（ハーネス移行計画の P3 / P4）のあとで足す
+# check: lint、整形、型チェック、単体テスト（docs/reference/api.md のずれを含む）、ハーネスの自己点検
+# db: ローカルの Supabase（Docker）にマイグレーションからまっさらな DB を作り、API の結合テストと E2E を回す。
+#     接続情報は supabase status が返す公開の固定値なので、GitHub Secrets は使わない
 name: CI
 
 on:
@@ -37,3 +38,33 @@ jobs:
         run: pnpm test
       - name: harness
         run: pnpm harness:check
+
+  db:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # マイグレーションをすべて適用した、まっさらな DB が作られる（H-010）
+      - name: start local Supabase
+        run: pnpm db:start
+      - name: integration tests
+        run: pnpm test:int
+      - name: install Playwright browser
+        run: pnpm --filter e2e exec playwright install --with-deps chromium
+      - name: e2e
+        run: pnpm test:e2e
+      - name: upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            packages/e2e/playwright-report/
+            packages/e2e/test-results/
+          retention-days: 7

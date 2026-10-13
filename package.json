@@ -8,6 +8,7 @@
   "scripts": {
     "dev:api": "pnpm --filter api dev",
     "dev:web": "pnpm --filter web dev",
+    "dev:local": "node --disable-warning=ExperimentalWarning packages/e2e/support/serve.ts",
     "typecheck": "pnpm -r --parallel run typecheck",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -18,13 +19,14 @@
     "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm harness:check",
     "db:types": "bash packages/shared/supabase-gen-types.sh",
     "db:docs": "node scripts/gen-db-docs.mjs",
+    "api:docs": "UPDATE_API_DOCS=1 pnpm --filter api exec vitest run scripts/apiReference.test.ts",
     "db:start": "supabase start --workdir packages/api -x realtime,imgproxy,edge-runtime,logflare,vector,supavisor",
     "db:stop": "supabase stop --workdir packages/api",
-    "test:int": "pnpm --filter api run test:int"
+    "test:int": "pnpm --filter api run test:int",
+    "test:e2e": "pnpm --filter e2e run test:e2e"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
-    "@playwright/test": "^1.64.0",
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",

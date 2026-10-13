@@ -31,6 +31,7 @@ user-invocable: false
    - 既存のパターンに沿っただけなら「不要」とする（多くの改修はこれに当たる）
    - 1 つの機能だけの振る舞いや設計は steering ではなく `spec.md` に書く（steering が膨らむのを防ぐ）
 5. **`docs/testing/manual-checklist.md`**: 手動でしか確かめられない挙動（PWA、端末依存、メールの実受信など）が増減したら更新する。
+5b. **`docs/reference/`**（自動生成の全体像）: API のルートや `describeRoute` を変えたら `pnpm api:docs`、DB のスキーマを変えたら `pnpm db:types`（`database.md` も作り直される）。手書きの欄（印の外）に関係する説明があれば直す。
 6. 関係する `.claude/rules/` や パッケージの `CLAUDE.md` の記述が誤りになっていたら直す（ハーネスの更新として完了報告にも書く）。
 
 ## 出口条件

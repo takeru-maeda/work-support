@@ -8,3 +8,4 @@ catalog:
   zod: 4.1.12
   dayjs: ^1.11.18
   "@supabase/supabase-js": ^2.58.0
+  "@types/node": ^24.7.0

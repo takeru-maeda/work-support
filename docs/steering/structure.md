@@ -2,7 +2,7 @@
 
 ## 基本方針
 
-**モノレポ + 機能単位**: pnpm ワークスペースで api / web / shared の 3 パッケージを管理し、各パッケージの中は機能（feature）ごとにまとめる。
+**モノレポ + 機能単位**: pnpm ワークスペースで api / web / shared の 3 パッケージ（と E2E 用の `e2e`）を管理し、各パッケージの中は機能（feature）ごとにまとめる。
 
 ## パッケージごとの構成
 
@@ -60,11 +60,14 @@ src/
 └── utils/         # 両側で使う純粋関数（例: goalProgress）
 ```
 
+### `packages/e2e/`
+**役割**: 画面を通す E2E（Playwright）。アプリのコードは置かない。ローカルの Supabase だけにつながる API と web を起動して回す（`support/localStack.ts`）。
+
 ### `docs/`
 - `steering/`: プロジェクト全体の規約と判断の軸（このフォルダ）
 - `specs/<feature>/spec.md`: 機能ごとの仕様書（現在の姿）。`changes/` に改修の記録
 - `specs/incidents.md`: 症状から原因へたどる索引
-- `reference/`: コードから自動で作る全体像（テーブルなど）。手書きの説明は印の外にだけ書く
+- `reference/`: コードから自動で作る全体像（テーブル、API のエンドポイント）。手書きの説明は印の外にだけ書く
 - `plans/`: 大きなタスクの計画書
 - `harness/`: ハーネス（AI エージェントの作業環境）の改善記録
 - `adr/`: 設計判断の記録
