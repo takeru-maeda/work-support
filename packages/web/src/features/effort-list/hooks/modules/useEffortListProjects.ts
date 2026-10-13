@@ -1,9 +1,9 @@
 import { useEffect, useMemo } from "react";
 
+import type { EffortProjectOption } from "@/features/effort-entry/types";
 import { showErrorToast } from "@/lib/toast";
 import { reportUiError } from "@/services/logs";
 import { useProjectsWithTasks } from "@/services/projects";
-import type { EffortProjectOption } from "@/features/effort-entry/types";
 
 export interface EffortListProjectsResult {
   projectOptions: EffortProjectOption[];

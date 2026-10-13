@@ -1,12 +1,15 @@
-import { API_ENDPOINTS } from "@/config/api";
-import apiClient from "@/lib/apiClient";
-import { useUserStore } from "@/store/user";
 import useSWR, {
   mutate,
   type BareFetcher,
   type SWRConfiguration,
   type SWRResponse,
 } from "swr";
+
+import { API_ENDPOINTS } from "@/config/api";
+import type { Goal } from "@/features/goals/types";
+import apiClient from "@/lib/apiClient";
+import { buildUserScopedKey } from "@/lib/utils";
+import { useUserStore } from "@/store/user";
 import {
   CreateGoalRequestSchema,
   CreateGoalResponseSchema,
@@ -27,8 +30,6 @@ import {
   type GoalUpdateRequest,
   type GoalUpdateResponse,
 } from "@shared/schemas/goals";
-import type { Goal } from "@/features/goals/types";
-import { buildUserScopedKey } from "@/lib/utils";
 /**
  * 目標を新規作成します。
  *

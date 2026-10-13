@@ -1,14 +1,14 @@
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { ThemeToggle } from "@/components/shared/ThemeToggle";
-import { ROUTES } from "@/config/routes";
-import { MAIN_NAVIGATION } from "@/config/navigation";
+import { AppHeaderDesktopNav } from "@/components/layout/header/AppHeaderDesktopNav";
 import { AppHeaderHomeLink } from "@/components/layout/header/AppHeaderHomeLink";
 import { AppHeaderUserMenu } from "@/components/layout/header/AppHeaderUserMenu";
-import { AppHeaderDesktopNav } from "@/components/layout/header/AppHeaderDesktopNav";
-import type { AppHeaderNavLink } from "@/types/navigation";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { MAIN_NAVIGATION } from "@/config/navigation";
+import { ROUTES } from "@/config/routes";
 import { logout, type AuthUser, type LogoutResult } from "@/lib/auth";
 import { useUserStore } from "@/store/user";
+import type { AppHeaderNavLink } from "@/types/navigation";
 import type { UserProfile } from "@/types/userProfile";
 
 export function AppHeader() {

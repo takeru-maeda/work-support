@@ -1,6 +1,5 @@
 import { type JSX } from "react";
 
-import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -11,6 +10,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 interface ConfirmEffortSubmitDialogProps {
   open: boolean;

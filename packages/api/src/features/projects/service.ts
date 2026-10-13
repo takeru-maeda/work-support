@@ -1,8 +1,9 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { fetchProjectsWithTasks } from "./repository";
 
-import type { Database } from "../../../../shared/src/types/db";
+import type { ProjectsViewRow } from "./repository";
 import type { ProjectWithTasks } from "./types";
-import { fetchProjectsWithTasks, ProjectsViewRow } from "./repository";
+import type { Database } from "../../../../shared/src/types/db";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * 案件とタスクを取得します。
@@ -48,8 +49,7 @@ export const getProjectsWithTasks = async (
       row.task_name !== null &&
       row.task_created_at !== null
     ) {
-      const taskSet =
-        taskSetMap.get(row.project_id) ?? new Set<number>();
+      const taskSet = taskSetMap.get(row.project_id) ?? new Set<number>();
       if (!taskSet.has(row.task_id)) {
         project.tasks.push({
           id: row.task_id,

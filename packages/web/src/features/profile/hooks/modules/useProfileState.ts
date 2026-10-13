@@ -6,9 +6,9 @@ import {
   type RefObject,
 } from "react";
 
+import type { AuthUser } from "@/lib/auth";
 import { useUserStore } from "@/store/user";
 import type { UserProfile } from "@/types/userProfile";
-import type { AuthUser } from "@/lib/auth";
 
 interface UseProfileStateResult {
   user: AuthUser | null;

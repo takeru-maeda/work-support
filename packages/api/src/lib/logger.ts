@@ -1,7 +1,7 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import { AppError } from "./errors";
 
 import type { Database, Json } from "../../../shared/src/types/db";
-import { AppError } from "./errors";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type LogLevel = Database["public"]["Enums"]["log_level"];
 export type LogSource = Database["public"]["Enums"]["log_source"];

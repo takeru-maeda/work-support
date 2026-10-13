@@ -6,7 +6,15 @@
  */
 import path from "node:path";
 
-import { FORMAT_EXT, LINT_EXT, projectRoot, readEvent, recordTouched, run, toRelative } from "./lib.mjs";
+import {
+  FORMAT_EXT,
+  LINT_EXT,
+  projectRoot,
+  readEvent,
+  recordTouched,
+  run,
+  toRelative,
+} from "./lib.mjs";
 
 const event = readEvent();
 const root = projectRoot();
@@ -17,12 +25,22 @@ recordTouched(event, rel);
 const bin = (name) => path.join(root, "node_modules/.bin", name);
 if (FORMAT_EXT.test(rel)) {
   // .prettierignore の対象（文書や生成物）はそのまま
-  run(bin("prettier"), ["--write", "--ignore-unknown", "--log-level", "warn", rel], root);
+  run(
+    bin("prettier"),
+    ["--write", "--ignore-unknown", "--log-level", "warn", rel],
+    root,
+  );
 }
 if (LINT_EXT.test(rel)) {
-  const { code, out } = run(bin("eslint"), ["--fix", "--no-warn-ignored", rel], root);
+  const { code, out } = run(
+    bin("eslint"),
+    ["--fix", "--no-warn-ignored", rel],
+    root,
+  );
   if (code !== 0) {
-    console.error(`${rel} に自動で直らない lint のエラーがあります。続ける前に直してください:\n${out}`);
+    console.error(
+      `${rel} に自動で直らない lint のエラーがあります。続ける前に直してください:\n${out}`,
+    );
     process.exit(2);
   }
 }

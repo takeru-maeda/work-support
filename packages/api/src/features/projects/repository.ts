@@ -1,7 +1,7 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { AppError } from "../../lib/errors";
 
 import type { Database, Tables } from "../../../../shared/src/types/db";
-import { AppError } from "../../lib/errors";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type ProjectsViewRow = Omit<Tables<"projects_with_tasks_mv">, "user_id">;
 

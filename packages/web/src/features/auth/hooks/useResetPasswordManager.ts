@@ -1,13 +1,13 @@
 import { useCallback, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { supabase } from "@/lib/supabase";
-import { useResetPasswordState } from "@/features/auth/hooks/modules/reset/useResetPasswordState";
-import { useRecoverySession } from "@/features/auth/hooks/modules/reset/useRecoverySession";
 import {
   useEmailSubmission,
   usePasswordSubmission,
 } from "@/features/auth/hooks/modules/reset/usePasswordResetSubmission";
+import { useRecoverySession } from "@/features/auth/hooks/modules/reset/useRecoverySession";
+import { useResetPasswordState } from "@/features/auth/hooks/modules/reset/useResetPasswordState";
+import { supabase } from "@/lib/supabase";
 
 export type ResetPasswordStep = "email" | "password";
 

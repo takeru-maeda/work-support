@@ -1,8 +1,10 @@
 import { Skeleton } from "@/components/ui/skeleton";
+
+import CardContainer from "../shared/CardContainer";
 import { PageContainer } from "../shared/PageContainer";
+
 import { CardSkeleton } from "./CardSkeleton";
 import TableAndFooterSkeleton from "./TableAndFooterSkeleton";
-import CardContainer from "../shared/CardContainer";
 
 export function ContentsAreaSkeleton() {
   return (

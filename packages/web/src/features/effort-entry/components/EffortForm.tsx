@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 
-import { Textarea } from "@/components/ui/textarea";
+import CardContainer from "@/components/shared/CardContainer";
 import { DatePicker } from "@/components/ui/date-picker";
-
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { ConfirmEffortSubmitDialog } from "@/features/effort-entry/components/ConfirmEffortSubmitDialog";
 import { EffortEntries } from "@/features/effort-entry/components/entries";
 import { EffortSummary } from "@/features/effort-entry/components/summary/EffortSummary";
+import { UndoRedoControls } from "@/features/effort-entry/components/UndoRedoControls";
 import { useEffortFormManager } from "@/features/effort-entry/hooks/useEffortFormManager";
-import { Skeleton } from "@/components/ui/skeleton";
-import CardContainer from "@/components/shared/CardContainer";
+
 import EffortEntrySkeleton from "./skeleton/EffortEntrySkeleton";
 import EffortSummarySkeleton from "./skeleton/EffortSummarySkeleton";
-import { ConfirmEffortSubmitDialog } from "@/features/effort-entry/components/ConfirmEffortSubmitDialog";
-import { UndoRedoControls } from "@/features/effort-entry/components/UndoRedoControls";
 
 export function EffortForm() {
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -85,7 +85,10 @@ export function EffortForm() {
           <DatePicker />
         ) : (
           <div className="flex items-center justify-between">
-            <DatePicker date={formData.date ?? undefined} onDateChange={setDate} />
+            <DatePicker
+              date={formData.date ?? undefined}
+              onDateChange={setDate}
+            />
             <UndoRedoControls
               canUndo={canUndo}
               canRedo={canRedo}

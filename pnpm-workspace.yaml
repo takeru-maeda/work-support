@@ -1,5 +1,5 @@
 packages:
-  - 'packages/*'
+  - "packages/*"
 
 # パッケージ間でそろえるバージョン。各 package.json からは "catalog:" で参照する
 catalog:

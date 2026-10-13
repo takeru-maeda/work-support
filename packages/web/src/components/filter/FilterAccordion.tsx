@@ -1,4 +1,3 @@
-import type { JSX, ReactNode } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -6,6 +5,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
+
+import type { JSX, ReactNode } from "react";
 
 interface FilterAccordionProps {
   children: ReactNode;

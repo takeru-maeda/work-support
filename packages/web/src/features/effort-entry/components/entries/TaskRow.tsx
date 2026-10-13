@@ -1,8 +1,8 @@
-import type { JSX } from "react";
 import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { DifferenceBadge } from "@/features/effort-entry/components/entries/DifferenceBadge";
 import { TaskCombobox } from "@/features/effort-entry/components/entries/TaskCombobox";
 import type {
@@ -10,8 +10,9 @@ import type {
   EffortEntryError,
   EffortProjectOption,
 } from "@/features/effort-entry/types";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+
+import type { JSX } from "react";
 
 interface TaskRowProps {
   entry: EffortEntry;

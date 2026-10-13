@@ -1,5 +1,6 @@
-import { Tables } from "shared";
 import { z } from "zod";
+
+import type { Tables } from "shared";
 
 export type {
   EffortDraft,

@@ -1,10 +1,8 @@
-import { useCallback, useState } from "react";
 import { AlertTriangle } from "lucide-react";
+import { useCallback, useState } from "react";
 
 import { SectionHeader } from "@/components/sections/SectionHeader";
 import CardContainer from "@/components/shared/CardContainer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +13,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface AccountDeletionSectionProps {
   email: string;

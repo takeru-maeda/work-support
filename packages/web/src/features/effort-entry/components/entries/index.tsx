@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-import { Plus } from "lucide-react";
 import {
   DndContext,
   PointerSensor,
@@ -11,6 +9,8 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { Plus } from "lucide-react";
+import { useMemo } from "react";
 
 import CardContainer from "@/components/shared/CardContainer";
 import { Button } from "@/components/ui/button";
@@ -19,8 +19,9 @@ import type {
   EffortEntryError,
   EffortProjectOption,
 } from "@/features/effort-entry/types";
-import { SortableProjectGroupCard } from "./SortableProjectGroupCard";
 import { getProjectGroupKey } from "@/features/effort-entry/utils/projectGrouping";
+
+import { SortableProjectGroupCard } from "./SortableProjectGroupCard";
 
 interface EffortEntriesProps {
   entries: EffortEntry[];

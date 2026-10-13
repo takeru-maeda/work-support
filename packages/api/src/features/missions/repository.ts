@@ -1,10 +1,11 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import {
+import { AppError } from "../../lib/errors";
+
+import type {
   Database,
   Tables,
   TablesInsert,
 } from "../../../../shared/src/types/db";
-import { AppError } from "../../lib/errors";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * ミッションを取得します。

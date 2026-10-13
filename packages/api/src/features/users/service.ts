@@ -1,7 +1,7 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { AppError } from "../../lib/errors";
 
 import type { Database } from "../../../../shared/src/types/db";
-import { AppError } from "../../lib/errors";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const AVATAR_BUCKET = "avatars";
 const STORAGE_LIST_LIMIT = 100;

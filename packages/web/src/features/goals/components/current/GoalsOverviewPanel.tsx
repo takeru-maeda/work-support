@@ -2,6 +2,7 @@ import { Target, Award, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { GoalProgressCard } from "@/features/goals/components/shared/GoalProgressCard";
+
 import GoalSectionHeader from "./GoalSectionHeader";
 
 interface GoalsOverviewPanelProps {

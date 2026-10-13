@@ -65,7 +65,9 @@ export function GoalDeleteConfirmDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>キャンセル</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>
+            キャンセル
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
             disabled={!goal || isDeleting || !isMatch}

@@ -1,13 +1,14 @@
 import { useCallback } from "react";
-import type { FormEvent } from "react";
 
+import { ROUTES } from "@/config/routes";
 import {
   requestPasswordReset,
   updatePassword,
   type BasicResult,
 } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
-import { ROUTES } from "@/config/routes";
+
+import type { FormEvent } from "react";
 import type { NavigateFunction } from "react-router-dom";
 
 interface UseEmailSubmissionOptions {

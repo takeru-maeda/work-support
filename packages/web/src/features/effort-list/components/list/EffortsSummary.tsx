@@ -1,7 +1,8 @@
-import type { EffortListEntry } from "@/features/effort-list/types";
-import type { JSX } from "react";
-import { cn } from "@/lib/utils";
 import { formatWorkHours } from "@/features/effort-entry/utils/formatHours";
+import type { EffortListEntry } from "@/features/effort-list/types";
+import { cn } from "@/lib/utils";
+
+import type { JSX } from "react";
 
 interface EffortsSummaryProps {
   entries: EffortListEntry[];
@@ -61,9 +62,7 @@ export function EffortsSummary({
   );
 }
 
-function calculateTotals(
-  entries: EffortListEntry[],
-): {
+function calculateTotals(entries: EffortListEntry[]): {
   estimated: number;
   actual: number;
   difference: number;

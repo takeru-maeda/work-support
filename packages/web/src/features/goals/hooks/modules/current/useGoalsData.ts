@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { useCurrentGoals } from "@/services/goals";
-import { showErrorToast } from "@/lib/toast";
-import { reportUiError } from "@/services/logs";
 import type { Goal } from "@/features/goals/types";
+import { showErrorToast } from "@/lib/toast";
+import { useCurrentGoals } from "@/services/goals";
+import { reportUiError } from "@/services/logs";
 
 interface GoalsDataResult {
   goals: Goal[];

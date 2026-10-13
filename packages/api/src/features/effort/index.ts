@@ -1,27 +1,10 @@
 import { Hono } from "hono";
+import { describeRoute, resolver, validator } from "hono-openapi";
 
-import { apiKeyAuthMiddleware, jwtAuthMiddleware } from "../../middleware/auth";
-import {
-  EffortDraft,
-  EffortDraftRecord,
-  EffortDraftResponse,
-  EffortDraftResponseSchema,
-  EffortDraftSchema,
-  EffortDraftUpsertResponse,
-  EffortDraftUpsertResponseSchema,
-  EffortEntriesRequest,
-  EffortEntriesRequestSchema,
-  EffortEntriesResponse,
-  EffortEntriesResponseSchema,
-  EffortRequestSchema,
-  EffortResponse,
-  EffortResponseSchema,
-} from "./types";
-import { AuthenticatedUser, HonoEnv } from "../../custom-types";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { createSupabaseClient } from "../../lib/supabase";
 import { AppError } from "../../lib/errors";
-import { Database, Tables } from "../../../../shared/src/types/db";
+import { createSupabaseClient } from "../../lib/supabase";
+import { apiKeyAuthMiddleware, jwtAuthMiddleware } from "../../middleware/auth";
+
 import {
   deleteEffortDraftService,
   getEffortDraftService,
@@ -30,8 +13,29 @@ import {
   sendEffortCompletionEmailIfNeeded,
   upsertEffortDraftService,
 } from "./service";
-import { describeRoute, resolver, validator } from "hono-openapi";
-import { Logger } from "../../lib/logger";
+import {
+  EffortDraftResponseSchema,
+  EffortDraftSchema,
+  EffortDraftUpsertResponseSchema,
+  EffortEntriesRequestSchema,
+  EffortEntriesResponseSchema,
+  EffortRequestSchema,
+  EffortResponseSchema,
+} from "./types";
+
+import type {
+  EffortDraft,
+  EffortDraftRecord,
+  EffortDraftResponse,
+  EffortDraftUpsertResponse,
+  EffortEntriesRequest,
+  EffortEntriesResponse,
+  EffortResponse,
+} from "./types";
+import type { Database, Tables } from "../../../../shared/src/types/db";
+import type { AuthenticatedUser, HonoEnv } from "../../custom-types";
+import type { Logger } from "../../lib/logger";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const gasEffort = new Hono<HonoEnv>();
 

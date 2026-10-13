@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
 
-import { updateGoal } from "@/services/goals";
-import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { reportUiError } from "@/services/logs";
 import type { Goal } from "@/features/goals/types";
+import { showErrorToast, showSuccessToast } from "@/lib/toast";
+import { updateGoal } from "@/services/goals";
+import { reportUiError } from "@/services/logs";
 
 interface UseGoalContentDialogOptions {
   onGoalUpdated: (goal: Goal) => void;

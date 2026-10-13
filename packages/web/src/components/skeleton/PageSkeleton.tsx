@@ -1,5 +1,5 @@
-import { HeaderSkeleton } from "./HeaderSkeleton";
 import { ContentsAreaSkeleton } from "./ContentsAreaSkeleton";
+import { HeaderSkeleton } from "./HeaderSkeleton";
 
 export function PageSkeleton() {
   return (

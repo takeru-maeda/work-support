@@ -2,11 +2,12 @@ import { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { ROUTES } from "@/config/routes";
-import { useGoalsData } from "@/features/goals/hooks/modules/current/useGoalsData";
-import { useGoalDraft } from "@/features/goals/hooks/modules/add/useGoalDraft";
 import { useAddGoalMetrics } from "@/features/goals/hooks/modules/add/useAddGoalMetrics";
 import { useAddGoalPeriodValidation } from "@/features/goals/hooks/modules/add/useAddGoalPeriodValidation";
 import { useAddGoalSave } from "@/features/goals/hooks/modules/add/useAddGoalSave";
+import { useGoalDraft } from "@/features/goals/hooks/modules/add/useGoalDraft";
+import { useGoalsData } from "@/features/goals/hooks/modules/current/useGoalsData";
+
 import type { NewGoal } from "../types";
 
 interface UseAddGoalsManagerResult {
@@ -62,16 +63,12 @@ export function useAddGoalsManager(): UseAddGoalsManagerResult {
   const { totalWeight, isWeightValid, isWeightExceeded } =
     useAddGoalMetrics(goals);
 
-  const {
-    periodError,
-    isPeriodValid,
-    validatePeriod,
-    setPeriodError,
-  } = useAddGoalPeriodValidation({
-    latestGoalEndDate,
-    periodStart,
-    periodEnd,
-  });
+  const { periodError, isPeriodValid, validatePeriod, setPeriodError } =
+    useAddGoalPeriodValidation({
+      latestGoalEndDate,
+      periodStart,
+      periodEnd,
+    });
 
   const { handleSave, isSaving } = useAddGoalSave({
     goals,

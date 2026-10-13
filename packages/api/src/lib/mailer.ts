@@ -1,10 +1,12 @@
-import type { HonoEnv } from "../custom-types";
 import {
-  EmailRequest,
   EmailRequestSchema,
   EmailResponseSchema,
 } from "../../../shared/src/schemas/email";
+
 import { AppError } from "./errors";
+
+import type { EmailRequest } from "../../../shared/src/schemas/email";
+import type { HonoEnv } from "../custom-types";
 
 interface EffortEmailOptions {
   to: string;

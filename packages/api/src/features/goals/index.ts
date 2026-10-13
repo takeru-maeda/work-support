@@ -1,29 +1,10 @@
 import { Hono } from "hono";
-import { SupabaseClient } from "@supabase/supabase-js";
-
-import { AuthenticatedUser, HonoEnv } from "../../custom-types";
-import { jwtAuthMiddleware } from "../../middleware/auth";
-import { createSupabaseClient } from "../../lib/supabase";
-import {
-  CreateGoalResponseSchema,
-  CreateGoalRequestSchema,
-  GetGoalResponseSchema,
-  GoalCreateRequest,
-  GoalHistoryQuery,
-  GoalHistoryQuerySchema,
-  GoalHistoryResponse,
-  GoalHistoryResponseSchema,
-  GoalPreviousWeekProgress,
-  GoalPreviousWeekProgressSchema,
-  GoalPreviousWeekQuery,
-  GoalPreviousWeekQuerySchema,
-  GoalUpdateRequest,
-  UpdateGoalResponseSchema,
-  UpdateGoalRequestSchema,
-} from "./types";
-import { AppError } from "../../lib/errors";
-import { Database, Tables } from "../../../../shared/src/types/db";
 import { describeRoute, resolver, validator } from "hono-openapi";
+
+import { AppError } from "../../lib/errors";
+import { createSupabaseClient } from "../../lib/supabase";
+import { jwtAuthMiddleware } from "../../middleware/auth";
+
 import {
   createGoalService,
   deleteGoalService,
@@ -32,6 +13,29 @@ import {
   searchGoalsService,
   updateGoalService,
 } from "./service";
+import {
+  CreateGoalResponseSchema,
+  CreateGoalRequestSchema,
+  GetGoalResponseSchema,
+  GoalHistoryQuerySchema,
+  GoalHistoryResponseSchema,
+  GoalPreviousWeekProgressSchema,
+  GoalPreviousWeekQuerySchema,
+  UpdateGoalResponseSchema,
+  UpdateGoalRequestSchema,
+} from "./types";
+
+import type {
+  GoalCreateRequest,
+  GoalHistoryQuery,
+  GoalHistoryResponse,
+  GoalPreviousWeekProgress,
+  GoalPreviousWeekQuery,
+  GoalUpdateRequest,
+} from "./types";
+import type { Database, Tables } from "../../../../shared/src/types/db";
+import type { AuthenticatedUser, HonoEnv } from "../../custom-types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const goals = new Hono<HonoEnv>();
 

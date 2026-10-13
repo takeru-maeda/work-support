@@ -1,11 +1,11 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-
-import type { Database, Tables } from "../../../../shared/src/types/db";
 import {
   createUserSettings,
   getUserSettingsByUserId,
   updateUserSettings,
 } from "./repository";
+
+import type { Database, Tables } from "../../../../shared/src/types/db";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * ユーザー設定を作成します。

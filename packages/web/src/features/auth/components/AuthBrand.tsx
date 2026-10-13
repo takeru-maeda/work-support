@@ -6,7 +6,11 @@ interface AuthBrandProps {
   className?: string;
 }
 
-export function AuthBrand({ title, subtitle, className }: Readonly<AuthBrandProps>) {
+export function AuthBrand({
+  title,
+  subtitle,
+  className,
+}: Readonly<AuthBrandProps>) {
   return (
     <div className={cn("flex flex-col items-center space-y-4", className)}>
       <img

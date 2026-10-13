@@ -1,11 +1,12 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+import { cn } from "@/lib/utils";
+
 import {
   ProjectGroupCard,
   type ProjectGroupCardProps,
 } from "./ProjectGroupCard";
-import { cn } from "@/lib/utils";
 
 interface SortableProjectGroupCardProps extends ProjectGroupCardProps {
   id: string;

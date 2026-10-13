@@ -1,18 +1,20 @@
 import { Hono } from "hono";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { describeRoute, resolver, validator } from "hono-openapi";
 
-import { AuthenticatedUser, HonoEnv } from "../../custom-types";
-import { jwtAuthMiddleware } from "../../middleware/auth";
-import { createSupabaseClient } from "../../lib/supabase";
 import { AppError } from "../../lib/errors";
+import { createSupabaseClient } from "../../lib/supabase";
+import { jwtAuthMiddleware } from "../../middleware/auth";
+
 import { createErrorLogService } from "./service";
 import {
-  ErrorLogCreateRequest,
   ErrorLogCreateRequestSchema,
   ErrorLogCreateResponseSchema,
 } from "./types";
+
+import type { ErrorLogCreateRequest } from "./types";
 import type { Database, Tables } from "../../../../shared/src/types/db";
+import type { AuthenticatedUser, HonoEnv } from "../../custom-types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const logs = new Hono<HonoEnv>();
 

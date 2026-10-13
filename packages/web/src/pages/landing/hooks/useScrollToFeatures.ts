@@ -7,4 +7,3 @@ export const useScrollToFeatures = () =>
       featuresSection.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, []);
-

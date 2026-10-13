@@ -1,15 +1,16 @@
-import { GoalsOverviewPanel } from "@/features/goals/components/current/GoalsOverviewPanel";
-import { GoalsDataTable } from "@/features/goals/components/current/GoalsDataTable";
-import { GoalsWeightWarning } from "@/features/goals/components/current/GoalsWeightWarning";
+import CardContainer from "@/components/shared/CardContainer";
+import { TableSkeleton } from "@/components/skeleton/TableSkeleton";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { GoalContentDialog } from "@/features/goals/components/current/GoalContentDialog";
 import { GoalDeleteConfirmDialog } from "@/features/goals/components/current/GoalDeleteConfirmDialog";
+import { GoalsDataTable } from "@/features/goals/components/current/GoalsDataTable";
+import { GoalsOverviewPanel } from "@/features/goals/components/current/GoalsOverviewPanel";
+import { GoalsWeightWarning } from "@/features/goals/components/current/GoalsWeightWarning";
 import { useGoalsTableManager } from "@/features/goals/hooks/useGoalsTableManager";
-import GoalsEmptyPanel from "./GoalsEmptyPanel";
-import CardContainer from "@/components/shared/CardContainer";
-import { Button } from "@/components/ui/button";
-import { TableSkeleton } from "@/components/skeleton/TableSkeleton";
+
 import GoalSectionHeader from "./GoalSectionHeader";
-import { Skeleton } from "@/components/ui/skeleton";
+import GoalsEmptyPanel from "./GoalsEmptyPanel";
 
 export function GoalsTable() {
   const {

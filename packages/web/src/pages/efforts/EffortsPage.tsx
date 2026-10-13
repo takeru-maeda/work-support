@@ -1,14 +1,16 @@
-import type { JSX } from "react";
-import { PageLayout } from "@/components/layout/PageLayout";
-import { EffortsFilterPanel } from "@/features/effort-list/components/list/EffortsFilterPanel";
-import { EffortsTableContainer } from "@/features/effort-list/components/list/EffortsTableContainer";
-import { EffortsTable } from "@/features/effort-list/components/list/EffortsTable";
-import { EffortsSummary } from "@/features/effort-list/components/list/EffortsSummary";
-import { TableFooter } from "@/components/table-footer/TableFooter";
-import { useEffortList } from "@/features/effort-list/hooks/useEffortList";
-import { EmptyState } from "@/components/empty-state/EmptyState";
 import { Search } from "lucide-react";
+
+import { EmptyState } from "@/components/empty-state/EmptyState";
+import { PageLayout } from "@/components/layout/PageLayout";
 import TableAndFooterSkeleton from "@/components/skeleton/TableAndFooterSkeleton";
+import { TableFooter } from "@/components/table-footer/TableFooter";
+import { EffortsFilterPanel } from "@/features/effort-list/components/list/EffortsFilterPanel";
+import { EffortsSummary } from "@/features/effort-list/components/list/EffortsSummary";
+import { EffortsTable } from "@/features/effort-list/components/list/EffortsTable";
+import { EffortsTableContainer } from "@/features/effort-list/components/list/EffortsTableContainer";
+import { useEffortList } from "@/features/effort-list/hooks/useEffortList";
+
+import type { JSX } from "react";
 
 export default function EffortsPage(): JSX.Element {
   const {

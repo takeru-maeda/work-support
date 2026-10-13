@@ -1,10 +1,10 @@
-import type { JSX } from "react";
-
 import {
   differentiators,
   differentiatorsSectionTitle,
   type Differentiator,
 } from "../landingContent";
+
+import type { JSX } from "react";
 
 export const DifferentiatorsSection = (): JSX.Element => (
   <section className="py-20 sm:py-28 px-4 relative overflow-hidden">

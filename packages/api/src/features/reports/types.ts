@@ -1,4 +1,4 @@
-import { Tables } from "shared";
+import type { Tables } from "shared";
 
 export {
   WeeklyReportQuery,

@@ -1,6 +1,8 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import { ParsedEffort } from "./types";
-import { Database, Tables } from "../../../../shared/src/types/db";
+import { AppError } from "../../lib/errors";
+import { type Logger } from "../../lib/logger";
+import { sendEffortCompletionEmail } from "../../lib/mailer";
+import { getUserSettingsByUserId } from "../user-settings/repository";
+
 import {
   createProject,
   createTask,
@@ -17,8 +19,8 @@ import {
   refreshProjectsWithTasksView,
   updateWorkEntryDraft,
 } from "./repository";
-import { Dayjs } from "dayjs";
-import { AppError } from "../../lib/errors";
+
+import type { ParsedEffort } from "./types";
 import type {
   EffortDraft,
   EffortDraftRecord,
@@ -27,10 +29,10 @@ import type {
   EffortEntriesResponse,
   EffortEntry,
 } from "./types";
+import type { Database, Tables } from "../../../../shared/src/types/db";
 import type { AuthenticatedUser, HonoEnv } from "../../custom-types";
-import { getUserSettingsByUserId } from "../user-settings/repository";
-import { type Logger } from "../../lib/logger";
-import { sendEffortCompletionEmail } from "../../lib/mailer";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Dayjs } from "dayjs";
 
 interface StructuredEffortResult {
   record: Tables<"work_records">;

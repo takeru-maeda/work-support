@@ -1,11 +1,11 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import { AppError } from "../../lib/errors";
 
 import type {
   Database,
   Tables,
   TablesInsert,
 } from "../../../../shared/src/types/db";
-import { AppError } from "../../lib/errors";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 interface CreateErrorLogParams {
   accessLogId: number;

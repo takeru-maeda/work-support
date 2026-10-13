@@ -1,13 +1,6 @@
-import type { Json } from "../../../../shared/src/types/db";
-import {
-  TablesInsert,
-  Database,
-  Tables,
-} from "../../../../shared/src/types/db";
 import { AppError } from "../../lib/errors";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { ParsedEffort } from "./types";
-import { Dayjs } from "dayjs";
+
+import type { ParsedEffort } from "./types";
 import type {
   EffortDraft,
   EffortDraftRecord,
@@ -15,6 +8,14 @@ import type {
   ProjectCreationResult,
   TaskCreationResult,
 } from "./types";
+import type {
+  TablesInsert,
+  Database,
+  Tables,
+} from "../../../../shared/src/types/db";
+import type { Json } from "../../../../shared/src/types/db";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Dayjs } from "dayjs";
 
 /**
  * 案件を検索または作成します。
@@ -73,7 +74,7 @@ export async function findOrCreateTask(
   projectId: number,
   taskName: string,
 ): Promise<{ id: number; created: boolean }> {
-  let { data: task, error } = await supabase
+  const { data: task, error } = await supabase
     .from("tasks")
     .select("id")
     .eq("project_id", projectId)

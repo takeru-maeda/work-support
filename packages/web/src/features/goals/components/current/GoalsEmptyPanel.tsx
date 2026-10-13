@@ -1,8 +1,9 @@
+import { Plus, Target, TrendingUp } from "lucide-react";
+
 import { EmptyState } from "@/components/empty-state/EmptyState";
 import { SectionHeader } from "@/components/sections/SectionHeader";
 import CardContainer from "@/components/shared/CardContainer";
 import { Button } from "@/components/ui/button";
-import { Plus, Target, TrendingUp } from "lucide-react";
 
 interface GoalsEmptyPanelProps {
   onNavigateToAdd: () => void;

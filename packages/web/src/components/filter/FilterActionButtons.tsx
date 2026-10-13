@@ -1,6 +1,8 @@
+import { Search, X } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Search, X } from "lucide-react";
+
 import type { JSX } from "react";
 
 interface FilterActionButtonsProps {

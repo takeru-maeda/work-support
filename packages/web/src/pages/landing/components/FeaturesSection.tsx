@@ -1,11 +1,11 @@
-import type { JSX } from "react";
-
 import {
   features,
   featuresSectionTitle,
   featuresSectionSubtitle,
   type Feature,
 } from "../landingContent";
+
+import type { JSX } from "react";
 
 export const FeaturesSection = (): JSX.Element => (
   <section

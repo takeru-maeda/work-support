@@ -1,6 +1,8 @@
-import { TableSkeleton } from "./TableSkeleton";
-import { Skeleton } from "../ui/skeleton";
 import { cn } from "@/lib/utils";
+
+import { Skeleton } from "../ui/skeleton";
+
+import { TableSkeleton } from "./TableSkeleton";
 
 interface TableAndFooterSkeletonProps {
   rows?: number;

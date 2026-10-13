@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+
 import { formatWorkHours } from "../../utils/formatHours";
 
 interface DifferenceLabelProps {

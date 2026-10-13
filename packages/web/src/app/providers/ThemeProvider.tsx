@@ -1,7 +1,8 @@
-import type { JSX, ReactNode } from "react";
 import { useEffect, useRef } from "react";
 
 import { themeStorageKey, useThemeStore, type Theme } from "@/store/theme";
+
+import type { JSX, ReactNode } from "react";
 
 interface ThemeProviderProps {
   children: ReactNode;

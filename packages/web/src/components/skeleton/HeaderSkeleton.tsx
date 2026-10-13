@@ -1,5 +1,5 @@
-import { Skeleton } from "@/components/ui/skeleton";
 import { AppHeaderHomeLink } from "@/components/layout/header/AppHeaderHomeLink";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function HeaderSkeleton() {
   return (

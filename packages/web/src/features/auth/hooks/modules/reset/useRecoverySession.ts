@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-import { supabase } from "@/lib/supabase";
-import { getCurrentUser, type AuthUser } from "@/lib/auth";
 import type { ResetPasswordStep } from "@/features/auth/hooks/useResetPasswordManager";
+import { getCurrentUser, type AuthUser } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 
 interface UseRecoverySessionOptions {
   setLoading: (loading: boolean) => void;

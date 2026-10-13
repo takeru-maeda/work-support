@@ -1,7 +1,9 @@
-import { API_ENDPOINTS } from "@/config/api";
-import apiClient from "@/lib/apiClient";
 import { isAxiosError } from "axios";
 import useSWR, { mutate, type SWRConfiguration } from "swr";
+
+import { API_ENDPOINTS } from "@/config/api";
+import apiClient from "@/lib/apiClient";
+import { buildUserScopedKey } from "@/lib/utils";
 import {
   UpdateUserSettingsRequestSchema,
   UserSettingsResponseSchema,
@@ -9,7 +11,6 @@ import {
   type UserSettings,
   type UserSettingsResponse,
 } from "@shared/schemas/userSettings";
-import { buildUserScopedKey } from "@/lib/utils";
 
 /**
  * ユーザー設定を取得します。

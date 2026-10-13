@@ -1,22 +1,22 @@
-import { useCallback, useMemo } from "react";
 import dayjs from "dayjs";
+import { useCallback, useMemo } from "react";
 
-import { reportUiError } from "@/services/logs";
-import { useCurrentGoals } from "@/services/goals";
-import { showErrorToast } from "@/lib/toast";
 import { usePastGoalFilters } from "@/features/goals/hooks/modules/past/usePastGoalFilters";
 import { usePastGoalHistory } from "@/features/goals/hooks/modules/past/usePastGoalHistory";
 import { usePastGoalsSelection } from "@/features/goals/hooks/modules/past/usePastGoalsSelection";
-import type {
-  GoalHistoryQuery,
-  GoalHistorySortOption,
-} from "@shared/schemas/goals";
 import type {
   Goal,
   PastGoal,
   SortField,
   SortDirection,
 } from "@/features/goals/types";
+import { showErrorToast } from "@/lib/toast";
+import { useCurrentGoals } from "@/services/goals";
+import { reportUiError } from "@/services/logs";
+import type {
+  GoalHistoryQuery,
+  GoalHistorySortOption,
+} from "@shared/schemas/goals";
 
 export interface UsePastGoalsResult {
   goals: PastGoal[];

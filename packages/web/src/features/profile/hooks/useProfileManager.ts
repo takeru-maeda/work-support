@@ -1,9 +1,9 @@
 import { useCallback, type ChangeEvent, type RefObject } from "react";
 
-import type { UserProfile } from "@/types/userProfile";
-import { useProfileState } from "@/features/profile/hooks/modules/useProfileState";
-import { useProfilePersistence } from "@/features/profile/hooks/modules/useProfilePersistence";
 import { useAvatarUpload } from "@/features/profile/hooks/modules/useAvatarUpload";
+import { useProfilePersistence } from "@/features/profile/hooks/modules/useProfilePersistence";
+import { useProfileState } from "@/features/profile/hooks/modules/useProfileState";
+import type { UserProfile } from "@/types/userProfile";
 
 interface UseProfileManagerResult {
   profile: UserProfile;

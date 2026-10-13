@@ -1,12 +1,13 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Database, Tables } from "../../../../shared/src/types/db";
 import { AppError } from "../../lib/errors";
-import {
+
+import type {
   Effort,
   WorkRecordListQuery,
   WorkRecordSort,
   WorkRecordWithRelations,
 } from "./types";
+import type { Database, Tables } from "../../../../shared/src/types/db";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * 週報向けの工数記録を取得します。

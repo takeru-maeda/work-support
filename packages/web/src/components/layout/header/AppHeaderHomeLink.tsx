@@ -1,9 +1,9 @@
+import { Command } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ROUTES } from "@/config/routes";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Command } from "lucide-react";
 
 interface AppHeaderHomeLinkProps {
   className?: string;

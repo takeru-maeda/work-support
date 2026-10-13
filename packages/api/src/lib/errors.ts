@@ -1,4 +1,4 @@
-import { ContentfulStatusCode } from "hono/utils/http-status";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 
 /**
  * アプリケーション固有のエラーを表します。

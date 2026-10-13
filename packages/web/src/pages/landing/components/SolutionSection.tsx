@@ -1,10 +1,10 @@
-import type { JSX } from "react";
-
 import {
   solutions,
   solutionSectionTitle,
   type SolutionItem,
 } from "../landingContent";
+
+import type { JSX } from "react";
 
 export const SolutionSection = (): JSX.Element => (
   <section className="py-20 sm:py-28 px-4 relative overflow-hidden">

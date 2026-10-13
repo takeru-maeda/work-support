@@ -1,20 +1,26 @@
-"use client"
+"use client";
 
 interface GaugeChartProps {
-  value: number
-  maxValue?: number
-  size?: number
-  label?: string
-  title?: string
+  value: number;
+  maxValue?: number;
+  size?: number;
+  label?: string;
+  title?: string;
 }
 
-export function GaugeChart({ value, maxValue = 100, size = 120, label = "%", title }: GaugeChartProps) {
-  const percentage = Math.min(100, Math.max(0, (value / maxValue) * 100))
-  const radius = (size - 16) / 2
-  const circumference = Math.PI * radius
-  const offset = circumference - (percentage / 100) * circumference
+export function GaugeChart({
+  value,
+  maxValue = 100,
+  size = 120,
+  label = "%",
+  title,
+}: GaugeChartProps) {
+  const percentage = Math.min(100, Math.max(0, (value / maxValue) * 100));
+  const radius = (size - 16) / 2;
+  const circumference = Math.PI * radius;
+  const offset = circumference - (percentage / 100) * circumference;
 
-  const needleAngle = -90 + (percentage / 100) * 180
+  const needleAngle = -90 + (percentage / 100) * 180;
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -51,7 +57,12 @@ export function GaugeChart({ value, maxValue = 100, size = 120, label = "%", tit
               strokeLinecap="round"
               className="transition-all duration-500 ease-out"
             />
-            <circle cx={size / 2} cy={size * 0.6} r="4" fill="hsl(var(--foreground))" />
+            <circle
+              cx={size / 2}
+              cy={size * 0.6}
+              r="4"
+              fill="hsl(var(--foreground))"
+            />
           </g>
         </svg>
         {/* Value display */}
@@ -59,12 +70,18 @@ export function GaugeChart({ value, maxValue = 100, size = 120, label = "%", tit
           <div className="text-center">
             <div className="text-2xl font-bold text-foreground">
               {value.toFixed(1)}
-              <span className="text-sm text-muted-foreground ml-1">{label}</span>
+              <span className="text-sm text-muted-foreground ml-1">
+                {label}
+              </span>
             </div>
           </div>
         </div>
       </div>
-      {title && <span className="text-sm font-medium text-muted-foreground">{title}</span>}
+      {title && (
+        <span className="text-sm font-medium text-muted-foreground">
+          {title}
+        </span>
+      )}
     </div>
-  )
+  );
 }

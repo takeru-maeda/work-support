@@ -1,23 +1,27 @@
 import { Hono } from "hono";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { describeRoute, resolver, validator } from "hono-openapi";
 
-import { AuthenticatedUser, HonoEnv } from "../../custom-types";
-import { jwtAuthMiddleware } from "../../middleware/auth";
+import { AppError } from "../../lib/errors";
 import { createSupabaseClient } from "../../lib/supabase";
+import { jwtAuthMiddleware } from "../../middleware/auth";
+
+import { generateFormattedReport, getWorkRecordListService } from "./service";
 import {
-  WeeklyReportQuery,
   WeeklyReportQuerySchema,
-  WeeklyReportResponse,
   WeeklyReportResponseSchema,
-  WorkRecordListQuery,
   WorkRecordListQuerySchema,
-  WorkRecordListResponse,
   WorkRecordListResponseSchema,
 } from "./types";
-import { AppError } from "../../lib/errors";
-import { Database } from "../../../../shared/src/types/db";
-import { generateFormattedReport, getWorkRecordListService } from "./service";
-import { describeRoute, resolver, validator } from "hono-openapi";
+
+import type {
+  WeeklyReportQuery,
+  WeeklyReportResponse,
+  WorkRecordListQuery,
+  WorkRecordListResponse,
+} from "./types";
+import type { Database } from "../../../../shared/src/types/db";
+import type { AuthenticatedUser, HonoEnv } from "../../custom-types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const reports = new Hono<HonoEnv>();
 

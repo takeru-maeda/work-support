@@ -1,5 +1,5 @@
-import { Tables } from "../../shared/src/types/db";
 import type { Logger } from "./lib/logger";
+import type { Tables } from "../../shared/src/types/db";
 
 export interface HonoEnv {
   Variables: {

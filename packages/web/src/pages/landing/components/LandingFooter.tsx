@@ -1,8 +1,9 @@
-import type { JSX } from "react";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/config/routes";
+
+import type { JSX } from "react";
 
 export const LandingFooter = (): JSX.Element => (
   <footer className="py-12 sm:py-16 px-4 border-t border-border/50 bg-linear-to-b from-muted/30 to-muted/50 relative overflow-hidden">

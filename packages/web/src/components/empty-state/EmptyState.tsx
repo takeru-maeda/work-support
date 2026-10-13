@@ -1,6 +1,6 @@
-import type { PropsWithChildren } from "react";
-
 import { cn } from "@/lib/utils";
+
+import type { PropsWithChildren } from "react";
 
 interface EmptyStateProps {
   title: string;

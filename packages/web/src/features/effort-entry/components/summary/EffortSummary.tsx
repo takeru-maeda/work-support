@@ -1,8 +1,8 @@
 import CardContainer from "@/components/shared/CardContainer";
 import { Label } from "@/components/ui/label";
-
 import type { ProjectBreakdownItem } from "@/features/effort-entry/types";
 import { formatWorkHours } from "@/features/effort-entry/utils/formatHours";
+
 import DifferenceLabel from "../entries/DifferenceLabel";
 
 interface EffortSummaryProps {
@@ -64,7 +64,11 @@ export function EffortSummary({
                       <span className="text-xs sm:text-sm text-muted-foreground">
                         差分:
                       </span>
-                      <DifferenceLabel difference={project.hasEstimated ? project.difference : null} />
+                      <DifferenceLabel
+                        difference={
+                          project.hasEstimated ? project.difference : null
+                        }
+                      />
                     </div>
                   </div>
                 </div>

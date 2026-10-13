@@ -1,6 +1,6 @@
-import type { JSX } from "react";
-
 import { steps, howItWorksSectionTitle, type Step } from "../landingContent";
+
+import type { JSX } from "react";
 
 export const HowItWorksSection = (): JSX.Element => (
   <section className="py-20 sm:py-28 px-4 relative overflow-hidden">

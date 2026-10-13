@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 
+import type { Goal } from "@/features/goals/types";
 import {
   calculateGoalSummaries,
   type GoalProgressSummary,
 } from "@shared/utils/goalProgress";
-import type { Goal } from "@/features/goals/types";
 
 interface UseGoalProgressMetricsOptions {
   goals: Goal[];

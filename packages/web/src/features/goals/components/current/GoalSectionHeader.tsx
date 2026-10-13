@@ -1,5 +1,7 @@
-import { SectionHeader } from "@/components/sections/SectionHeader";
 import { TrendingUp } from "lucide-react";
+
+import { SectionHeader } from "@/components/sections/SectionHeader";
+
 import type { JSX } from "react";
 
 const GoalSectionHeader = (): JSX.Element => {

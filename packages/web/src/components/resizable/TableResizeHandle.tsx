@@ -1,5 +1,7 @@
 import { GripHorizontal } from "lucide-react";
+
 import { cn } from "@/lib/utils";
+
 import type { JSX } from "react";
 
 interface TableResizeHandleProps {

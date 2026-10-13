@@ -1,5 +1,7 @@
-import { SectionHeader } from "@/components/sections/SectionHeader";
 import { History } from "lucide-react";
+
+import { SectionHeader } from "@/components/sections/SectionHeader";
+
 import type { JSX } from "react";
 
 const PastGoalSectionHeader = (): JSX.Element => {

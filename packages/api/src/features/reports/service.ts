@@ -1,13 +1,15 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Database, Tables } from "../../../../shared/src/types/db";
+import dayjs from "dayjs";
+
+import { calculateGoalSummaries } from "../../../../shared/src/utils/goalProgress";
+
 import {
   getGoalsForReport,
   getGoalProgressHistories,
   getWorkRecordList,
   getWorkRecordsForReport,
 } from "./repository";
-import dayjs, { Dayjs } from "dayjs";
-import {
+
+import type {
   Effort,
   GoalSummary,
   GoalWithProgressDiff,
@@ -16,10 +18,10 @@ import {
   WeeklyReportData,
   WeeklyReportResponse,
 } from "./types";
-import {
-  calculateGoalSummaries,
-  GoalProgressSummary,
-} from "../../../../shared/src/utils/goalProgress";
+import type { Database, Tables } from "../../../../shared/src/types/db";
+import type { GoalProgressSummary } from "../../../../shared/src/utils/goalProgress";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Dayjs } from "dayjs";
 
 /**
  * 週報の雛形を生成します

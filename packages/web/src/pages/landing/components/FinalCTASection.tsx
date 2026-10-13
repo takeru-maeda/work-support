@@ -1,9 +1,11 @@
-import type { JSX } from "react";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
-import { finalCTA } from "../landingContent";
 import { ROUTES } from "@/config/routes";
+
+import { finalCTA } from "../landingContent";
+
+import type { JSX } from "react";
 
 const CtaIcon = finalCTA.primaryCtaIcon;
 

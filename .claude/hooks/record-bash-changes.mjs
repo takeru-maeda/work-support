@@ -8,7 +8,14 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { baselinePath, changedFilesWithMtime, diffChanged, projectRoot, readEvent, recordTouched } from "./lib.mjs";
+import {
+  baselinePath,
+  changedFilesWithMtime,
+  diffChanged,
+  projectRoot,
+  readEvent,
+  recordTouched,
+} from "./lib.mjs";
 
 const event = readEvent();
 const root = projectRoot();

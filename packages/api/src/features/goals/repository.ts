@@ -1,19 +1,20 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import dayjs from "dayjs";
 
-import {
-  Database,
-  Tables,
-  TablesInsert,
-  TablesUpdate,
-} from "../../../../shared/src/types/db";
-import {
+import { AppError } from "../../lib/errors";
+
+import type {
   GoalCreateRequest,
   GoalHistoryQuery,
   GoalHistorySortOption,
   GoalUpdateRequest,
 } from "./types";
-import { AppError } from "../../lib/errors";
+import type {
+  Database,
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from "../../../../shared/src/types/db";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * 最新期間の目標を取得します。

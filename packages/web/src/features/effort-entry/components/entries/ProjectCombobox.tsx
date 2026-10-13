@@ -31,7 +31,7 @@ export function ProjectCombobox({
   const resolvedValue: string =
     value.name.trim().length > 0
       ? value.name
-      : availableOptions.find((option) => option.id === value.id)?.name ?? "";
+      : (availableOptions.find((option) => option.id === value.id)?.name ?? "");
 
   const handleChange = (next: string) => {
     const matched: EffortProjectOption | undefined = availableOptions.find(

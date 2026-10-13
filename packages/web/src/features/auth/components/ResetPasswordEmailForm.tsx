@@ -1,5 +1,3 @@
-import type { FormEvent } from "react";
-
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -8,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { ROUTES } from "@/config/routes";
 import { AuthErrorAlert } from "@/features/auth/components/AuthErrorAlert";
 import { AuthInfoAlert } from "@/features/auth/components/AuthInfoAlert";
+
+import type { FormEvent } from "react";
 
 interface ResetPasswordEmailFormProps {
   email: string;

@@ -1,4 +1,4 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { AppError } from "../../lib/errors";
 
 import type {
   Database,
@@ -6,7 +6,7 @@ import type {
   TablesInsert,
   TablesUpdate,
 } from "../../../../shared/src/types/db";
-import { AppError } from "../../lib/errors";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * ユーザー設定を取得します。
