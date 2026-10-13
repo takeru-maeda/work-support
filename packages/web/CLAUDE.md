@@ -12,9 +12,9 @@ React 19 + Vite 7 + React Router 6 の SPA（Vercel にデプロイ）。UI は 
 
 ## ビルド・テスト・型チェックの鉄則
 
-- 型チェック: `pnpm --filter web exec tsc -p tsconfig.app.json --noEmit`（数秒で終わる）
+- 型チェック: `pnpm --filter web run typecheck`（数秒で終わる。編集のたびに回してよい）
 - ビルド: `pnpm --filter web build`（`tsc -b && vite build`）
-- lint: `pnpm exec eslint packages/web/src`（P2 で既存のエラーを一掃するまでは、**今回触ったファイルだけ**を対象にする）
+- lint と整形: ルートで `pnpm lint` / `pnpm format:check`（エラー 0 を保つ）。編集したファイルは hook が自動で整形と lint の修正をかける
 - テスト: Vitest + Testing Library + MSW は移行計画の P4 で整備する。それまでは、純粋なロジック（`utils/`、計算）の単体テストを `pnpm --filter web exec vitest run <path>` で書く
 - shadcn の CLI は、どのサブコマンドも実行前にユーザーへ確認する（`.claude/rules/third-party-skills.md`）
 

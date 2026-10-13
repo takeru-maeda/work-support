@@ -12,10 +12,10 @@ Hono 4 + Cloudflare Workers の API。Supabase（PostgreSQL）に service role �
 
 ## ビルド・テスト・型チェックの鉄則
 
-- 型チェック: `pnpm --filter api exec tsc --noEmit`（数秒で終わる。編集のたびに回してよい）
-- lint: `pnpm exec eslint packages/api/src`（P2 で既存のエラーを一掃するまでは、**今回触ったファイルだけ**を対象にする: `pnpm exec eslint <files>`）
+- 型チェック: `pnpm --filter api run typecheck`（数秒で終わる。編集のたびに回してよい）
+- lint と整形: ルートで `pnpm lint` / `pnpm format:check`（エラー 0 を保つ）。編集したファイルは hook が自動で整形と lint の修正をかける
 - テスト: `pnpm --filter api exec vitest run <path>`（`-q` 相当に `--reporter=dot`）
-- ⚠️ **今の `vitest.config.ts` は `.dev.vars` を読み込むため、DB につながるテストは本番の Supabase に接続してしまう**。テスト用 DB の仕組み（移行計画の P3 / P4）ができるまで、**DB に触れるテストを書かない・実行しない**。純粋なロジックの単体テストだけを書く
+- テストに `.dev.vars`（本番の接続情報）は渡らない。テスト用 DB の仕組み（移行計画の P3 / P4）ができるまで、**DB に触れるテストは書かない**。純粋なロジックの単体テストだけを書く
 - デプロイ（`pnpm -F api run deploy`）とシークレットの変更は人間が行う
 
 ## 参照 grep の対象パス

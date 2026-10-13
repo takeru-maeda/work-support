@@ -13,7 +13,7 @@ pnpm ワークスペースのモノレポ。バックエンドは Cloudflare Wor
 - **バックエンド**: Cloudflare Workers + Hono 4
 - **フロントエンド**: React 19 + Vite 7 + React Router 6（SPA。SSR / RSC は使わない）
 - **DB / 認証**: Supabase（PostgreSQL、Auth）
-- **パッケージ管理**: pnpm 10（npm は使わない）
+- **パッケージ管理**: pnpm 10（npm は使わない）。複数のパッケージで使う依存のバージョンは `pnpm-workspace.yaml` の catalog でそろえ、各 `package.json` からは `"catalog:"` で参照する。各パッケージは自分の `package.json` に書いた依存だけを import する（lint で検出）
 
 正確なバージョンは各 `package.json` と `pnpm-lock.yaml` を正とする。ライブラリの使い方は、実際に入っているバージョンに合わせて Context7（`mcp__context7__resolve-library-id` → `mcp__context7__query-docs`）で確かめる。
 
@@ -24,7 +24,7 @@ pnpm ワークスペースのモノレポ。バックエンドは Cloudflare Wor
 - **hono-openapi + Zod**: 入力の検証と OpenAPI の自動生成
 - **@supabase/supabase-js**: DB アクセス（service role キーで接続）
 - **jose**: Supabase JWT の検証
-- **メール送信**: GAS のエンドポイント（`GAS_EMAIL_ENDPOINT`）へ fetch で依頼する（`src/lib/mailer.ts`）。`resend` は依存に残っているが使っていない（P2 の依存整理で扱う）
+- **メール送信**: GAS のエンドポイント（`GAS_EMAIL_ENDPOINT`）へ fetch で依頼する（`src/lib/mailer.ts`）。メール送信のライブラリは使わない
 
 ### フロントエンド（`packages/web`）
 - **shadcn/ui（radix, new-york）+ Radix UI + Tailwind CSS 4**: UI とスタイル
@@ -45,7 +45,7 @@ pnpm ワークスペースのモノレポ。バックエンドは Cloudflare Wor
 - 型だけを import するときは `import type` を使う
 
 ### コードの品質
-- ESLint + Prettier（ダブルクォート、セミコロンあり）
+- ESLint + Prettier（ダブルクォート、セミコロンあり）。ESLint の設定はルートの `eslint.config.js` 1 つ。整形は Prettier が担い、ESLint では見ない
 - 関数や公開 API には JSDoc を書く（`docs/guides/jsdoc-guidelines.md`）
 - コメントは「なぜ」を書き、コードの言い換えは書かない
 

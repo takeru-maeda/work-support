@@ -10,7 +10,7 @@ user-invocable: false
 
 ## 3a. 機械チェック（親）
 
-パッケージの `CLAUDE.md`「ビルド・テスト・型チェックの鉄則」にある型チェックと lint を、今回触ったファイルを対象に回す。**編集ごとに整形と lint をかける hook（format-on-edit）はハーネス移行計画の P2 で作る。それまでは、触ったファイルに `pnpm exec prettier --check <files>` と `pnpm exec eslint <files>` をここで手で回す。**
+パッケージの `CLAUDE.md`「ビルド・テスト・型チェックの鉄則」にある型チェックと lint を、今回触ったファイルを対象に回す。編集ごとの整形と lint の自動修正は hook（format-on-edit）が行い、応答を終えるときに hook（verify-gate）が触ったファイルの lint・整形・型チェック・関連テストを回す。ここでは、その結果に頼らず `pnpm lint` と型チェックを回し、エラー 0 を確かめる。
 
 ## 3b. 独立したバグ点検（`bug-reviewer` に任せる）
 

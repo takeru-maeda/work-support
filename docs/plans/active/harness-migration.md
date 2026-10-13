@@ -206,9 +206,10 @@ moon-voice の `apps/*/AGENTS.md` と同じく、スキルから節の名前で�
 
 | Hook | タイミング | 内容 |
 |---|---|---|
-| `spec-gate` | PreToolUse（Edit/Write） | `packages/` 配下を編集するときに、`approved` か `in_progress` の改修ドキュメントまたは計画書があるかを確認する。なければ exit 2 で止め、理由と対処を返す |
-| `guard-bash` | PreToolUse（Bash） | `git commit` / `push`、`supabase db push`、`wrangler deploy`、`reset --hard` を止めるか、確認を求める |
+| `spec-gate` | PreToolUse（Edit/Write） | `packages/` 配下を編集するときに、`approved` か `in_progress` の改修ドキュメント、または `scope:` に編集先を含む計画書があるかを確認する。なければ**人に確認を求める**（理由と対処を表示。XS はその場で人が許可すれば通る） |
+| `guard-bash` | PreToolUse（Bash） | settings.json の deny / ask を補う。秘密情報のファイルへの接触、`--no-verify`、force push を止め、人間の未ステージの差分を消す・隠す操作（`reset --hard`、`restore`、`clean`、`stash` など）と複合コマンドの中のステージに確認を求める |
 | `format-on-edit` | PostToolUse | 編集したファイルに eslint --fix と prettier をかけ、直らなかったエラーを返す |
+| `record-bash-changes` | Pre / PostToolUse（Bash） | Bash で変わったファイルを、実行の前後の比較で「このセッションで触ったファイル」に記録する |
 | `verify-gate` | Stop | このセッションで触ったパッケージだけを対象に、型チェック、lint、関連する単体テストを実行する。Bash で変えたファイルも対象に含める（bridge-api の方式）。`stop_hook_active` を見て無限ループを防ぐ |
 
 ### 3.5 外部スキル（2026-10-10 に導入済み。`.claude/skills/` と `skills-lock.json`）
@@ -291,14 +292,16 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 > - `settings.json` は今回のセッションの途中で作ったため、`/hooks` を開くかセッションを再起動して読み込み直す必要がある
 
 ### P2. 機械的強制の土台
-- [ ] ESLint 設定を flat config に一本化し、`.eslintrc.json` を削除する
+- [x] ESLint 設定を flat config に一本化し、`.eslintrc.json` を削除する（整形は Prettier に分け、`eslint-plugin-prettier` は外した。`import/no-extraneous-dependencies` と `consistent-type-imports` を追加）
 - [ ] lint と format を一括で自動修正する（整形だけの独立したコミットにし、`.git-blame-ignore-revs` に登録する）。残りは手で直す
-- [ ] ルートの scripts を揃える: `typecheck` / `lint` / `format` / `test` / `test:e2e` / `check`
+- [x] ルートの scripts を揃える: `typecheck` / `lint` / `format` / `test` / `harness:check` / `check`（`test:e2e` は Playwright を入れる P4 で足す）
 - [ ] 依存関係を整理する: `date-fns` のバージョン固定、ルートの不要な依存の削除、TypeScript のバージョン統一、`.env.example` への改名、`verbatimModuleSyntax` の有効化
-- [ ] hooks を実装する（spec-gate、guard-bash、format-on-edit、verify-gate）と `settings.json` の permissions
-- [ ] GitHub Actions を作る（まず lint、型チェック、`scripts/harness-check.mjs`）
-- [ ] api の `vitest.config.ts` が `.dev.vars`（本番の接続情報）を読む問題を止める（テストが本番の DB につながらないようにする。P3 / P4 のテスト用 DB とつなぐ）
-- [ ] 使っていない依存（`resend` など）を消す
+  - [x] `date-fns` を `^4.1.0` に固定。ルートの依存を lint と整形の道具だけにし、宣言なしで使われていた `@supabase/supabase-js` / `dayjs` / `zod` を使うパッケージに宣言した。共通のバージョン（TypeScript 5.9、Vitest、zod、dayjs、supabase-js）は `pnpm-workspace.yaml` の catalog にまとめた。`packages/web/.env example` を `.env.example` に改名し、コードが使う項目に合わせた
+  - [ ] `verbatimModuleSyntax` を api と shared で有効にする（一括修正で `import type` にそろえたあと）
+- [x] hooks を実装する（spec-gate、guard-bash、format-on-edit、verify-gate、record-bash-changes）と `settings.json` の permissions。判定のロジックは `.claude/hooks/hooks.test.mjs` でテストし、`pnpm harness:check` で回す
+- [x] GitHub Actions を作る（`.github/workflows/ci.yml`。lint、整形、型チェック、単体テスト、ハーネスの自己点検）
+- [x] api の `vitest.config.ts` が `.dev.vars`（本番の接続情報）を読む問題を止める（読み込みを外した。テスト用 DB とつなぐのは P3 / P4）
+- [x] 使っていない依存（`resend` など）を消す（api: `resend`、`@hono/zod-validator`、`ngrok`、`ts-node`、`dotenv`。web: `@hookform/resolvers`、`uuid`、`tailwindcss-animate`。ルート: `tsx` など）
 
 ### P3. スキーマ管理とテスト用 DB
 - [ ] 本番のスキーマを取り込む（`supabase db pull`、読み取りのみ）。⚠️ 実行前に確認を取る
@@ -395,3 +398,8 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 | 2026-10-10 | `/commit` 用の `commit` スキルを追加（旧 `.agent/workflows/commit.md` の移植） | ユーザーがコミットを頼むときの書式をそろえる |
 | 2026-10-10 | P1 の成果物を、文脈を持たないサブエージェントでレビューし、20 件の指摘を反映（S の改修で省いた工程の印の付け方、hook ができるまでの spec-gate の扱いと XS の手順、計画書の `scope:`、bug-reviewer への差分の渡し方、S は 3b を省き 6 を必ず回す、`/code-review` の重要度は親が付ける、done からの再開、改修の記録の `released_in:`、settings.json の deny / ask の追加、steering の事実誤り） | 作る人と判定する人を分ける。自己点検スクリプトにも、チェックリストと工程スキルの一致、skillOverrides の確認を追加した |
 | 2026-10-10 | D20: テーブル（ER 図つき）とエンドポイントの全体像を `docs/reference/` に置く。コードから自動で作り、ずれは CI で止める。database.md は P3、api.md は P4 で作る | ユーザーの要望（人間の開発者が全体を把握しやすい）。手書きの旧設計書（`docs/legacy/specs/design/05-api.md`、`09-database.md`）が古くなったのと同じことを、自動生成で防ぐ |
+| 2026-10-10 | P2: 整形は Prettier だけが担い、ESLint では見ない（`eslint-plugin-prettier` を外した）。CI では `prettier --check` を回す | typescript-eslint の推奨。lint の出力が整形の指摘で埋もれず、速い |
+| 2026-10-10 | P2: spec-gate は、根拠が無いとき止めずに人へ確認を求める。XS はその場で人が許可すれば通る | ユーザーの選択。XS のたびに改修の記録を作らずに済み、それでも人の目は必ず通る |
+| 2026-10-10 | P2: react-hooks/exhaustive-deps の 12 件は、挙動が変わらないものだけ P2 で直し、挙動が変わりうるものは理由付きの eslint-disable にして P6 でテストを書いてから直す。ルールは error のまま | ユーザーの選択。テストが無いまま依存配列を変えると、再実行の増加などで挙動が変わる |
+| 2026-10-10 | P2: 共通の依存のバージョンは pnpm の catalog でそろえる。各パッケージは自分の `package.json` に書いた依存だけを使う（`import/no-extraneous-dependencies`） | 依存の整理で、web と api がルートの依存を宣言なしで使っていたことが分かった。lint で再発を防ぐ |
+| 2026-10-10 | P2: hook のセッション記録は `node_modules/.cache/claude-hooks/` に置く | `/tmp` は誰でも書き込める。bridge-api の方式（固定のパス）は保ちつつ、リポジトリの中に置く |

@@ -1,30 +1,33 @@
 {
   "name": "work-support",
   "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "dev:api": "pnpm --filter api dev",
-    "dev:web": "pnpm --filter web dev"
+    "dev:web": "pnpm --filter web dev",
+    "typecheck": "pnpm -r --parallel run typecheck",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "pnpm -r run test",
+    "harness:check": "node scripts/harness-check.mjs && node --test \".claude/hooks/*.test.mjs\"",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm harness:check"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
-    "@typescript-eslint/parser": "^8.44.1",
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
     "prettier": "^3.6.2",
-    "tsx": "^4.20.6",
-    "typescript": "^5.0.0",
-    "typescript-eslint": "^8.44.1",
-    "zod": "^4.1.12"
+    "typescript": "catalog:",
+    "typescript-eslint": "^8.44.1"
   },
-  "packageManager": "pnpm@10.17.1+sha512.17c560fca4867ae9473a3899ad84a88334914f379be46d455cbf92e5cf4b39d34985d452d2583baf19967fa76cb5c17bc9e245529d0b98745721aa7200ecaf7a",
-  "dependencies": {
-    "@hookform/resolvers": "^5.2.2",
-    "@supabase/supabase-js": "^2.58.0",
-    "dayjs": "^1.11.18"
-  }
+  "packageManager": "pnpm@10.17.1+sha512.17c560fca4867ae9473a3899ad84a88334914f379be46d455cbf92e5cf4b39d34985d452d2583baf19967fa76cb5c17bc9e245529d0b98745721aa7200ecaf7a"
 }
