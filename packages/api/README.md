@@ -35,7 +35,7 @@ packages/api/src/
 詳細は `docs/legacy/specs/design/02-backend.md` と `docs/legacy/specs/design/08-logic.md` を参照してください。
 
 ## 認証とセキュリティ
-- フロントエンドからのリクエストは `jwtAuthMiddleware` を通じ、Supabase の JWT を検証してユーザーを特定します。
+- フロントエンドからのリクエストは `jwtAuthMiddleware` を通じ、Supabase の JWT を検証してユーザーを特定します。HS256 のトークンは `SUPABASE_JWT_SECRET` で、ES256 / RS256 のトークンは Supabase が公開する JWKS（`<SUPABASE_URL>/auth/v1/.well-known/jwks.json`）で検証します（`docs/specs/platform/spec.md`）。
 - Google Apps Script など外部システムからの工数登録は固定 API キー (`Authorization: Bearer <API_KEY>`) による `apiKeyAuthMiddleware` で保護します。
 - すべてのルートで CORS 設定を適切に行い、許可されたオリジンのみアクセスできるようにします。
 
@@ -49,7 +49,7 @@ API 一覧とスキーマ詳細は `docs/legacy/specs/design/05-api.md` およ�
 | --------------------------- | ---- | ------------------------------------------------------------------------------------- | --------------------------------------------- |
 | `SUPABASE_URL`              | 必須 | Supabase プロジェクトの URL。                                                         | `https://xyzcompany.supabase.co`              |
 | `SUPABASE_SERVICE_ROLE_KEY` | 必須 | Supabase Service Role キー（DB への管理操作用）。                                     | `eyJhbGciOi...`                               |
-| `SUPABASE_JWT_SECRET`       | 必須 | Supabase が発行する JWT を検証するための秘密鍵。                                      | `super-secret-jwt-key`                        |
+| `SUPABASE_JWT_SECRET`       | 必須 | Supabase が HS256 で署名した JWT を検証するための共有シークレット（ES256 / RS256 の JWT は JWKS で検証するので使わない）。 | `super-secret-jwt-key`                        |
 | `API_KEY`                   | 必須 | Google Apps Script など外部サービスからの API 認証に利用する固定キー。                | `my-secure-api-key`                           |
 | `GAS_EMAIL_ENDPOINT`        | 必須 | 工数登録完了メールを送信する Google Apps Script のエンドポイント。                    | `https://script.google.com/macros/s/.../exec` |
 | `PROD_FRONTEND_URL`         | 必須 | 本番フロントエンドのオリジン（CORS 許可対象）。                                       | `https://work-support-app.com`                |

@@ -321,8 +321,8 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 - [x] `docs/reference/database.md` を作る（D20。`scripts/gen-db-docs.mjs`。列の型と既定値・主キー・外部キーはマイグレーションの SQL から、列の NULL の可否・ビュー・enum は db.ts から読む。`pnpm db:types` の最後にも走る）。`db.ts` を最新にしたあと、ER 図（Mermaid の `erDiagram`。ログ用のテーブルも含む）とテーブル・ビューの列をスクリプトで作る。テーブルの目的と担当する機能は手書きの欄に書く。生成し直した結果とのずれを自己点検と CI で検出する
 
 ### P4. テスト基盤
-- [ ] api: Vitest と `app.request` で結合テストを書けるようにする（認証ヘルパー、データの用意と後片付け）
-- [ ] マイグレーションの検査: ローカルの Supabase（Docker）にマイグレーションからまっさらな DB を作り、新規ユーザーで主な API（案件の一覧、工数の登録、目標、週報）を通すテストを CI で回す（H-010。基準のマイグレーションでマテリアライズドビューが未更新のまま作られ、案件の一覧が 500 になった）
+- [x] api: Vitest と `app.request` で結合テストを書けるようにする（認証ヘルパー、データの用意と後片付け）。`*.int.test.ts` をローカルの Supabase で回す（`pnpm db:start` → `pnpm test:int`）。ローカルの Supabase は ES256 で署名するため、API の認証を公開鍵方式にも対応させた（[v1.1.0](../../specs/platform/changes/v1.1.0-auth-asymmetric-jwt.md)）。ローカルの Supabase のポートは、ほかのプロジェクトと共存できるよう 55xxx 番台にした
+- [ ] マイグレーションの検査（テストは `packages/api/test/fresh-user.int.test.ts` で作成済み。CI への組み込みが残り）: ローカルの Supabase（Docker）にマイグレーションからまっさらな DB を作り、新規ユーザーで主な API（案件の一覧、工数の登録、目標、週報）を通すテストを CI で回す（H-010。基準のマイグレーションでマテリアライズドビューが未更新のまま作られ、案件の一覧が 500 になった）
 - [ ] shared: 単体テスト
 - [ ] web: Vitest、Testing Library、MSW
 - [ ] E2E: Playwright（テストアカウント、主要な画面の通し動作、3 幅）
@@ -350,7 +350,7 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 | 12 | weekly-report（週報） | [ ] | [ ] |
 | 13 | profile（アバター、アカウント削除） | [ ] | [ ] |
 | 14 | user-settings（ユーザー設定） | [ ] | [ ] |
-| 15 | platform（ログ、エラー処理、認証ミドルウェア、CORS、OpenAPI、メール送信） | [ ] | [ ] |
+| 15 | platform（ログ、エラー処理、認証ミドルウェア、CORS、OpenAPI、メール送信。認証の部分は v1.1.0 で作成済み） | [ ] | [ ] |
 
 - [ ] 直近のバグ修正（例: a8a5c14 の下書き同期の競合）を、ポストモーテムと incidents.md に初期データとして登録する
 - [ ] `spec-backfill` スキルを作る（変換の手順。旧ドキュメントとコードの照合、食い違いの扱い、baseline の記録）

@@ -17,10 +17,14 @@
     "harness:check": "node scripts/harness-check.mjs && node scripts/gen-db-docs.mjs --check && node --test \".claude/hooks/*.test.mjs\"",
     "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm harness:check",
     "db:types": "bash packages/shared/supabase-gen-types.sh",
-    "db:docs": "node scripts/gen-db-docs.mjs"
+    "db:docs": "node scripts/gen-db-docs.mjs",
+    "db:start": "supabase start --workdir packages/api -x realtime,imgproxy,edge-runtime,logflare,vector,supavisor",
+    "db:stop": "supabase stop --workdir packages/api",
+    "test:int": "pnpm --filter api run test:int"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@playwright/test": "^1.64.0",
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",

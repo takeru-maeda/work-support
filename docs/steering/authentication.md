@@ -12,7 +12,7 @@
 Web からのリクエスト用。
 
 1. `Authorization: Bearer <jwt>` を取り出す（ない・形式が違うときは 401）
-2. `jose` の `jwtVerify` で `SUPABASE_JWT_SECRET` を使って検証する（失敗は 401）
+2. `lib/jwt.ts` の `verifySupabaseAccessToken` で検証する（失敗は 401）。署名方式はトークンのヘッダーで決まり、HS256 は `SUPABASE_JWT_SECRET`、ES256 / RS256 は Supabase が公開する JWKS で確かめる。共有シークレットを公開鍵方式の検証に使わない（方式の取り違えでなりすましを許すため。詳しくは `docs/specs/platform/spec.md`）
 3. `c.set("user", { id, email })` でコンテキストに入れる
 
 OPTIONS（CORS のプリフライト）は認証をとばす。

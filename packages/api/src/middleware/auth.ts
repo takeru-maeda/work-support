@@ -1,18 +1,19 @@
 import { createMiddleware } from "hono/factory";
-import { jwtVerify, type JWTPayload } from "jose";
 
 import { EffortRequestSchema } from "../features/effort/types";
 import { AppError } from "../lib/errors";
+import { verifySupabaseAccessToken } from "../lib/jwt";
 import { createSupabaseClient } from "../lib/supabase";
 
 import type { Database } from "../../../shared/src/types/db";
 import type { AuthenticatedUser, HonoEnv } from "../custom-types";
 import type { EffortRequest } from "../features/effort/types";
 import type { AuthError, SupabaseClient, User } from "@supabase/supabase-js";
+import type { JWTPayload } from "jose";
 import type z from "zod";
 
 /**
- * JWT 認証を検証します。
+ * JWT 認証を検証します（共有シークレットの HS256 と、JWKS で検証する ES256 / RS256 の両方）。
  *
  * @param c Honoコンテキスト
  * @param next 次のミドルウェア
@@ -31,14 +32,10 @@ export const jwtAuthMiddleware = createMiddleware(async (c, next) => {
   }
 
   const token: string = authHeader.split(" ")[1];
-  const secretKey: Uint8Array = new TextEncoder().encode(
-    c.env.SUPABASE_JWT_SECRET,
-  );
 
   let payload: JWTPayload;
   try {
-    const verified = await jwtVerify(token, secretKey);
-    payload = verified.payload;
+    payload = await verifySupabaseAccessToken(token, c.env);
   } catch (error) {
     throw new AppError(401, "Unauthorized", error as Error);
   }

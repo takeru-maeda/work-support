@@ -14,8 +14,8 @@ Hono 4 + Cloudflare Workers の API。Supabase（PostgreSQL）に service role �
 
 - 型チェック: `pnpm --filter api run typecheck`（数秒で終わる。編集のたびに回してよい）
 - lint と整形: ルートで `pnpm lint` / `pnpm format:check`（エラー 0 を保つ）。編集したファイルは hook が自動で整形と lint の修正をかける
-- テスト: `pnpm --filter api exec vitest run <path>`（`-q` 相当に `--reporter=dot`）
-- テストに `.dev.vars`（本番の接続情報）は渡らない。テスト用 DB の仕組み（移行計画の P3 / P4）ができるまで、**DB に触れるテストは書かない**。純粋なロジックの単体テストだけを書く
+- 単体テスト（DB を使わない、`*.test.ts`）: `pnpm --filter api exec vitest run <path> --reporter=dot`
+- 結合テスト（DB を使う、`*.int.test.ts`）: ルートで `pnpm db:start`（ローカルの Supabase。初回は数分）→ `pnpm test:int`。接続先はローカルの Supabase だけで、`.dev.vars` は読まない。テスト用ユーザーの作り方とトークンは `test/helpers.ts` と `test/tokens.ts`
 - デプロイ（`pnpm -F api run deploy`）とシークレットの変更は人間が行う
 
 ## 参照 grep の対象パス
@@ -35,7 +35,7 @@ rg '<トークン>' packages/api/src packages/shared/src packages/web/src
 
 - 方針の正典は `docs/steering/testing.md`
 - service の業務ロジックは、repository を差し替えて単体テストする（supabase クライアントを引数で受け取る作りを使う）
-- ルートは `app.request(path, init, env)` で通してテストする（テスト用 DB の整備後）
+- ルートは `test/helpers.ts` の `callApi`（`app.request` に、ローカルの Supabase の環境変数と `waitUntil` の代わりを渡す）で通してテストする（`*.int.test.ts`）
 
 ## ドキュメントの更新先
 
@@ -53,5 +53,5 @@ rg '<トークン>' packages/api/src packages/shared/src packages/web/src
 - service role キーで接続するため RLS に守られない。**すべてのクエリに `user_id` の条件を入れる**。ユーザー ID は `c.get("user")` から取る
 - エラーは `AppError` で投げる。レスポンスの形は `globalErrorHandler` が決める（`docs/steering/error-handling.md`）
 - 入出力のスキーマは `packages/shared/src/schemas` に置き、api 側で重複して定義しない
-- ローカルの API（`pnpm dev:api`）は `.dev.vars` の DB（本番）につながり、**どのリクエストも `access_logs` に書き込む**。起動して待ち受けを確かめるだけならよいが、リクエストを送る動作確認は事前にユーザーへ確認する（テスト用 DB を向くようにするのは移行計画の P3）
+- ローカルの API（`pnpm dev:api`）は `.dev.vars` の DB（2026-10-13 からクラウドの開発用。人が画面を触って確かめる環境）につながり、**どのリクエストも `access_logs` に書き込む**。起動して待ち受けを確かめるだけならよいが、リクエストを送る動作確認は事前にユーザーへ確認する。自動の確認は結合テスト（ローカルの Supabase）で行う
 - 取り消せない操作の例（実行前にユーザーへ確認）: マイグレーションの適用、`supabase db push` / `reset`、データの一括更新・削除、`wrangler deploy`、`wrangler secret`、メールの送信を伴う動作確認
