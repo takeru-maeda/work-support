@@ -12,3 +12,4 @@ packages/shared/src/types/db.ts
 **/dist/
 **/.wrangler/
 dev/
+**/supabase/.temp/

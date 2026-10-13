@@ -14,9 +14,10 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "pnpm -r run test",
-    "harness:check": "node scripts/harness-check.mjs && node --test \".claude/hooks/*.test.mjs\"",
+    "harness:check": "node scripts/harness-check.mjs && node scripts/gen-db-docs.mjs --check && node --test \".claude/hooks/*.test.mjs\"",
     "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm harness:check",
-    "db:types": "bash packages/shared/supabase-gen-types.sh"
+    "db:types": "bash packages/shared/supabase-gen-types.sh",
+    "db:docs": "node scripts/gen-db-docs.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

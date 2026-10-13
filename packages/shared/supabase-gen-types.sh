@@ -8,5 +8,8 @@ cd "$(dirname "$0")/../.."
 
 tmp="$(mktemp)"
 trap 'rm -f "$tmp"' EXIT
-pnpm exec supabase gen types typescript --project-id bffmiylvxwbmogkvukcq > "$tmp"
+pnpm exec supabase gen types typescript --project-id bffmiylvxwbmogkvukcq --workdir packages/api --schema public > "$tmp"
 pnpm exec prettier --stdin-filepath db.ts < "$tmp" > packages/shared/src/types/db.ts
+
+# テーブルの全体像（docs/reference/database.md）も作り直す
+node scripts/gen-db-docs.mjs

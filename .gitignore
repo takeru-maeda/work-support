@@ -2,3 +2,5 @@ node_modules/
 dev/
 .env
 .DS_Store
+# Supabase CLI のキャッシュ（紐付けたプロジェクトなど）
+**/supabase/.temp/
