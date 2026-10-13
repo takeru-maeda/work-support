@@ -293,11 +293,11 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 
 ### P2. 機械的強制の土台
 - [x] ESLint 設定を flat config に一本化し、`.eslintrc.json` を削除する（整形は Prettier に分け、`eslint-plugin-prettier` は外した。`import/no-extraneous-dependencies` と `consistent-type-imports` を追加）
-- [ ] lint と format を一括で自動修正する（整形だけの独立したコミットにし、`.git-blame-ignore-revs` に登録する）。残りは手で直す
+- [x] lint と format を一括で自動修正する（整形だけの独立したコミットにし、`.git-blame-ignore-revs` に登録する）。残りは手で直す（自動修正は 38115da。import 以外のコードが変わっていないことを構文解析で確かめた。手で直したのは全角空白 2 件、未使用の変数 1 件、フックの依存配列 10 件）
 - [x] ルートの scripts を揃える: `typecheck` / `lint` / `format` / `test` / `harness:check` / `check`（`test:e2e` は Playwright を入れる P4 で足す）
-- [ ] 依存関係を整理する: `date-fns` のバージョン固定、ルートの不要な依存の削除、TypeScript のバージョン統一、`.env.example` への改名、`verbatimModuleSyntax` の有効化
+- [x] 依存関係を整理する: `date-fns` のバージョン固定、ルートの不要な依存の削除、TypeScript のバージョン統一、`.env.example` への改名、`verbatimModuleSyntax` の有効化
   - [x] `date-fns` を `^4.1.0` に固定。ルートの依存を lint と整形の道具だけにし、宣言なしで使われていた `@supabase/supabase-js` / `dayjs` / `zod` を使うパッケージに宣言した。共通のバージョン（TypeScript 5.9、Vitest、zod、dayjs、supabase-js）は `pnpm-workspace.yaml` の catalog にまとめた。`packages/web/.env example` を `.env.example` に改名し、コードが使う項目に合わせた
-  - [ ] `verbatimModuleSyntax` を api と shared で有効にする（一括修正で `import type` にそろえたあと）
+  - [x] `verbatimModuleSyntax` を api と shared で有効にする（型の再 export 24 件に `type` を付けた）
 - [x] hooks を実装する（spec-gate、guard-bash、format-on-edit、verify-gate、record-bash-changes）と `settings.json` の permissions。判定のロジックは `.claude/hooks/hooks.test.mjs` でテストし、`pnpm harness:check` で回す
 - [x] GitHub Actions を作る（`.github/workflows/ci.yml`。lint、整形、型チェック、単体テスト、ハーネスの自己点検）
 - [x] api の `vitest.config.ts` が `.dev.vars`（本番の接続情報）を読む問題を止める（読み込みを外した。テスト用 DB とつなぐのは P3 / P4）
@@ -349,6 +349,9 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 
 ### P6. 既存機能のテスト（仕様書の AC をテストにする）
 - [ ] 機能ごとに AC からテストへの対応表を埋める（優先順: effort-ingest-gas → effort-draft → goals → weekly-report → その他）
+- [ ] P2 で保留にしたフックの依存配列の 2 件を、テストを書いてから改修の記録を通して直す（コードに `TODO(P6)` の印）
+  - `useEffortSummaryMetrics`: `projectOptions` の読み込みが終わっても案件名が更新されない可能性
+  - `useEffortSubmission`: `cancelSync`（`useEffortDraftSync` で毎回作り直される）が依存に無い
 - [ ] 主要な画面の E2E シナリオ
 
 ### P7. 構造の整理（テストを安全網にして行う）
@@ -403,3 +406,4 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 | 2026-10-10 | P2: react-hooks/exhaustive-deps の 12 件は、挙動が変わらないものだけ P2 で直し、挙動が変わりうるものは理由付きの eslint-disable にして P6 でテストを書いてから直す。ルールは error のまま | ユーザーの選択。テストが無いまま依存配列を変えると、再実行の増加などで挙動が変わる |
 | 2026-10-10 | P2: 共通の依存のバージョンは pnpm の catalog でそろえる。各パッケージは自分の `package.json` に書いた依存だけを使う（`import/no-extraneous-dependencies`） | 依存の整理で、web と api がルートの依存を宣言なしで使っていたことが分かった。lint で再発を防ぐ |
 | 2026-10-10 | P2: hook のセッション記録は `node_modules/.cache/claude-hooks/` に置く | `/tmp` は誰でも書き込める。bridge-api の方式（固定のパス）は保ちつつ、リポジトリの中に置く |
+| 2026-10-13 | P2: フックの依存配列 12 件のうち 10 件は挙動を変えずに直した（useState の setter を足す、`?? []` を useMemo で包む、オブジェクトから値を取り出してから使う、早期 return で守られた effect に依存を足す）。2 件は理由と `TODO(P6)` を書いて lint の対象から外した。ルールは error に上げた | 決定どおり。直せないものは数を絞り、場所と理由を残した |

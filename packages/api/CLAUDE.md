@@ -53,4 +53,5 @@ rg '<トークン>' packages/api/src packages/shared/src packages/web/src
 - service role キーで接続するため RLS に守られない。**すべてのクエリに `user_id` の条件を入れる**。ユーザー ID は `c.get("user")` から取る
 - エラーは `AppError` で投げる。レスポンスの形は `globalErrorHandler` が決める（`docs/steering/error-handling.md`）
 - 入出力のスキーマは `packages/shared/src/schemas` に置き、api 側で重複して定義しない
+- ローカルの API（`pnpm dev:api`）は `.dev.vars` の DB（本番）につながり、**どのリクエストも `access_logs` に書き込む**。起動して待ち受けを確かめるだけならよいが、リクエストを送る動作確認は事前にユーザーへ確認する（テスト用 DB を向くようにするのは移行計画の P3）
 - 取り消せない操作の例（実行前にユーザーへ確認）: マイグレーションの適用、`supabase db push` / `reset`、データの一括更新・削除、`wrangler deploy`、`wrangler secret`、メールの送信を伴う動作確認

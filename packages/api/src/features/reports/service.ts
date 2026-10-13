@@ -159,8 +159,8 @@ function getWeekRange(date: Date): { startDate: Date; endDate: Date } {
 /**
  * 月曜日から日曜日の週次差分を取得するために各目標の週初め（月曜日）よりも前の最新の進捗率を取得します
  *
- * @param supabase　Supabaseクライアント
- * @param goals　週報出力期間の目標
+ * @param supabase Supabaseクライアント
+ * @param goals 週報出力期間の目標
  * @param startDate 週報出力対象の開始日
  * @param sunday 週報出力対象の週末（日曜日）
  * @returns 週初め（月曜日）よりも前の最新の進捗率が格納された目標

@@ -1,0 +1,5 @@
+# git blame で無視する、整形だけのコミット（挙動は変えていない）
+# 使い方: git config blame.ignoreRevsFile .git-blame-ignore-revs（GitHub は自動で読む）
+
+# style: Prettier と ESLint の自動修正を一括で適用
+38115da459aa276325cde085bef96409a3b64735

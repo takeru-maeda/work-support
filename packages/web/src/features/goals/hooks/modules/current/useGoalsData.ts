@@ -20,7 +20,7 @@ export const useGoalsData = (): GoalsDataResult => {
     isLoading,
     mutate: mutateGoals,
   } = useCurrentGoals();
-  const goals: Goal[] = currentGoals ?? [];
+  const goals: Goal[] = useMemo(() => currentGoals ?? [], [currentGoals]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {

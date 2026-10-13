@@ -97,6 +97,10 @@ export default defineConfig([
       reactHooks.configs["recommended-latest"],
       reactRefresh.configs.vite,
     ],
+    rules: {
+      // 推奨設定では warn。依存の漏れは古い値を使う不具合になるので、止める
+      "react-hooks/exhaustive-deps": "error",
+    },
   },
   {
     // shadcn/ui の部品は variants などの定数も一緒に export する作り

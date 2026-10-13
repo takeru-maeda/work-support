@@ -146,6 +146,9 @@ export function useEffortSubmission({
     } finally {
       setIsSubmitting(false);
     }
+    // TODO(P6): cancelSync は useEffortDraftSync で毎回作り直される関数なので、依存に足すと送信の関数も毎回変わる。
+    // 下書き同期は過去に不具合があった箇所（effort-draft の仕様書）なので、テストを書いてから改修の記録を通して直す
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     clearPersistedDraft,
     formData.date,

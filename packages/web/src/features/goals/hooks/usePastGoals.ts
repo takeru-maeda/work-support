@@ -50,7 +50,10 @@ export interface UsePastGoalsResult {
 
 export const usePastGoals = (): UsePastGoalsResult => {
   const { data: currentGoalsData } = useCurrentGoals();
-  const currentGoals: Goal[] = currentGoalsData ?? [];
+  const currentGoals: Goal[] = useMemo(
+    () => currentGoalsData ?? [],
+    [currentGoalsData],
+  );
 
   const filters = usePastGoalFilters(currentGoals);
   const { goalHistory, isLoading } = usePastGoalHistory({

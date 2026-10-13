@@ -55,12 +55,12 @@ export function useProfileManager(): UseProfileManagerResult {
         onSuccess: () => setIsEditing(false),
       },
     );
-  }, [persistProfile, profile.name, user]);
+  }, [persistProfile, profile.name, setIsEditing, user]);
 
   const handleCancel = useCallback(() => {
     resetProfileFromUser();
     setIsEditing(false);
-  }, [resetProfileFromUser]);
+  }, [resetProfileFromUser, setIsEditing]);
 
   const handleImageUpload = useAvatarUpload({
     user,

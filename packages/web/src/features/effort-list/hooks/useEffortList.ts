@@ -94,17 +94,13 @@ export function useEffortList() {
   const totalPages: number = data?.meta.totalPages ?? 1;
   const totalCount: number = data?.meta.total ?? entries.length;
 
+  const { currentPage, filtersInitialized, setCurrentPage } = filters;
   useEffect(() => {
-    if (!filters.filtersInitialized) return;
-    if (filters.currentPage > totalPages) {
-      filters.setCurrentPage(Math.max(totalPages, 1));
+    if (!filtersInitialized) return;
+    if (currentPage > totalPages) {
+      setCurrentPage(Math.max(totalPages, 1));
     }
-  }, [
-    filters.currentPage,
-    filters.filtersInitialized,
-    filters.setCurrentPage,
-    totalPages,
-  ]);
+  }, [currentPage, filtersInitialized, setCurrentPage, totalPages]);
 
   const handleItemsPerPageChange = (value: number) => {
     filters.setItemsPerPage(value);

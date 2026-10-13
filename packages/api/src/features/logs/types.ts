@@ -1,6 +1,6 @@
 export {
-  ErrorLogCreateRequest,
+  type ErrorLogCreateRequest,
   ErrorLogCreateRequestSchema,
-  ErrorLogCreateResponse,
+  type ErrorLogCreateResponse,
   ErrorLogCreateResponseSchema,
 } from "../../../../shared/src/schemas/logs";

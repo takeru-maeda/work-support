@@ -78,19 +78,28 @@ export function useResetPasswordManager(): UseResetPasswordManagerResult {
     setNewPassword("");
     setConfirmPassword("");
     await supabase.auth.signOut();
-  }, []);
+  }, [setConfirmPassword, setError, setInfo, setNewPassword, setStep]);
 
-  const onEmailChange = useCallback((value: string) => {
-    setEmail(value);
-  }, []);
+  const onEmailChange = useCallback(
+    (value: string) => {
+      setEmail(value);
+    },
+    [setEmail],
+  );
 
-  const onNewPasswordChange = useCallback((value: string) => {
-    setNewPassword(value);
-  }, []);
+  const onNewPasswordChange = useCallback(
+    (value: string) => {
+      setNewPassword(value);
+    },
+    [setNewPassword],
+  );
 
-  const onConfirmPasswordChange = useCallback((value: string) => {
-    setConfirmPassword(value);
-  }, []);
+  const onConfirmPasswordChange = useCallback(
+    (value: string) => {
+      setConfirmPassword(value);
+    },
+    [setConfirmPassword],
+  );
 
   return {
     step,

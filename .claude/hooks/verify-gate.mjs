@@ -4,8 +4,8 @@
  * Prettier と ESLint、触ったパッケージの型チェック、関連する単体テストを実行します。
  * 問題があれば exit 2 で終了を止め、直させます。
  *
- * - 対象は「このセッションで触ったファイル」だけ（format-on-edit と record-bash-changes の記録）。
- *   文書だけを触ったセッションや、別の作業の変更では止めない
+ * - 対象は「このセッションで触り、まだコミットされていない変更があるファイル」だけ
+ *   （format-on-edit と record-bash-changes の記録）。文書だけを触ったセッションや、別の作業の変更では止めない
  * - stop_hook_active のときは通す（無限に止め続けないため。強い促しであって絶対の壁ではない）
  * - DB につながるテストや E2E は CI に任せる
  */
@@ -13,6 +13,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import {
+  changedFilesWithMtime,
   FORMAT_EXT,
   LINT_EXT,
   groupByPackage,
@@ -28,7 +29,11 @@ if (event.stop_hook_active) process.exit(0);
 const root = projectRoot();
 const touched = touchedFiles(event);
 if (!touched) process.exit(0);
-const files = [...touched].filter((rel) => fs.existsSync(path.join(root, rel)));
+// コミット済みで変更の無いファイルは対象から外す（人間がコミットしたあとまで止め続けないため）
+const uncommitted = changedFilesWithMtime(root);
+const files = [...touched].filter(
+  (rel) => uncommitted.has(rel) && fs.existsSync(path.join(root, rel)),
+);
 const groups = groupByPackage(files);
 if (groups.size === 0) process.exit(0);
 

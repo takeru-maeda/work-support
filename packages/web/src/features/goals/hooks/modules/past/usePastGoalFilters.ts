@@ -129,7 +129,7 @@ export const usePastGoalFilters = (currentGoals: Goal[]): PastGoalFilters => {
     } finally {
       setFiltersInitialized(true);
     }
-  }, [filtersInitialized]);
+  }, [filtersInitialized, storageKey]);
 
   const appliedFilters = useMemo(() => {
     const startDate: string | undefined = filterStartDate
