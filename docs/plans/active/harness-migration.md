@@ -55,7 +55,7 @@ AI エージェントが次の流れを自律的に進められるようにす�
 | D3 | 承認の判定 | 改修ドキュメントの frontmatter の `status` で判定する。承認済みの改修も計画もないときは、hook で `packages/` 配下の編集を止める |
 | D4 | ツール | Claude Code に一本化する。`.kiro` / `.cursor` / `.agent` / `AI_AGENT_GUIDE.md` は廃止する。`AGENTS.md` は `CLAUDE.md` へのシンボリックリンクにする |
 | D5 | テスト | 基盤、E2E（Playwright）、既存機能の広いテストまで入れる |
-| D6 | テスト DB | クラウドにある既存のテスト用 Supabase を使う |
+| D6 | テスト DB | クラウドにある既存の開発用 Supabase（本番とは別のアカウント）を使う。削除はせず、DB の中身だけを本番から作った基準のマイグレーションで作り直す（2026-10-13 に変更） |
 | D7 | スキーマ | 本番のスキーマをマイグレーションとして取り込み、以後はマイグレーションで管理する |
 | D8 | CI / ブランチ | GitHub Actions を導入する。AI は作業ブランチで作業し、コミットは人間がレビューしてから行う |
 | D9 | 移行範囲 | lint の一括修正、`@docs` → `docs/` への改名、依存関係の整理、構造の不整合の解消 |
@@ -304,9 +304,13 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 - [x] 使っていない依存（`resend` など）を消す（api: `resend`、`@hono/zod-validator`、`ngrok`、`ts-node`、`dotenv`。web: `@hookform/resolvers`、`uuid`、`tailwindcss-animate`。ルート: `tsx` など）
 
 ### P3. スキーマ管理とテスト用 DB
-- [ ] 本番のスキーマを取り込む（`supabase db pull`、読み取りのみ）。⚠️ 実行前に確認を取る
-- [ ] 取り込んだ結果と既存のマイグレーション、`db.ts` との差分を確認し、基準となるマイグレーションを決める
-- [ ] テスト用 Supabase との差分を確認し、必要なら適用する。⚠️ 実行前に確認を取る
+- [x] 本番のスキーマを取り込む。`db pull` は本番の migration 履歴に書き込むおそれがあるため、読み取りのみの `supabase db dump --db-url`（Session pooler 経由）を人間が実行した。Supabase CLI はルートの devDependencies に入れ、`packages/api/supabase/config.toml` を作った
+- [x] 取り込んだ結果と既存のマイグレーション、`db.ts` との差分を確認し、基準となるマイグレーションを決める（`20261013000000_baseline.sql`。本番の public スキーマに、avatars バケットと storage ポリシーを足した。手書きの `0000_initial_schema.sql` は RLS の有効化などが欠けていたので削除）
+- [x] `db.ts` を作り直し、今の `db.ts` と差が無いことを確かめた。本番は別のアカウントにあるため、型の生成は本番と同じスキーマにした開発用から行う（`pnpm db:types`）
+- [ ] avatars の storage ポリシーを自分のフォルダ（`avatars/<user_id>/`）に絞る。今は、認証済みのユーザーなら他人の画像も上書き・削除できる。挙動が変わるので、改修の記録を通して行う
+- [x] 開発用 Supabase との差分を確認し、必要なら適用する。⚠️ 実行前に確認を取る
+  - [x] 差分の確認（開発用には、案件とタスクのマテリアライズドビュー、`access_logs.method` が無く、`goal_progress_histories.recorded_at` が日付型だった）
+  - [x] 開発用の DB を基準のマイグレーションで作り直す（`supabase db reset --db-url`。人間が実行した）。作り直したあとの public / auth / storage の書き出しが、本番と一字一句同じになったことを確かめた（2026-10-13）
 - [ ] テスト用の環境変数と GitHub Secrets の設計（設定は人間が行う）
 - [ ] テストデータの方針: 実行ごとに一意なテストユーザーを作り、終わったら片付ける。CI とローカルが同時に走っても衝突しないようにする
 - [ ] `docs/reference/database.md` を作る（D20）。`db.ts` を最新にしたあと、ER 図（Mermaid の `erDiagram`。ログ用のテーブルも含む）とテーブル・ビューの列をスクリプトで作る。テーブルの目的と担当する機能は手書きの欄に書く。生成し直した結果とのずれを自己点検と CI で検出する
@@ -407,3 +411,5 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 | 2026-10-10 | P2: 共通の依存のバージョンは pnpm の catalog でそろえる。各パッケージは自分の `package.json` に書いた依存だけを使う（`import/no-extraneous-dependencies`） | 依存の整理で、web と api がルートの依存を宣言なしで使っていたことが分かった。lint で再発を防ぐ |
 | 2026-10-10 | P2: hook のセッション記録は `node_modules/.cache/claude-hooks/` に置く | `/tmp` は誰でも書き込める。bridge-api の方式（固定のパス）は保ちつつ、リポジトリの中に置く |
 | 2026-10-13 | P2: フックの依存配列 12 件のうち 10 件は挙動を変えずに直した（useState の setter を足す、`?? []` を useMemo で包む、オブジェクトから値を取り出してから使う、早期 return で守られた effect に依存を足す）。2 件は理由と `TODO(P6)` を書いて lint の対象から外した。ルールは error に上げた | 決定どおり。直せないものは数を絞り、場所と理由を残した |
+| 2026-10-13 | D6 を変更: 開発用 Supabase は削除せずに DB の中身だけ作り直す。Supabase Branching は使わない | ユーザーの判断。プロジェクトを作り直すと、認証の設定や URL・キーの差し替えが必要になる。Branching は有料で、データも複製されない |
+| 2026-10-13 | P3: 本番のスキーマは `db pull` ではなく `db dump --db-url` で取り込む。接続文字列（パスワード）は人間がターミナルで扱う | `db pull` は本番の migration 履歴テーブルへの書き込みを求める。dump は読み取りのみ |
