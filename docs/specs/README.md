@@ -37,6 +37,6 @@ docs/specs/
 | goals-history | 過去の目標 | 未作成 |
 | missions | ミッション | 未作成 |
 | weekly-report | 週報 | 未作成 |
-| profile | プロフィール、アバター、アカウント削除 | 未作成 |
+| profile | プロフィール、アバター、アカウント削除 | [作成中](profile/spec.md)（プロフィール画像の保存だけ） |
 | user-settings | ユーザー設定（メール通知、テーマ） | 未作成 |
 | platform | ログ、エラー処理、認証ミドルウェア、CORS、OpenAPI、メール送信 | [作成中](platform/spec.md)（認証のみ。残りは P5） |

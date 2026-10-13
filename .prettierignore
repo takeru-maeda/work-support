@@ -13,3 +13,6 @@ packages/shared/src/types/db.ts
 **/.wrangler/
 dev/
 **/supabase/.temp/
+# Playwright の実行結果（packages/e2e/.gitignore と同じ）
+packages/e2e/test-results/
+packages/e2e/playwright-report/

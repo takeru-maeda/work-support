@@ -8,9 +8,9 @@ DB（Supabase の PostgreSQL、public スキーマ）のテーブルとビュー
 
 ## 前提
 
-- バックエンドは **service role キーで接続する**ため、RLS は有効でもポリシーは 0 個（ブラウザから直接は読み書きできない）。**すべてのクエリに `user_id` の条件を入れる**（`docs/steering/database.md`）
+- バックエンドは **service role キーで接続する**ため、public スキーマのテーブルは RLS が有効でもポリシーは 0 個（ブラウザから直接は読み書きできない）。**すべてのクエリに `user_id` の条件を入れる**（`docs/steering/database.md`）
 - ユーザーは Supabase Auth の `auth.users`。ユーザーを消すと、ほぼすべてのデータが連鎖して消える（`access_logs` だけは `user_id` が NULL になって残る）
-- ストレージは `avatars` バケット（プロフィール画像）。テーブルではないので下の図には出ない
+- ストレージは `avatars` バケット（プロフィール画像。公開）。テーブルではないので下の図には出ない。**ここだけはブラウザから本人のトークンで直接読み書きする**ので、`storage.objects` のポリシーで本人のフォルダ（`<ユーザー ID>/`）だけに絞っている（`docs/specs/profile/spec.md` の INV-1）
 
 ## テーブルの役割
 

@@ -6,6 +6,7 @@ import { inject, onTestFinished } from "vitest";
 import app from "../src";
 
 import type { HonoEnv } from "../src/custom-types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /** メール送信（GAS）の宛先。テストでは `test/setup.ts` がこの宛先への fetch を横取りする */
 export const TEST_GAS_ENDPOINT = "http://gas.test/send";
@@ -39,10 +40,7 @@ export interface TestUser {
  * テストが終わるとユーザーを削除します（関連するデータは外部キーの CASCADE で消える）。
  */
 export async function createTestUser(): Promise<TestUser> {
-  const sb = inject("supabase");
-  const admin = createClient(sb.url, sb.serviceRoleKey, {
-    auth: { persistSession: false },
-  });
+  const admin = adminClient();
   const email = `test-${randomUUID()}@example.test`;
   const password = `pw-${randomUUID()}`;
 
@@ -58,19 +56,46 @@ export async function createTestUser(): Promise<TestUser> {
   }
   const id = created.data.user.id;
   onTestFinished(async () => {
-    await admin.auth.admin.deleteUser(id);
+    const { error } = await admin.auth.admin.deleteUser(id);
+    // テストの中で API から削除した（DELETE /api/users/me）ときは、すでに消えている
+    if (error && error.status !== 404) {
+      throw new Error(`テスト用ユーザーを消せませんでした: ${error.message}`);
+    }
   });
 
-  const client = createClient(sb.url, sb.anonKey, {
-    auth: { persistSession: false },
+  const signedIn = await browserClient().auth.signInWithPassword({
+    email,
+    password,
   });
-  const signedIn = await client.auth.signInWithPassword({ email, password });
   if (signedIn.error || !signedIn.data.session) {
     throw new Error(
       `テスト用ユーザーでログインできませんでした: ${signedIn.error?.message}`,
     );
   }
   return { id, email, accessToken: signedIn.data.session.access_token };
+}
+
+/**
+ * ブラウザと同じ権限（anon キー + 本人のアクセストークン）の supabase-js のクライアントを返します。
+ * Storage のようにブラウザから直接呼ぶものを、RLS のポリシーを通して確かめるときに使う。
+ * `user` を省くと、ログインしていない状態のクライアントになる。
+ */
+export function browserClient(user?: TestUser): SupabaseClient {
+  const sb = inject("supabase");
+  return createClient(sb.url, sb.anonKey, {
+    auth: { persistSession: false },
+    global: user
+      ? { headers: { Authorization: `Bearer ${user.accessToken}` } }
+      : {},
+  });
+}
+
+/** RLS を通らない管理用（service role）のクライアントを返します。テストの準備と後片付け、結果の確認に使う */
+export function adminClient(): SupabaseClient {
+  const sb = inject("supabase");
+  return createClient(sb.url, sb.serviceRoleKey, {
+    auth: { persistSession: false },
+  });
 }
 
 interface ApiRequest {

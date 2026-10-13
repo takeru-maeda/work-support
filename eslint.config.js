@@ -19,6 +19,9 @@ export default defineConfig([
     "!.claude/hooks",
     // Supabase CLI の生成物（手で編集しない）
     "packages/shared/src/types/db.ts",
+    // Playwright の実行結果（HTML のレポートは JS を含む）
+    "packages/e2e/test-results",
+    "packages/e2e/playwright-report",
   ]),
 
   // Node で動くスクリプトと設定ファイル

@@ -55,4 +55,4 @@ rg '<トークン>' packages/api/src packages/shared/src packages/web/src
 - エラーは `AppError` で投げる。レスポンスの形は `globalErrorHandler` が決める（`docs/steering/error-handling.md`）
 - 入出力のスキーマは `packages/shared/src/schemas` に置き、api 側で重複して定義しない
 - ローカルの API（`pnpm dev:api`）は `.dev.vars` の DB（2026-10-13 からクラウドの開発用。人が画面を触って確かめる環境）につながり、**どのリクエストも `access_logs` に書き込む**。起動して待ち受けを確かめるだけならよいが、リクエストを送る動作確認は事前にユーザーへ確認する。自動の確認は結合テスト（ローカルの Supabase）で行う
-- 取り消せない操作の例（実行前にユーザーへ確認）: マイグレーションの適用、`supabase db push` / `reset`、データの一括更新・削除、`wrangler deploy`、`wrangler secret`、メールの送信を伴う動作確認
+- 取り消せない操作の例（実行前にユーザーへ確認）: クラウドの DB（開発用・本番）へのマイグレーションの適用、`supabase db push` / `reset`、データの一括更新・削除、`wrangler deploy`、`wrangler secret`、メールの送信を伴う動作確認

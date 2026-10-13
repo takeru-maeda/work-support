@@ -14,7 +14,7 @@
 - 依存を追加するときは、必ず事前にユーザーへ確認する（`@hono/cli`、`@vitest/coverage-*`、`better-all`、`svgo` など、スキルが勧めるものも含む）。
 
 ## DB（supabase / supabase-postgres-best-practices）
-- どの Supabase の DB にも DDL / DML を直接流さない（MCP の `execute_sql` / `apply_migration`、`supabase db push/reset/query`、`migration up`）。
+- クラウドの Supabase の DB（開発用・本番）に DDL / DML を直接流さない（MCP の `execute_sql` / `apply_migration`、`supabase db push`、`--linked` や `--db-url` を付けた `db reset/query`・`migration up`）。ローカルの Supabase だけは `--local` を付けて使ってよい（hook が確かめる）。
 - スキーマの変更は `packages/api/supabase/migrations/` に新しい SQL ファイルを作る形で提案する。ファイルを書く前にユーザーへ確認する。
 - `.mcp.json` を作ったり、Supabase MCP を接続したりしない。
 - バックエンドは service role で DB に接続している。RLS の助言は多層防御として扱い、構成を作り替える理由にはしない。

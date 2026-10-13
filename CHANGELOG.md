@@ -11,6 +11,9 @@
 ### Added
 - API の認証が、公開鍵方式（ES256 / RS256）で署名された Supabase のアクセストークンにも対応（今の方式のトークンはそのまま使える。将来 Supabase の署名の鍵を切り替えても API が止まらない）（api、[改修の記録](docs/specs/platform/changes/v1.1.0-auth-asymmetric-jwt.md)）
 
+### Security
+- プロフィール画像の保存先の権限を、本人のフォルダだけに絞った。これまでは、ログインしている人なら他人のプロフィール画像も上書き・削除できた（DB の権限の設定、[改修の記録](docs/specs/profile/changes/v1.1.1-avatar-storage-own-folder.md)）
+
 ### Changed
 - 開発の進め方を、Kiro の仕様駆動開発から「機能ごとの仕様書 + 改修の記録 + 承認後の自律実装」へ移行中（[計画](docs/plans/active/harness-migration.md)）
 

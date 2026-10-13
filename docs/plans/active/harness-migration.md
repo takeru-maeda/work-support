@@ -308,7 +308,7 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 - [x] 取り込んだ結果と既存のマイグレーション、`db.ts` との差分を確認し、基準となるマイグレーションを決める（`20261013000000_baseline.sql`。本番の public スキーマに、avatars バケットと storage ポリシーを足した。手書きの `0000_initial_schema.sql` は RLS の有効化などが欠けていたので削除）
 - [x] `db.ts` を作り直し、今の `db.ts` と差が無いことを確かめた。本番は別のアカウントにあるため、型の生成は本番と同じスキーマにした開発用から行う（`pnpm db:types`）
 - [x] 基準のマイグレーションでマテリアライズドビューが未更新のまま作られる欠陥を、更新するマイグレーションの追加で直した（`20261013010000_populate_projects_with_tasks_mv.sql`。H-010）
-- [ ] avatars の storage ポリシーを自分のフォルダ（`avatars/<user_id>/`）に絞る。今は、認証済みのユーザーなら他人の画像も上書き・削除できる。挙動が変わるので、改修の記録を通して行う。ストレージの権限をテストできるローカルの Supabase が整う P4 のあとに行う
+- [x] avatars の storage ポリシーを自分のフォルダ（`avatars/<user_id>/`）に絞る（[v1.1.1](../../specs/profile/changes/v1.1.1-avatar-storage-own-folder.md)。開発用は 2026-10-14 に適用済み。本番は未適用）。今は、認証済みのユーザーなら他人の画像も上書き・削除できる。挙動が変わるので、改修の記録を通して行う。ストレージの権限をテストできるローカルの Supabase が整う P4 のあとに行う
 - [x] 開発用 Supabase との差分を確認し、必要なら適用する。⚠️ 実行前に確認を取る
   - [x] 差分の確認（開発用には、案件とタスクのマテリアライズドビュー、`access_logs.method` が無く、`goal_progress_histories.recorded_at` が日付型だった）
   - [x] 開発用の DB を基準のマイグレーションで作り直す（`supabase db reset --db-url`。人間が実行した）。作り直したあとの public / auth / storage の書き出しが、本番と一字一句同じになったことを確かめた（2026-10-13）

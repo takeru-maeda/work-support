@@ -175,6 +175,26 @@ export function judgeBash(command) {
       reason: "force push はしません。必要なら人間が行います。",
     };
   }
+  // DB に SQL を流すコマンドは、ローカルの Supabase（--local）だけに許す。開発用・本番のクラウドの DB への
+  // 適用は人間が行う（--linked や --db-url、フラグなしで紐付けを使う形は止める）。db push は settings.json で禁止
+  if (
+    /\bsupabase\b[^;&|]*\s(migration\s+(up|down)|db\s+(reset|query))\b/.test(
+      command,
+    )
+  ) {
+    const segment = command.match(
+      /\bsupabase\b[^;&|]*\s(migration\s+(up|down)|db\s+(reset|query))\b[^;&|]*/,
+    )[0];
+    const local =
+      /\s--local\b/.test(segment) && !/\s--(linked|db-url)\b/.test(segment);
+    if (!local) {
+      return {
+        decision: "deny",
+        reason:
+          "DB に SQL を流すコマンドは、ローカルの Supabase だけに使います（--local を付け、--linked / --db-url は付けない）。クラウドの DB への適用は人間が行います。",
+      };
+    }
+  }
   // 人間は未ステージの差分で変更を確かめる。差分を消したり隠したりする操作は人に確認する
   const discard = [
     /\bgit\s+reset\s+--hard\b/,

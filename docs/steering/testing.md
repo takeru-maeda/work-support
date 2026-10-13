@@ -48,6 +48,8 @@ it("工数を登録すると、新しい案件が案件の一覧に出る", asyn
 });
 ```
 
+- ブラウザから Supabase を直接呼ぶもの（Storage）は、`browserClient(user)`（anon キー + 本人のトークン）でブラウザと同じ権限にして、他人とログインしていない状態からの操作が拒否されることをポリシーごと確かめる（`packages/api/test/avatar-storage.int.test.ts`）
+
 ## web のテスト
 
 - 通信は MSW で受け、画面に出る文言と操作（role、ラベル）で確かめる。実装の内部（state やフックの戻り値）を見ない
