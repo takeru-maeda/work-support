@@ -17,6 +17,10 @@
 | 別の端末で入力した内容が反映されない / 古い内容に戻る | effort-draft | [effort-draft/spec.md](effort-draft/spec.md) | INV-1（`clientUpdatedAt` で新しいほうを残す）、既知の落とし穴（端末の時計のずれ、ほぼ同時の保存） |
 | 工数登録で入力していた内容が、次に開くと消えている | effort-draft | [effort-draft/spec.md](effort-draft/spec.md) | 既知の落とし穴（800 ミリ秒以内に画面を離れた、サーバーへの保存の失敗）、AC-10 |
 | 工数登録画面を開いた直後に選んだ日付が入らない | effort-draft | [effort-draft/spec.md](effort-draft/spec.md) | 既知の落とし穴（読み込み中の仮の日付の選択） |
+| 日曜日や月曜の朝に更新した進捗が、前週からの差分に正しく入らない | goals | [goals/spec.md](goals/spec.md) | ポストモーテム 2025-11-18（`108e691`）、既知の落とし穴（週の境目が UTC） |
+| 前週から進捗を上げたのに、差分が +0.0% のまま | goals | [goals/spec.md](goals/spec.md) | AC-goals-10、既知の落とし穴（履歴の無い目標の前週の値）、INV-2 |
+| 目標を追加したら、今の目標が一覧から消えた / 一部しか保存されていない | goals | [goals/spec.md](goals/spec.md) | INV-1、INV-4、既知の落とし穴（一部だけ保存される、重み・期間のルールが API に無い） |
+| 過去の目標の検索でエラーになる / エラーのトーストが何度も出る | goals | [goals/spec.md](goals/spec.md) | 既知の落とし穴（過去の目標の検索） |
 
 
 ## 直したあとにやること

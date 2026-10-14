@@ -20,8 +20,8 @@ DB（Supabase の PostgreSQL、public スキーマ）のテーブルとビュー
 | `tasks` | 案件の中のタスク。案件ごとに名前が一意 | effort-entry、effort-list |
 | `work_records` | 工数の実績（日付、時間、見積） | effort-entry、effort-list、weekly-report |
 | `work_entry_drafts` | 工数登録の下書き。端末間で同期し、`client_updated_at` で競合を判定する（ユーザーごとに 1 行） | effort-draft |
-| `goals` | 期間の目標（内容、重み、進捗） | goals-current、goals-add、goals-history、weekly-report |
-| `goal_progress_histories` | 目標の進捗の履歴。週ごとの差分を出すのに使う | goals-current、weekly-report |
+| `goals` | 期間の目標（内容、重み、進捗） | goals、weekly-report |
+| `goal_progress_histories` | 目標の進捗の履歴。週ごとの差分を出すのに使う | goals、weekly-report |
 | `missions` | ミッション（ユーザーごとの自由記述） | missions、weekly-report |
 | `user_settings` | ユーザー設定（工数登録の完了メールを送るか） | user-settings、effort-entry |
 | `access_logs` | API へのリクエストの記録。すべてのリクエストで 1 行書く | platform |
