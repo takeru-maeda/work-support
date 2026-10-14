@@ -28,7 +28,7 @@ docs/specs/
 | auth | ログイン、新規登録、パスワード再設定、ログアウト、AuthGuard | 未作成 |
 | landing | ランディングページ、未ログイン時のルーティング | 未作成 |
 | app-shell | ヘッダー、モバイルの下部ナビ、PWA | 未作成 |
-| effort-entry | 工数登録（入れ子の入力、undo / redo、完了メール） | 未作成 |
+| effort-entry | 工数登録（入れ子の入力、案件とタスクの候補、undo / redo、完了メール） | [spec.md](effort-entry/spec.md) |
 | effort-draft | 工数登録の下書きの同期と競合の制御 | [spec.md](effort-draft/spec.md) |
 | effort-ingest-gas | GAS / Google Form からのテキスト取り込み | [spec.md](effort-ingest-gas/spec.md) |
 | effort-list | 工数一覧（絞り込み、並べ替え、ページ送り、集計） | 未作成 |

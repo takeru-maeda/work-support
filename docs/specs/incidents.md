@@ -23,6 +23,9 @@
 | 過去の目標の検索でエラーになる / エラーのトーストが何度も出る | goals | [goals/spec.md](goals/spec.md) | 既知の落とし穴（過去の目標の検索） |
 | 週報の平均や合計が日別の時間と合わない / 日別の時間が長い小数になる | weekly-report | [weekly-report/spec.md](weekly-report/spec.md) | 既知の落とし穴（土日の工数、日別の時間の小数）、AC-04 |
 | 週報の目標の差分や期待値がおかしい / 過去の週なのに今の進捗が出る | weekly-report | [weekly-report/spec.md](weekly-report/spec.md) | INV-1、INV-2、既知の落とし穴（週の境目、過去の週の目標の値、期待値、履歴の件数の上限） |
+| 工数の送信に失敗して送り直したら 2 重に登録された / 一部だけ登録されている | effort-entry | [effort-entry/spec.md](effort-entry/spec.md) | 既知の落とし穴（保存はまとめて行われない）、AC-06 |
+| 登録した新しい案件やタスクが候補に出てこない | effort-entry | [effort-entry/spec.md](effort-entry/spec.md) | INV-2、AC-07、既知の落とし穴（失敗した送信で作った案件） |
+| 工数登録の完了メールが届かない | effort-entry | [effort-entry/spec.md](effort-entry/spec.md) | AC-09（送る条件）、既知の落とし穴（完了メールの失敗が記録されない） |
 
 
 ## 直したあとにやること

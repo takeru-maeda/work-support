@@ -27,7 +27,7 @@ DB（Supabase の PostgreSQL、public スキーマ）のテーブルとビュー
 | `access_logs` | API へのリクエストの記録。すべてのリクエストで 1 行書く | platform |
 | `error_logs` | エラーの記録（API と UI の両方）。`access_log_id` でリクエストとたどれる | platform |
 | `info_logs` | 情報レベルのログ | platform |
-| `projects_with_tasks_mv`（マテリアライズドビュー） | 案件とタスクを結合した一覧。工数登録のたびに `refresh_projects_with_tasks_mv()` で更新する。**一度も更新していないと読み出しがエラーになる** | effort-entry、effort-list |
+| `projects_with_tasks_mv`（マテリアライズドビュー） | 案件とタスクを結合した一覧。工数の登録で案件かタスクを新しく作ったときに `refresh_projects_with_tasks_mv()` で全体を作り直す。**一度も更新していないと読み出しがエラーになる** | effort-entry、effort-list |
 | `work_record_diffs`（ビュー） | 工数の実績と見積の差 | effort-list |
 
 <!-- BEGIN GENERATED: pnpm db:docs で作り直す。この間は手で編集しない -->

@@ -16,7 +16,7 @@ scope:                 # P2 の lint の一括修正と依存の整理、P4 の�
 ## 現在地
 
 - **フェーズ**: P4（テスト基盤）まで完了。CI の db ジョブ（ローカルの Supabase、結合テスト、E2E）が GitHub の上で通ることを確かめた（2026-10-14）
-- **次にやること**: P5（仕様書への変換）。effort-ingest-gas、effort-draft、goals、weekly-report、missions は済み、次は残りの機能（effort-entry ほか）。本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
+- **次にやること**: P5（仕様書への変換）。effort-ingest-gas、effort-draft、goals、weekly-report、missions、effort-entry は済み、次は effort-list。本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
 - **ブロッカー**: なし（Context7 は `mcp__context7__resolve-library-id` / `mcp__context7__query-docs` で使えることを 2026-10-10 に確認した）
 
 ---
@@ -339,12 +339,12 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 | 1 | auth（ログイン、新規登録、パスワード再設定、ログアウト、AuthGuard） | [ ] | [ ] |
 | 2 | landing（未ログイン時のルーティングを含む） | [ ] | [ ] |
 | 3 | app-shell（ヘッダー、モバイルの下部ナビ、PWA） | [ ] | [ ] |
-| 4 | effort-entry（工数登録、undo/redo、完了メール） | [ ] | [ ] |
+| 4 | effort-entry（工数登録、案件とタスクの候補、undo/redo、完了メール） | [x] | [ ] |
 | 5 | effort-draft（下書きの同期と競合制御） | [x] | [x] |
 | 6 | effort-ingest-gas（GAS / Google Form からのテキスト取り込み） | [x] | [x] |
 | 7 | effort-list（工数一覧） | [ ] | [ ] |
 | 8〜10 | goals（現在の目標、重みの合計 100% ルール、前週の進捗、目標の追加、過去の目標。1 つの仕様書にまとめた） | [x] | [x] |
-| 11 | missions | [x] | [ ] |
+| 11 | missions | [x] | [x] |
 | 12 | weekly-report（週報の出力。ミッションの編集は #11） | [x] | [x] |
 | 13 | profile（アバター、アカウント削除） | [ ] | [ ] |
 | 14 | user-settings（ユーザー設定） | [ ] | [ ] |
@@ -393,6 +393,17 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
   - 編集中に取り直しが失敗しても、入力欄を隠さない
   - まだミッションが無いユーザーが同時に 2 回保存すると片方が 500 になる（1 回の upsert にする）
   - 取得に失敗したときのエラーの文を、英語のまま出さない
+- [ ] P5 で決めた effort-entry の直し（`docs/specs/effort-entry/changes/v1.0.7-baseline.md` の「人間の判断」。それぞれ改修の記録を通す）
+  - 送信をまとめて保存する（全部保存するか全部保存しないか。effort-ingest-gas の直しと合わせて設計する）。候補の一覧の作り直しの失敗は、保存の成功として返す
+  - キーボードの undo / redo を、確認のダイアログを開いている間と送信中は効かないようにする
+  - 100 時間以上で DB の桁あふれの 500 になる（スキーマで 100 未満にして 400 にし、画面でも止める）。負の値を画面で止める
+  - 大文字小文字の扱いを「区別する」にそろえる（送信の中の使い回し、画面のタスクの候補、集計のまとまり）。「案件A」があるところで「案件a」と打ってタスクを選ぶと 400 になり案件だけが残る件も、これで解消する
+  - 同じ送信の中で、使い回したタスクの ID が案件を確かめない
+  - 完了メールの失敗を `error_logs` に残す。GAS が JSON 以外を返したときも扱う。【集計】の前の空行を 1 行にする
+  - 同じ案件・タスクを画面で 2 つ入れられる（名前の打ち込みで候補の除外をすり抜ける）
+  - 案件名を打っている途中で、既存の案件名と一致した瞬間に候補の一覧が閉じる
+  - 開発用サーバーで undo の 1 歩が 2 回ずつ記録される（履歴の記録を状態の更新の外に出す）
+  - 案件を変えたときに、2 つ目以降のタスクの「必須入力」が消えないことがある（直すときに確かめる）
 - [ ] P4 で見つけた潜在的な不具合: 目標の履歴の検索で `minProgress` / `maxProgress` に空文字か null を渡すと、「指定なし」にならず 400 になる（`GoalHistoryQuerySchema` の前処理のあとで `z.coerce.number()` が NaN にする）。web は値があるときだけ送るので画面からは起きない。`packages/shared/src/schemas/goals.test.ts` の `it.fails` を `it` に戻す形で、改修の記録を通して直す
 - [ ] P2 で保留にしたフックの依存配列の 2 件を、テストを書いてから改修の記録を通して直す（コードに `TODO(P6)` の印）
   - `useEffortSummaryMetrics`: `projectOptions` の読み込みが終わっても案件名が更新されない可能性
