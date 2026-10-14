@@ -128,7 +128,7 @@ symptoms:
 
 ## エラー時の挙動
 
-- 入力の検証の失敗は 400（`{ success: false, error: [...] }` の形。`globalErrorHandler` の形ではない）。DB の失敗は 500（`{ error, accessLogId }`）
+- 入力の検証の失敗は 400（`{ data, error: [...], success: false }` の形。`globalErrorHandler` の形ではない）。DB の失敗は 500（`{ error, accessLogId }`）
 - 画面: 「週報の取得に失敗しました: 」のあとに、axios や検証のエラーの文（英語のことが多い）をそのまま出す
 
 ## 既知の落とし穴

@@ -16,7 +16,7 @@ scope:                 # P2 の lint の一括修正と依存の整理、P4 の�
 ## 現在地
 
 - **フェーズ**: P4（テスト基盤）まで完了。CI の db ジョブ（ローカルの Supabase、結合テスト、E2E）が GitHub の上で通ることを確かめた（2026-10-14）
-- **次にやること**: P5（仕様書への変換）。effort-ingest-gas、effort-draft、goals、weekly-report は済み、次は missions。本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
+- **次にやること**: P5（仕様書への変換）。effort-ingest-gas、effort-draft、goals、weekly-report、missions は済み、次は残りの機能（effort-entry ほか）。本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
 - **ブロッカー**: なし（Context7 は `mcp__context7__resolve-library-id` / `mcp__context7__query-docs` で使えることを 2026-10-10 に確認した）
 
 ---
@@ -344,8 +344,8 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 | 6 | effort-ingest-gas（GAS / Google Form からのテキスト取り込み） | [x] | [x] |
 | 7 | effort-list（工数一覧） | [ ] | [ ] |
 | 8〜10 | goals（現在の目標、重みの合計 100% ルール、前週の進捗、目標の追加、過去の目標。1 つの仕様書にまとめた） | [x] | [x] |
-| 11 | missions | [ ] | [ ] |
-| 12 | weekly-report（週報の出力。ミッションの編集は #11） | [x] | [ ] |
+| 11 | missions | [x] | [ ] |
+| 12 | weekly-report（週報の出力。ミッションの編集は #11） | [x] | [x] |
 | 13 | profile（アバター、アカウント削除） | [ ] | [ ] |
 | 14 | user-settings（ユーザー設定） | [ ] | [ ] |
 | 15 | platform（ログ、エラー処理、認証ミドルウェア、CORS、OpenAPI、メール送信。認証の部分は v1.1.0 で作成済み） | [ ] | [ ] |
@@ -388,6 +388,11 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
   - 進捗の履歴を件数の上限なしで取っている（`max_rows` を超えると週の始まりの値が 0 になる）。履歴のクエリを `user_id` でも絞る
   - 重みが同じ目標の並びと、期待値に使う目標が決まらない（DB の返す順）
   - 画面: 日付を変えても前の週の本文が残る、コピーの失敗を知らせない、エラーの文を英語のまま出す
+- [ ] P5 で決めた missions の直し（`docs/specs/missions/changes/v1.0.7-baseline.md` の「人間の判断」。それぞれ改修の記録を通す）
+  - 保存中は「キャンセル」と入力を止める（保存中にキャンセルして保存が失敗すると入力が戻らない、保存中に打ち足した文字が捨てられるため）
+  - 編集中に取り直しが失敗しても、入力欄を隠さない
+  - まだミッションが無いユーザーが同時に 2 回保存すると片方が 500 になる（1 回の upsert にする）
+  - 取得に失敗したときのエラーの文を、英語のまま出さない
 - [ ] P4 で見つけた潜在的な不具合: 目標の履歴の検索で `minProgress` / `maxProgress` に空文字か null を渡すと、「指定なし」にならず 400 になる（`GoalHistoryQuerySchema` の前処理のあとで `z.coerce.number()` が NaN にする）。web は値があるときだけ送るので画面からは起きない。`packages/shared/src/schemas/goals.test.ts` の `it.fails` を `it` に戻す形で、改修の記録を通して直す
 - [ ] P2 で保留にしたフックの依存配列の 2 件を、テストを書いてから改修の記録を通して直す（コードに `TODO(P6)` の印）
   - `useEffortSummaryMetrics`: `projectOptions` の読み込みが終わっても案件名が更新されない可能性

@@ -33,7 +33,7 @@ docs/specs/
 | effort-ingest-gas | GAS / Google Form からのテキスト取り込み | [spec.md](effort-ingest-gas/spec.md) |
 | effort-list | 工数一覧（絞り込み、並べ替え、ページ送り、集計） | 未作成 |
 | goals | 目標管理（現在の目標、重みの合計 100%、前週の進捗、目標の追加、過去の目標） | [spec.md](goals/spec.md) |
-| missions | ミッション | 未作成 |
+| missions | ミッション（週報の画面で編集する自由記述） | [spec.md](missions/spec.md) |
 | weekly-report | 週報の出力（工数と目標の進捗から雛形を作る） | [spec.md](weekly-report/spec.md) |
 | profile | プロフィール、アバター、アカウント削除 | [作成中](profile/spec.md)（プロフィール画像の保存だけ） |
 | user-settings | ユーザー設定（メール通知、テーマ） | 未作成 |
