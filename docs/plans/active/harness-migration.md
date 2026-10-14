@@ -340,8 +340,8 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 | 2 | landing（未ログイン時のルーティングを含む） | [ ] | [ ] |
 | 3 | app-shell（ヘッダー、モバイルの下部ナビ、PWA） | [ ] | [ ] |
 | 4 | effort-entry（工数登録、undo/redo、完了メール） | [ ] | [ ] |
-| 5 | effort-draft（下書きの同期と競合制御） | [ ] | [ ] |
-| 6 | effort-ingest-gas（GAS / Google Form からのテキスト取り込み） | [ ] | [ ] |
+| 5 | effort-draft（下書きの同期と競合制御） | [x] | [ ] |
+| 6 | effort-ingest-gas（GAS / Google Form からのテキスト取り込み） | [x] | [x] |
 | 7 | effort-list（工数一覧） | [ ] | [ ] |
 | 8 | goals-current（現在の目標、重みの合計 100% ルール、前週の進捗） | [ ] | [ ] |
 | 9 | goals-add（目標の追加） | [ ] | [ ] |
@@ -352,14 +352,26 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 | 14 | user-settings（ユーザー設定） | [ ] | [ ] |
 | 15 | platform（ログ、エラー処理、認証ミドルウェア、CORS、OpenAPI、メール送信。認証の部分は v1.1.0 で作成済み） | [ ] | [ ] |
 
-- [ ] 直近のバグ修正（例: a8a5c14 の下書き同期の競合）を、ポストモーテムと incidents.md に初期データとして登録する
-- [ ] `spec-backfill` スキルを作る（変換の手順。旧ドキュメントとコードの照合、食い違いの扱い、baseline の記録）
+- [x] 直近のバグ修正（例: a8a5c14 の下書き同期の競合）を、ポストモーテムと incidents.md に初期データとして登録する（effort-draft の spec.md）
+- [x] `spec-backfill` スキルを作る（変換の手順。旧ドキュメントとコードの照合、食い違いの扱い、baseline の記録）
 - [ ] 各機能の `spec.md` の「画面と API」「データ」から、`docs/reference/` の該当箇所へリンクする（一覧を spec に重複して書かない）
 - [ ] 全機能の変換が終わったら、旧 requirements、design、tasks（`docs/legacy/`）を削除し、`packages/*/README.md` の旧ドキュメントへの参照を `docs/specs/` に直す
 
 ### P6. 既存機能のテスト（仕様書の AC をテストにする）
 - [ ] 機能ごとに AC からテストへの対応表を埋める（優先順: effort-ingest-gas → effort-draft → goals → weekly-report → その他）
-- [ ] P4 の E2E で見つけた不具合: 工数登録の画面を開いてすぐ（下書きの `GET /api/effort/draft` が返る前に）入力すると、読み込みのあとでフォームが下書きか空の状態で上書きされ、入力が消える（`useEffortDraftSync` の初期化の effect）。通信が遅いと利用者にも起きうる。effort-draft の仕様書を作ってから、改修の記録を通して直す（初期化が終わるまで入力を止める、など）。直したら `packages/e2e/tests/effort.spec.ts` の待ち合わせ（`TODO(P6)`）を外す
+- [ ] P5 で決めた effort-ingest-gas の直し（`docs/specs/effort-ingest-gas/changes/v1.0.7-baseline.md` の「人間の判断」。それぞれ改修の記録を通す）
+  - 書式や数値の書き間違い（読めない行、半角の `:`、`1,5`、負の値など）は 400 にして何も保存しない
+  - 1 回の送信を、全部保存するか全部保存しないかにする（途中で失敗すると一部だけ残り、送り直すと 2 重になるため）
+  - 1 回の送信の中で、大文字小文字だけが違う案件名・タスク名を最初のものにまとめない（DB と同じく区別する）
+  - ユーザーの検索で Auth の管理 API が失敗したときは、400 `User not found` ではなく 500 にする
+- [ ] P4 の E2E で見つけた不具合: 工数登録の画面を開いてすぐ（下書きの `GET /api/effort/draft` が返る前に）日付を選ぶと、入らない。読み込み中は、開けるが選んでも反映されない仮の日付の選択を出しているため（`EffortForm` の `isInitializing` の間の `<DatePicker />`。P5 で仕組みを確かめて記述を直した）。通信が遅いと利用者にも起きる。改修の記録を通して直す（読み込み中は操作できない表示にする、など）。直したら `packages/e2e/tests/effort.spec.ts` の待ち合わせ（`TODO(P6)`）を外す
+- [ ] P5 で決めた effort-draft の直し（`docs/specs/effort-draft/changes/v1.0.7-baseline.md` の「人間の判断」。それぞれ改修の記録を通す）
+  - 手で全部消したときは、サーバーの下書きも消す（登録のあとの空のフォームとは区別する）
+  - 画面を離れるときは、待っている保存を取り消さずにすぐ送る（最後の変更から 800 ミリ秒以内に離れると入力が失われるため）
+  - 開いている画面どうしの同期（古いタブでの編集が別の端末の新しい入力を上書きする）は、仕様を決めてから直す
+  - 送信を待っている間は入力を止める（登録した内容が下書きとして復活しうるため）
+  - 下書きでは未入力の実績を未入力のまま保存する（別の端末で開くと 0 になるため）
+  - 下書きの上書きのときに `updated_at` を更新する
 - [ ] P4 で見つけた潜在的な不具合: 目標の履歴の検索で `minProgress` / `maxProgress` に空文字か null を渡すと、「指定なし」にならず 400 になる（`GoalHistoryQuerySchema` の前処理のあとで `z.coerce.number()` が NaN にする）。web は値があるときだけ送るので画面からは起きない。`packages/shared/src/schemas/goals.test.ts` の `it.fails` を `it` に戻す形で、改修の記録を通して直す
 - [ ] P2 で保留にしたフックの依存配列の 2 件を、テストを書いてから改修の記録を通して直す（コードに `TODO(P6)` の印）
   - `useEffortSummaryMetrics`: `projectOptions` の読み込みが終わっても案件名が更新されない可能性

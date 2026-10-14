@@ -29,8 +29,8 @@ docs/specs/
 | landing | ランディングページ、未ログイン時のルーティング | 未作成 |
 | app-shell | ヘッダー、モバイルの下部ナビ、PWA | 未作成 |
 | effort-entry | 工数登録（入れ子の入力、undo / redo、完了メール） | 未作成 |
-| effort-draft | 工数登録の下書きの同期と競合の制御 | 未作成 |
-| effort-ingest-gas | GAS / Google Form からのテキスト取り込み | 未作成 |
+| effort-draft | 工数登録の下書きの同期と競合の制御 | [spec.md](effort-draft/spec.md) |
+| effort-ingest-gas | GAS / Google Form からのテキスト取り込み | [spec.md](effort-ingest-gas/spec.md) |
 | effort-list | 工数一覧（絞り込み、並べ替え、ページ送り、集計） | 未作成 |
 | goals-current | 現在の目標（重みの合計 100%、前週の進捗） | 未作成 |
 | goals-add | 目標の追加 | 未作成 |

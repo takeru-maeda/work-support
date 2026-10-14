@@ -150,7 +150,7 @@ const instructionFiles = [
   "packages/web/CLAUDE.md",
   ...repoFiles.filter((f) => /^\.claude\/(rules|agents)\/.+\.md$/.test(f)),
   ...repoFiles.filter((f) =>
-    /^\.claude\/skills\/(autonomous-impl|impl-[a-z-]+|plan|release|steering|commit)\/SKILL\.md$/.test(
+    /^\.claude\/skills\/(autonomous-impl|impl-[a-z-]+|plan|release|steering|commit|spec-backfill)\/SKILL\.md$/.test(
       f,
     ),
   ),

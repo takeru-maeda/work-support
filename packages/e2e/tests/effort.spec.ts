@@ -6,8 +6,8 @@ test("工数を登録すると、工数一覧に出る", async ({ page, user }) 
   const project = `E2E 案件 ${randomUUID().slice(0, 8)}`;
   const task = "設計";
   await login(page, user);
-  // 下書きの読み込みが終わる前に入力すると、読み込み後にフォームが上書きされて消える（TODO(P6): 画面の不具合として
-  // 改修の記録を通して直す。直したらこの待ち合わせは外す）
+  // 下書きの読み込みが終わるまでの日付の選択は仮のもので、選んでも反映されない（TODO(P6): 画面の不具合として
+  // 改修の記録を通して直す。直したらこの待ち合わせは外す。docs/specs/effort-draft/spec.md の既知の落とし穴）
   const draftLoaded = page.waitForResponse(
     (res) =>
       res.url().endsWith("/api/effort/draft") &&
