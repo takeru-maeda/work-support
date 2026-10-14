@@ -21,6 +21,8 @@
 | 前週から進捗を上げたのに、差分が +0.0% のまま | goals | [goals/spec.md](goals/spec.md) | AC-goals-10、既知の落とし穴（履歴の無い目標の前週の値）、INV-2 |
 | 目標を追加したら、今の目標が一覧から消えた / 一部しか保存されていない | goals | [goals/spec.md](goals/spec.md) | INV-1、INV-4、既知の落とし穴（一部だけ保存される、重み・期間のルールが API に無い） |
 | 過去の目標の検索でエラーになる / エラーのトーストが何度も出る | goals | [goals/spec.md](goals/spec.md) | 既知の落とし穴（過去の目標の検索） |
+| 週報の平均や合計が日別の時間と合わない / 日別の時間が長い小数になる | weekly-report | [weekly-report/spec.md](weekly-report/spec.md) | 既知の落とし穴（土日の工数、日別の時間の小数）、AC-04 |
+| 週報の目標の差分や期待値がおかしい / 過去の週なのに今の進捗が出る | weekly-report | [weekly-report/spec.md](weekly-report/spec.md) | INV-1、INV-2、既知の落とし穴（週の境目、過去の週の目標の値、期待値、履歴の件数の上限） |
 
 
 ## 直したあとにやること

@@ -22,13 +22,13 @@ DB（Supabase の PostgreSQL、public スキーマ）のテーブルとビュー
 | `work_entry_drafts` | 工数登録の下書き。端末間で同期し、`client_updated_at` で競合を判定する（ユーザーごとに 1 行） | effort-draft |
 | `goals` | 期間の目標（内容、重み、進捗） | goals、weekly-report |
 | `goal_progress_histories` | 目標の進捗の履歴。週ごとの差分を出すのに使う | goals、weekly-report |
-| `missions` | ミッション（ユーザーごとの自由記述） | missions、weekly-report |
+| `missions` | ミッション（ユーザーごとの自由記述）。週報の画面で編集する（週報の本文には入らない） | missions |
 | `user_settings` | ユーザー設定（工数登録の完了メールを送るか） | user-settings、effort-entry |
 | `access_logs` | API へのリクエストの記録。すべてのリクエストで 1 行書く | platform |
 | `error_logs` | エラーの記録（API と UI の両方）。`access_log_id` でリクエストとたどれる | platform |
 | `info_logs` | 情報レベルのログ | platform |
 | `projects_with_tasks_mv`（マテリアライズドビュー） | 案件とタスクを結合した一覧。工数登録のたびに `refresh_projects_with_tasks_mv()` で更新する。**一度も更新していないと読み出しがエラーになる** | effort-entry、effort-list |
-| `work_record_diffs`（ビュー） | 工数の実績と見積の差 | weekly-report |
+| `work_record_diffs`（ビュー） | 工数の実績と見積の差 | effort-list |
 
 <!-- BEGIN GENERATED: pnpm db:docs で作り直す。この間は手で編集しない -->
 

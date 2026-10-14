@@ -34,7 +34,7 @@ docs/specs/
 | effort-list | 工数一覧（絞り込み、並べ替え、ページ送り、集計） | 未作成 |
 | goals | 目標管理（現在の目標、重みの合計 100%、前週の進捗、目標の追加、過去の目標） | [spec.md](goals/spec.md) |
 | missions | ミッション | 未作成 |
-| weekly-report | 週報 | 未作成 |
+| weekly-report | 週報の出力（工数と目標の進捗から雛形を作る） | [spec.md](weekly-report/spec.md) |
 | profile | プロフィール、アバター、アカウント削除 | [作成中](profile/spec.md)（プロフィール画像の保存だけ） |
 | user-settings | ユーザー設定（メール通知、テーマ） | 未作成 |
 | platform | ログ、エラー処理、認証ミドルウェア、CORS、OpenAPI、メール送信 | [作成中](platform/spec.md)（認証のみ。残りは P5） |
