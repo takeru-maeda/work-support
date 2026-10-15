@@ -22,14 +22,14 @@ src/
     └── types.ts       # その機能の型（入出力スキーマは shared から再利用）
 ```
 
-**層の依存の向き**: `index.ts → service.ts → repository.ts`。逆向きの依存は作らない。他機能のデータが必要なときは、その機能の service を通すことを基本とする（現状 `effort/service.ts` が `user-settings/repository.ts` を直接呼んでいる。新しいコードでは真似しない。ハーネス移行計画の P7 で整理する）。
+**層の依存の向き**: `index.ts → service.ts → repository.ts`。逆向きの依存は作らない。他機能のデータが必要なときは、その機能の service を通すことを基本とする（ほかの機能の repository / index / types は直接 import しない）。
 
 ### `packages/web/`（フロントエンド）
 **構成**: Bulletproof React を下敷きにした機能単位の構成。
 
 ```
 src/
-├── app/           # エントリポイント、ルーター（App.tsx）、Provider
+├── app/           # エントリポイント、ルーター（App.tsx）、Provider、認証つきの枠（AuthenticatedLayout）
 ├── pages/         # ルート単位のページ。レイアウトを組むだけにして、ロジックは features に置く
 ├── features/{feature}/   # 機能ごとの api / components / hooks / utils / types
 ├── api/           # 複数の機能（やページ）から使う API 呼び出しと SWR フック
@@ -98,10 +98,11 @@ import { EffortForm } from "./EffortForm";
 
 ## コードの置き方の原則
 
-1. **機能の境界で分ける**: 機能固有のものは `features/{feature}` に置き、2 つ目の機能で必要になったら共通の場所（web は `components/` か `hooks/`、両パッケージなら `shared`）へ切り出す
+1. **機能の境界で分ける**: 機能固有のものは `features/{feature}` に置き、2 つ目の機能で必要になったら共通の場所（web は API なら `api/`、部品は `components/`、フックは `hooks/`、関数は `lib/`。両パッケージなら `shared`）へ切り出す
 2. **API 契約は shared に一つだけ**: 入出力の型をパッケージごとに重複して定義しない
 3. **層の責務を混ぜない**: ルートに業務ロジックを書かない。repository に業務判断を書かない。ページにロジックを書かない
 4. **既存の近いコードに合わせる**: 新しく書くときは、同じ種類の既存実装を手本にする
+5. **依存は一方向**: web は app → pages → features → 共通の層、api は index → service → repository。機能どうしは web では import せず、api ではその機能の service を通す。ESLint（`import/no-restricted-paths`）で止める
 
 ---
 _ファイルの一覧ではなくパターンを書く。パターンに沿った新しいファイルは、ここを更新しなくてよい_

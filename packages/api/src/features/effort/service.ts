@@ -1,7 +1,7 @@
 import { AppError } from "../../lib/errors";
 import { type Logger } from "../../lib/logger";
 import { sendEffortCompletionEmail } from "../../lib/mailer";
-import { getUserSettingsByUserId } from "../user-settings/repository";
+import { fetchUserSettings } from "../user-settings/service";
 
 import {
   createProject,
@@ -503,8 +503,10 @@ export const sendEffortCompletionEmailIfNeeded = async (
   if (!user.email) return;
   if (!result.savedRecords.length) return;
 
-  const settings: Tables<"user_settings"> | null =
-    await getUserSettingsByUserId(supabase, user.id);
+  const settings: Tables<"user_settings"> | null = await fetchUserSettings(
+    supabase,
+    user.id,
+  );
   if (settings && settings.notify_effort_email === false) return;
 
   const { subject, body } = buildEffortCompletionEmail(

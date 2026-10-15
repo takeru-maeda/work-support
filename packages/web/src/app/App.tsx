@@ -2,7 +2,6 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 
 import { ThemeProvider } from "@/app/providers/ThemeProvider";
-import { AuthenticatedLayout } from "@/components/layout/AuthenticatedLayout";
 import { ROUTES } from "@/config/routes";
 import LoginPage from "@/pages/auth/LoginPage";
 import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
@@ -17,6 +16,8 @@ import ProfilePage from "@/pages/profile/ProfilePage";
 import WeeklyReportPage from "@/pages/reports/WeeklyReportPage";
 import SettingsPage from "@/pages/settings/SettingsPage";
 import { useThemeStore, type Theme } from "@/store/theme";
+
+import { AuthenticatedLayout } from "./AuthenticatedLayout";
 
 import type { JSX } from "react";
 

@@ -15,8 +15,8 @@ scope:                 # P2 の lint の一括修正と依存の整理、P4 の�
 
 ## 現在地
 
-- **フェーズ**: P6 まで完了（P5 で見つけた直しは、新規開発を優先するため [バックログ](../backlog.md) に移した。2026-10-15）
-- **次にやること**: P7（構造の整理）を全部行う → P8 は新規開発の最初の 1 件を試運転にして、振り返ったら完了。旧ドキュメント（`docs/legacy/`）の削除は人間の判断でしばらく残す。本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
+- **フェーズ**: P7 まで完了（P5 で見つけた直しは [バックログ](../backlog.md) に移した。2026-10-15）
+- **次にやること**: P8 は新規開発の最初の 1 件を試運転にして、振り返ったら完了。旧ドキュメント（`docs/legacy/`）の削除は人間の判断でしばらく残す。本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
 - **ブロッカー**: なし（Context7 は `mcp__context7__resolve-library-id` / `mcp__context7__query-docs` で使えることを 2026-10-10 に確認した）
 
 ---
@@ -362,7 +362,7 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 ### P7. 構造の整理（テストを安全網にして行う）
 - [x] web の `services/` を `features/` に統合する（2026-10-15。1 つの機能だけで使う API は `features/<feature>/api/`、複数の機能から使う API は `src/api/`。`reports.ts` は週報と工数一覧に分けた。機能をまたいでいた `formatWorkHours` は `lib/` へ、effort-list は `EffortProjectOption` の代わりに shared の `ProjectWithTasks` を使う）
 - [x] 重複したファイルを解消し、ファイル名の付け方を統一する（2026-10-15。重複していた `components/ui/use-mobile.tsx` と、どこからも使われていないファイル（古い Radix のトースト一式、`AppHeaderMobileNav`、表の列幅の変更）を消した。`form-helpers.ts` → `formHelpers.ts`、`custom-types.ts` → `customTypes.ts`。命名の規約は `scripts/harness-check.mjs` で確かめる。shadcn の CLI が作るファイルと api の結合テストは例外。shadcn の未使用の部品は、新規開発で使うかもしれないので残した）
-- [ ] 層のルールを ESLint で強制する（エラーメッセージに直し方を書く）
+- [x] 層のルールを ESLint で強制する（エラーメッセージに直し方を書く）（2026-10-15。`import/no-restricted-paths` と、`@/` を解決する `eslint-import-resolver-typescript`（人間の了承を得て追加）。違反の 2 件を直した: api の effort の service は user-settings の service を通す、web の `AuthenticatedLayout` を `app/` へ移す。例外は 2 つ: errorHandler から logs の service、API キーの認証から effort の入力の型）
 
 ### P8. ワークフローの仕上げと試運転
 - [ ] `autonomous-impl` と `impl-*`、`plan`、`release`、`bug-reviewer`、`spec-reviewer` を仕上げる（P1〜P7 で実際に使ったことを反映する）

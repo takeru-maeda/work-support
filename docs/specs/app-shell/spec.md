@@ -4,7 +4,7 @@ feature: app-shell
 status: current
 updated: 2026-10-15
 code:
-  - packages/web/src/components/layout/AuthenticatedLayout.tsx :: AuthenticatedLayout
+  - packages/web/src/app/AuthenticatedLayout.tsx :: AuthenticatedLayout
   - packages/web/src/components/layout/header/AppHeader.tsx :: AppHeader
   - packages/web/src/components/layout/header/AppHeaderDesktopNav.tsx :: AppHeaderDesktopNav
   - packages/web/src/components/layout/header/AppHeaderHomeLink.tsx :: AppHeaderHomeLink

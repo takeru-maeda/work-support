@@ -16,7 +16,7 @@ code:
   - packages/web/src/lib/apiClient.ts :: apiClient
   - packages/web/src/store/user.ts :: useUserStore
   - packages/web/src/features/auth/components/AuthGuard.tsx :: AuthGuard
-  - packages/web/src/components/layout/AuthenticatedLayout.tsx :: AuthenticatedLayout
+  - packages/web/src/app/AuthenticatedLayout.tsx :: AuthenticatedLayout
   - packages/web/src/pages/auth/LoginPage.tsx :: LoginPage
   - packages/web/src/pages/auth/SignupPage.tsx :: SignupPage
   - packages/web/src/pages/auth/ResetPasswordPage.tsx :: ResetPasswordPage
