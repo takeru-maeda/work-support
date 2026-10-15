@@ -126,7 +126,7 @@ export async function insertWorkRecord(
     user_id: userId,
     task_id: taskId,
     work_date: workDate.toISOString(),
-    hours: effort.hours || 0,
+    hours: effort.hours,
     estimated_hours: effort.estimated_hours,
   };
 

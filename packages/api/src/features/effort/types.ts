@@ -39,7 +39,20 @@ export interface ParsedEffort {
   project_name: string;
   taskName: string;
   estimated_hours: number | null;
-  hours: number | null;
+  /** 実績。GAS の書式で空なら、読む段階で 0 にする */
+  hours: number;
+}
+
+/** 工数のテキストの読めない行（行番号は 1 始まり） */
+export interface EffortTextError {
+  line: number;
+  reason: string;
+}
+
+/** 工数のテキストを読んだ結果。errors が空でないときは、efforts を保存しない */
+export interface ParsedEffortText {
+  efforts: ParsedEffort[];
+  errors: EffortTextError[];
 }
 
 export interface ProjectCreationResult {

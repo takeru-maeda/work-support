@@ -170,9 +170,9 @@ describe("POST /api/effort（GAS からの取り込み）", () => {
       expect(await errorOf(res)).toBe("User not found");
     });
 
-    it("AC-effort-ingest-gas-07: 読めるタスクの行が 1 つも無いと 400 で、何も保存しない", async () => {
+    it("AC-effort-ingest-gas-07: 誤りが無くタスクの行が 1 つも無いと 0 件の 400 で、何も保存しない", async () => {
       const user = await createTestUser();
-      const res = await ingest(user.email, "■案件A\n・設計:[2]<1>");
+      const res = await ingest(user.email, "■案件A");
 
       expect(res.status).toBe(400);
       expect(await errorOf(res)).toBe(
@@ -180,6 +180,44 @@ describe("POST /api/effort（GAS からの取り込み）", () => {
       );
       expect(await projectsOf(user)).toEqual([]);
     });
+
+    it("AC-effort-ingest-gas-07 / INV-5: 読めない行が 1 つでもあれば、正しい行も含めて何も保存せずに 400。メッセージに行番号と理由", async () => {
+      const user = await createTestUser();
+      const res = await ingest(
+        user.email,
+        "・先頭：[]<1>\n■案件A\n・設計:[]<1>\n・実装：[]<2>\n■\n・後ろ：[]<3>",
+      );
+
+      expect(res.status).toBe(400);
+      expect(await errorOf(res)).toBe(
+        "工数のテキストに読めない行があります。 1行目: 最初の案件の行より前にタスクの行があります / 3行目: タスクの行の書式が正しくありません / 5行目: 案件名がありません",
+      );
+      expect(await projectsOf(user)).toEqual([]);
+      expect(await workRecordsOf(user)).toEqual([]);
+    });
+
+    it.each([
+      ["カンマの小数", "[1,5]<2>"],
+      ["単位付き", "[2]<1.5h>"],
+      ["負の値", "[-1]<1>"],
+      ["100 以上（DB の桁あふれの手前で止める）", "[1]<100>"],
+      ["小数第 3 位（DB で 100.00 に丸められる）", "[1]<99.995>"],
+    ])(
+      "AC-effort-ingest-gas-06: 数値が%sなら 400 で、何も保存しない",
+      async (_label, values) => {
+        const user = await createTestUser();
+        const res = await ingest(
+          user.email,
+          `■案件A\n・設計：[1]<1>\n・実装：${values}`,
+        );
+
+        expect(res.status).toBe(400);
+        expect(await errorOf(res)).toMatch(
+          /^工数のテキストに読めない行があります。 3行目: /,
+        );
+        expect(await projectsOf(user)).toEqual([]);
+      },
+    );
   });
 
   describe("保存", () => {
@@ -228,20 +266,38 @@ describe("POST /api/effort（GAS からの取り込み）", () => {
       expect(mine.task_id).not.toBe(theirs.task_id);
     });
 
-    it("AC-effort-ingest-gas-05: 1 回の送信の中では、大文字小文字だけが違う名前を最初のものにまとめる（既知の落とし穴）", async () => {
+    it("AC-effort-ingest-gas-05: 1 回の送信の中でも、大文字小文字だけが違う名前は別の案件・別のタスクになる", async () => {
       const user = await createTestUser();
-      await ingest(
+      const res = await ingest(
         user.email,
         "■ABC\n・Review：[]<1>\n・review：[]<2>\n■abc\n・設計：[]<3>",
       );
 
-      expect(await projectsOf(user)).toEqual([
-        expect.objectContaining({ name: "ABC" }),
+      expect(res.status, await res.clone().text()).toBe(201);
+      expect((await projectsOf(user)).map((p) => p.name)).toEqual([
+        "ABC",
+        "abc",
       ]);
-      expect((await workRecordsOf(user)).map((r) => r.task)).toEqual([
-        "Review",
-        "Review",
-        "設計",
+      const records = await workRecordsOf(user);
+      expect(records.map((r) => [r.project, r.task])).toEqual([
+        ["ABC", "Review"],
+        ["ABC", "review"],
+        ["abc", "設計"],
+      ]);
+      expect(records[0].task_id).not.toBe(records[1].task_id);
+    });
+
+    it("AC-effort-ingest-gas-05: Object の組み込みの名前（toString、constructor）の案件も、ふつうに作って付ける", async () => {
+      const user = await createTestUser();
+      const res = await ingest(
+        user.email,
+        "■toString\n・設計：[]<1>\n■constructor\n・valueOf：[]<1>",
+      );
+
+      expect(res.status, await res.clone().text()).toBe(201);
+      expect((await projectsOf(user)).map((p) => p.name)).toEqual([
+        "toString",
+        "constructor",
       ]);
     });
 
@@ -269,11 +325,9 @@ describe("POST /api/effort（GAS からの取り込み）", () => {
     });
 
     it.each([
-      ["単位の付いた値は先頭の数値", "[2h]<1.5h>", 1.5, 2],
-      ["カンマの小数は前の整数", "[1,5]<2,5>", 2, 1],
       ["空の見積は NULL、空の実績は 0", "[]<>", 0, null],
-      ["数値でない見積は NULL、実績は 0", "[abc]<xyz>", 0, null],
-      ["負の値もそのまま", "[-1]<-2>", -2, -1],
+      ["小数第 2 位まで", "[0.25]<99.99>", 99.99, 0.25],
+      ["全角の数字は半角に直す", "[２]<１．５>", 1.5, 2],
     ])(
       "AC-effort-ingest-gas-06: %s",
       async (_label, values, hours, estimated) => {
@@ -287,15 +341,18 @@ describe("POST /api/effort（GAS からの取り込み）", () => {
       },
     );
 
-    it("AC-effort-ingest-gas-07: 読めない行は読み飛ばし、読めた行だけ保存して 201", async () => {
+    it("AC-effort-ingest-gas-07: 空の行は読み飛ばして保存する", async () => {
       const user = await createTestUser();
       const res = await ingest(
         user.email,
-        "・先頭：[]<1>\n■案件A\n・設計:[]<1>\n・実装：[]<2>\n■\n・後ろ：[]<3>",
+        "\n■案件A\n\n・設計：[]<1>\n   \n・実装：[]<2>\n",
       );
 
-      expect(res.status).toBe(201);
-      expect((await workRecordsOf(user)).map((r) => r.task)).toEqual(["実装"]);
+      expect(res.status, await res.clone().text()).toBe(201);
+      expect((await workRecordsOf(user)).map((r) => r.task)).toEqual([
+        "設計",
+        "実装",
+      ]);
     });
 
     it("AC-effort-ingest-gas-08: 完了メールの設定が有効でも、メールを送らない", async () => {

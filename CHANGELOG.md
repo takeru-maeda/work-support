@@ -14,6 +14,9 @@
 ### Security
 - プロフィール画像の保存先の権限を、本人のフォルダだけに絞った。これまでは、ログインしている人なら他人のプロフィール画像も上書き・削除できた（DB の権限の設定、[改修の記録](docs/specs/profile/changes/v1.1.1-avatar-storage-own-folder.md)）
 
+### Fixed
+- Google Form（GAS）からの工数の取り込みで、書き間違えた行（メモの行、書式や数値の誤り）が黙って捨てられ、一部の行だけが登録されていた。誤りが 1 つでもあれば何も登録せずにエラーにし、何行目が何で読めないかを返す。全角の数字は受け付ける。同じ送信の中で大文字小文字だけが違う案件・タスクがまとめられていたのを、別のものとして扱う（api、[改修の記録](docs/specs/effort-ingest-gas/changes/v1.1.2-strict-format.md)。**本番に出す前に Google Form の説明文に書式を明記する**）
+
 ### Changed
 - 開発の進め方を、Kiro の仕様駆動開発から「機能ごとの仕様書 + 改修の記録 + 承認後の自律実装」へ移行中（[計画](docs/plans/active/harness-migration.md)）
 

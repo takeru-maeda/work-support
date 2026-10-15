@@ -20,7 +20,7 @@ import {
   updateWorkEntryDraft,
 } from "./repository";
 
-import type { ParsedEffort } from "./types";
+import type { EffortTextError, ParsedEffort, ParsedEffortText } from "./types";
 import type {
   EffortDraft,
   EffortDraftRecord,
@@ -63,29 +63,35 @@ export async function saveEffortRecords(
   workDate: Date | Dayjs,
   effortText: string,
 ): Promise<void> {
-  const projectCache: Record<string, number> = {};
-  const taskCache: Record<string, number> = {};
+  // キーは利用者の入力そのものなので、Object の組み込みの名前（toString など）と衝突しない Map にする
+  const projectCache = new Map<string, number>();
+  const taskCache = new Map<string, number>();
   let shouldRefreshProjectsView = false;
 
-  const parsedEfforts: ParsedEffort[] = parseEffortText(effortText);
+  // 書き間違いがあれば、DB に触れる前にまとめて返す（読みながら保存すると、前半の行だけが残る）
+  const { efforts: parsedEfforts, errors } = parseEffortText(effortText);
+  if (errors.length > 0) {
+    throw new AppError(400, formatEffortTextErrors(errors));
+  }
   if (!parsedEfforts.length) {
     throw new AppError(400, "工数の値が不正です。登録件数が0件でした。");
   }
 
   for (const effort of parsedEfforts) {
-    const projectKey: string = effort.project_name.toLowerCase();
-    let projectId: number | undefined = projectCache[projectKey];
+    // DB の検索と同じく大文字小文字を区別する（区別しないと、同じ送信の中の「abc」が「ABC」に付く）
+    const projectKey: string = effort.project_name;
+    let projectId: number | undefined = projectCache.get(projectKey);
     if (projectId === undefined) {
       const projectResult = await findProject(supabase, userId, effort);
       projectId = projectResult.id;
-      projectCache[projectKey] = projectId;
+      projectCache.set(projectKey, projectId);
       if (projectResult.created) {
         shouldRefreshProjectsView = true;
       }
     }
 
-    const taskKeyCache: string = taskKey(projectId, effort.taskName);
-    let taskId: number | undefined = taskCache[taskKeyCache];
+    const taskKeyCache: string = exactTaskKey(projectId, effort.taskName);
+    let taskId: number | undefined = taskCache.get(taskKeyCache);
     if (taskId === undefined) {
       const taskResult = await findOrCreateTask(
         supabase,
@@ -93,7 +99,7 @@ export async function saveEffortRecords(
         effort.taskName,
       );
       taskId = taskResult.id;
-      taskCache[taskKeyCache] = taskId;
+      taskCache.set(taskKeyCache, taskId);
       if (taskResult.created) {
         shouldRefreshProjectsView = true;
       }
@@ -202,35 +208,82 @@ export const saveStructuredEffortEntries = async (
 };
 
 /**
- * 工数テキストを解析します。
+ * タスクの行の形。タスク名は、後ろが [<見積>]<実績> として読める最初の「：」まで。
+ * 括弧の中に閉じ括弧を許すと、「<1>メモ>」のような書式の誤りが数値の誤りとして報告されるので、括弧の中は閉じ括弧を含まない
+ */
+const TASK_LINE_PATTERN = /^\u30fb(.*?)：\[([^\]]*)\]<([^>]*)>$/;
+/** 見積と実績の形。DB の列（numeric(4,2)）に合わせて小数第 2 位まで */
+const HOURS_PATTERN = /^\d+(\.\d{1,2})?$/;
+const MAX_HOURS_EXCLUSIVE = 100;
+/** 全角の数字・ピリオドと半角の文字コードの差（「０」U+FF10 → 「0」U+0030） */
+const FULLWIDTH_TO_ASCII_OFFSET = 0xfee0;
+
+/**
+ * 工数テキストを解析します。読めない行は errors に行番号と理由を入れ、空の行は読み飛ばします。
  *
  * @param effortText 工数入力テキスト
- * @returns 解析結果
+ * @returns 読めたタスクの行と、読めない行
  */
-export function parseEffortText(effortText: string): ParsedEffort[] {
-  const lines: string[] = effortText.split("\n");
-  const regExp: RegExp = new RegExp(/^\u30fb(.+?)：\[(.*?)\]<(.*?)>$/);
-
-  const parsedEfforts: ParsedEffort[] = [];
+export function parseEffortText(effortText: string): ParsedEffortText {
+  const efforts: ParsedEffort[] = [];
+  const errors: EffortTextError[] = [];
+  // null: まだ案件の行が無い、"": 名前の空の案件の行の後ろ（その誤りだけを報告する）
   let currentProjectName: string | null = null;
 
-  for (const line of lines) {
+  effortText.split("\n").forEach((line, index) => {
+    const lineNumber: number = index + 1;
     const trimmedLine: string = line.trim();
+    if (trimmedLine === "") return;
 
     if (trimmedLine.startsWith("■")) {
       currentProjectName = trimmedLine.substring(1).trim();
-    } else if (trimmedLine.startsWith("・") && currentProjectName) {
-      const parsedEffort: ParsedEffort | null = parseTaskText(
-        trimmedLine,
-        currentProjectName,
-        regExp,
-      );
-      if (!parsedEffort) continue;
-      parsedEfforts.push(parsedEffort);
+      if (currentProjectName === "") {
+        errors.push({ line: lineNumber, reason: "案件名がありません" });
+      }
+      return;
     }
-  }
 
-  return parsedEfforts;
+    if (!trimmedLine.startsWith("・")) {
+      errors.push({
+        line: lineNumber,
+        reason: "案件の行（■）でもタスクの行（・）でもありません",
+      });
+      return;
+    }
+
+    if (currentProjectName === null) {
+      errors.push({
+        line: lineNumber,
+        reason: "最初の案件の行より前にタスクの行があります",
+      });
+      return;
+    }
+
+    const result: ParsedEffort | string = parseTaskText(
+      trimmedLine,
+      currentProjectName,
+    );
+    if (typeof result === "string") {
+      errors.push({ line: lineNumber, reason: result });
+      return;
+    }
+    if (currentProjectName !== "") efforts.push(result);
+  });
+
+  return { efforts, errors };
+}
+
+/**
+ * 読めない行を、利用者に返すメッセージにまとめます。
+ *
+ * @param errors 読めない行
+ * @returns 「工数のテキストに読めない行があります。 <行番号>行目: <理由> / …」
+ */
+function formatEffortTextErrors(errors: EffortTextError[]): string {
+  const details: string = errors
+    .map(({ line, reason }) => `${line}行目: ${reason}`)
+    .join(" / ");
+  return `工数のテキストに読めない行があります。 ${details}`;
 }
 
 /**
@@ -469,31 +522,60 @@ export const sendEffortCompletionEmailIfNeeded = async (
 };
 
 /**
- * タスク行を解析します。
+ * タスクの行を解析します。
+ *
+ * @param line 前後の空白を除いたタスクの行
+ * @param pjName その行の案件名
+ * @returns 読めたタスク。読めなければ理由の文
  */
-function parseTaskText(
-  line: string,
-  pjName: string,
-  regExp: RegExp,
-): ParsedEffort | null {
-  const match: RegExpMatchArray | null = regExp.exec(line);
-  if (!match) return null;
+function parseTaskText(line: string, pjName: string): ParsedEffort | string {
+  const match: RegExpExecArray | null = TASK_LINE_PATTERN.exec(line);
+  if (!match) return "タスクの行の書式が正しくありません";
 
   const taskName: string = match[1].trim();
-  const estimated_hours_str: string = match[2] ? match[2].trim() : "";
-  const hours_str: string = match[3] ? match[3].trim() : "";
+  if (taskName === "") return "タスク名がありません";
 
-  const estimated_hours: number | null =
-    estimated_hours_str === "" ? null : Number.parseFloat(estimated_hours_str);
-  const hours: number | null =
-    hours_str === "" ? null : Number.parseFloat(hours_str);
+  const estimated_hours: number | null | undefined = parseHours(match[2]);
+  if (estimated_hours === undefined) return invalidHoursReason("見積");
+  const hours: number | null | undefined = parseHours(match[3]);
+  if (hours === undefined) return invalidHoursReason("実績");
 
   return {
     project_name: pjName,
     taskName,
     estimated_hours,
-    hours,
+    // 実績が空なら 0（GAS の書式の決まり）
+    hours: hours ?? 0,
   };
+}
+
+/**
+ * 見積・実績の文字を読みます。全角の数字とピリオドは半角に直します（スマホの入力で全角になるため）。
+ *
+ * @param value 括弧の中の文字
+ * @returns 空なら null、読めなければ undefined
+ */
+function parseHours(value: string): number | null | undefined {
+  const normalized: string = value
+    .trim()
+    .replace(/[０-９．]/g, (char) =>
+      String.fromCharCode(char.charCodeAt(0) - FULLWIDTH_TO_ASCII_OFFSET),
+    );
+  if (normalized === "") return null;
+  if (!HOURS_PATTERN.test(normalized)) return undefined;
+
+  const hours: number = Number(normalized);
+  return hours < MAX_HOURS_EXCLUSIVE ? hours : undefined;
+}
+
+/**
+ * 見積・実績が読めないときの理由の文を返します。
+ *
+ * @param label 「見積」か「実績」
+ * @returns 理由の文
+ */
+function invalidHoursReason(label: "見積" | "実績"): string {
+  return `${label}は 0 以上 ${MAX_HOURS_EXCLUSIVE} 未満の、小数第 2 位までの数値にしてください`;
 }
 
 interface ResolvedProject {
@@ -633,7 +715,18 @@ const resolveTask = async (
 };
 
 /**
- * タスクキャッシュ用キーを生成します。
+ * GAS の取り込みのタスクのキャッシュのキーを生成します。taskKey と違い、大文字小文字を区別する
+ * （DB の検索と同じ。Web の経路の taskKey をそろえるのは effort-entry の改修で扱う）。
+ *
+ * @param projectId 案件の ID
+ * @param name タスク名
+ * @returns キャッシュのキー
+ */
+const exactTaskKey = (projectId: number, name: string): string =>
+  `${projectId}::${name}`;
+
+/**
+ * タスクキャッシュ用キーを生成します（大文字小文字を区別しない。Web の工数登録の経路で使う）。
  */
 const taskKey = (projectId: number, name: string): string => {
   return `${projectId}::${name.toLowerCase()}`;

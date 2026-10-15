@@ -14,7 +14,7 @@ import {
 } from "../../test/tokens";
 import { AppError } from "../lib/errors";
 
-import { jwtAuthMiddleware } from "./auth";
+import { apiKeyAuthMiddleware, jwtAuthMiddleware } from "./auth";
 
 import type { HonoEnv } from "../custom-types";
 
@@ -42,8 +42,15 @@ async function call(token: string | null, env = jwtTestEnv()) {
   return createApp().request("/me", { headers }, env);
 }
 
+// GAS 用の認証は、Auth の管理 API（listUsers）でユーザーを探す。結合テストでは失敗させられないので、ここで差し替える
+const { listUsers } = vi.hoisted(() => ({ listUsers: vi.fn() }));
+vi.mock("../lib/supabase", () => ({
+  createSupabaseClient: () => ({ auth: { admin: { listUsers } } }),
+}));
+
 afterEach(() => {
   vi.unstubAllGlobals();
+  listUsers.mockReset();
 });
 
 describe("jwtAuthMiddleware", () => {
@@ -126,5 +133,66 @@ describe("jwtAuthMiddleware", () => {
     const key = await createSigningKey("ES256");
     serveJwks(null);
     expect((await call(await signWithKey(key))).status).toBe(401);
+  });
+});
+
+describe("apiKeyAuthMiddleware", () => {
+  const API_KEY = "test-api-key";
+
+  function callGas(email: string) {
+    const app = new Hono<HonoEnv>();
+    app.post("/", apiKeyAuthMiddleware, (c) => c.json(c.get("user") ?? null));
+    app.onError((err, c) =>
+      c.json(
+        { error: err.message },
+        err instanceof AppError ? err.statusCode : 500,
+      ),
+    );
+    return app.request(
+      "/",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ date: "2026-10-13", email, effort: "" }),
+      },
+      { ...jwtTestEnv(), API_KEY },
+    );
+  }
+
+  it("AC-effort-ingest-gas-01: メールアドレスのユーザーが見つかれば、そのユーザーになる", async () => {
+    const id = randomUUID();
+    listUsers.mockResolvedValue({
+      data: { users: [{ id, email: "User@Example.test" }] },
+      error: null,
+    });
+
+    const res = await callGas("user@example.test");
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ id, email: "User@Example.test" });
+  });
+
+  it("AC-effort-ingest-gas-03: ユーザーが見つからなければ 400 User not found", async () => {
+    listUsers.mockResolvedValue({ data: { users: [] }, error: null });
+
+    const res = await callGas("nobody@example.test");
+
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "User not found" });
+  });
+
+  it("Auth の管理 API が失敗したら 500 Failed to look up user（送り手の誤りと区別する）", async () => {
+    listUsers.mockResolvedValue({
+      data: { users: [] },
+      error: { message: "Auth is down", status: 503 },
+    });
+
+    const res = await callGas("user@example.test");
+
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ error: "Failed to look up user" });
   });
 });

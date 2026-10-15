@@ -13,6 +13,7 @@
 
 | 症状（利用者から見えること） | 機能 | 該当する文書 | まず読む節 / 再発時に確認すること |
 | --- | --- | --- | --- |
+| Google Form から送った工数が 1 行も登録されず、開発者に「工数のテキストに読めない行があります」のメールが届く（v1.1.2 から。それまでは書き間違えた行だけが黙って登録されなかった） | effort-ingest-gas | [effort-ingest-gas/spec.md](effort-ingest-gas/spec.md) | AC-06、AC-07（メッセージの行番号と理由）、INV-4（フォームの説明文と書式が合っているか）、INV-5 |
 | 工数を登録したのに、次に工数登録画面を開くと、登録した内容が下書きとして戻ってくる | effort-draft | [effort-draft/spec.md](effort-draft/spec.md) | ポストモーテム 2026-01-23（`a8a5c14`）、INV-2。送信の最初に待っている保存を取り消しているか |
 | 別の端末で入力した内容が反映されない / 古い内容に戻る | effort-draft | [effort-draft/spec.md](effort-draft/spec.md) | INV-1（`clientUpdatedAt` で新しいほうを残す）、既知の落とし穴（端末の時計のずれ、ほぼ同時の保存） |
 | 工数登録で入力していた内容が、次に開くと消えている | effort-draft | [effort-draft/spec.md](effort-draft/spec.md) | 既知の落とし穴（800 ミリ秒以内に画面を離れた、サーバーへの保存の失敗）、AC-10 |

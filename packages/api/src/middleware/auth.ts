@@ -80,7 +80,9 @@ export const apiKeyAuthMiddleware = createMiddleware(async (c, next) => {
   if (!email) throw new AppError(400, "Email is required");
 
   const { user, error } = await findUserByEmail(email, c.env);
-  if (error || !user) throw new AppError(400, "User not found", error);
+  // Auth の障害は送り手の誤りではないので 500 にする（400 だと GAS のメールで原因を取り違える）
+  if (error) throw new AppError(500, "Failed to look up user", error);
+  if (!user) throw new AppError(400, "User not found");
 
   c.set("user", user);
   await next();
