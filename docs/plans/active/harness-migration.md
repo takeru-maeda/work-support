@@ -16,7 +16,7 @@ scope:                 # P2 の lint の一括修正と依存の整理、P4 の�
 ## 現在地
 
 - **フェーズ**: P4（テスト基盤）まで完了。CI の db ジョブ（ローカルの Supabase、結合テスト、E2E）が GitHub の上で通ることを確かめた（2026-10-14）
-- **次にやること**: P5（仕様書への変換）。effort-ingest-gas、effort-draft、goals、weekly-report、全機能の spec を作った（auth、landing、app-shell、profile、user-settings、platform はレビュー待ち）。次は P5 の残り（`docs/reference/` へのリンク、旧ドキュメントの削除）本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
+- **次にやること**: P6（既存機能のテストと、P5 で決めた直し）。P5 は全機能の spec を作り、レビューも済んだ。旧ドキュメント（`docs/legacy/`）の削除は人間の判断でしばらく残す。本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
 - **ブロッカー**: なし（Context7 は `mcp__context7__resolve-library-id` / `mcp__context7__query-docs` で使えることを 2026-10-10 に確認した）
 
 ---
@@ -336,9 +336,9 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 
 | # | 機能（仮の ID） | spec | レビュー |
 |---|---|---|---|
-| 1 | auth（ログイン、新規登録、パスワード再設定、ログアウト、AuthGuard） | [x] | [ ] |
-| 2 | landing（未ログイン時のルーティングは auth に書いた） | [x] | [ ] |
-| 3 | app-shell（ヘッダー、モバイルの下部ナビ、ホーム。PWA は未導入） | [x] | [ ] |
+| 1 | auth（ログイン、新規登録、パスワード再設定、ログアウト、AuthGuard） | [x] | [x] |
+| 2 | landing（未ログイン時のルーティングは auth に書いた） | [x] | [x] |
+| 3 | app-shell（ヘッダー、モバイルの下部ナビ、ホーム。PWA は未導入） | [x] | [x] |
 | 4 | effort-entry（工数登録、案件とタスクの候補、undo/redo、完了メール） | [x] | [x] |
 | 5 | effort-draft（下書きの同期と競合制御） | [x] | [x] |
 | 6 | effort-ingest-gas（GAS / Google Form からのテキスト取り込み） | [x] | [x] |
@@ -346,13 +346,13 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 | 8〜10 | goals（現在の目標、重みの合計 100% ルール、前週の進捗、目標の追加、過去の目標。1 つの仕様書にまとめた） | [x] | [x] |
 | 11 | missions | [x] | [x] |
 | 12 | weekly-report（週報の出力。ミッションの編集は #11） | [x] | [x] |
-| 13 | profile（アバター、アカウント削除） | [x] | [ ] |
-| 14 | user-settings（ユーザー設定） | [x] | [ ] |
-| 15 | platform（ログ、エラー処理、認証ミドルウェア、CORS、OpenAPI、メール送信。認証の部分は v1.1.0 で作成済み） | [x] | [ ] |
+| 13 | profile（アバター、アカウント削除） | [x] | [x] |
+| 14 | user-settings（ユーザー設定） | [x] | [x] |
+| 15 | platform（ログ、エラー処理、認証ミドルウェア、CORS、OpenAPI、メール送信。認証の部分は v1.1.0 で作成済み） | [x] | [x] |
 
 - [x] 直近のバグ修正（例: a8a5c14 の下書き同期の競合）を、ポストモーテムと incidents.md に初期データとして登録する（effort-draft の spec.md）
 - [x] `spec-backfill` スキルを作る（変換の手順。旧ドキュメントとコードの照合、食い違いの扱い、baseline の記録）
-- [ ] 各機能の `spec.md` の「画面と API」「データ」から、`docs/reference/` の該当箇所へリンクする（一覧を spec に重複して書かない）
+- [x] 各機能の `spec.md` の「画面と API」「データ」から、`docs/reference/` の該当箇所へリンクする（一覧を spec に重複して書かない。landing と app-shell は API も DB も持たないので無し）
 - [ ] 全機能の変換が終わったら、旧 requirements、design、tasks（`docs/legacy/`）を削除し、`packages/*/README.md` の旧ドキュメントへの参照を `docs/specs/` に直す
 
 ### P6. 既存機能のテスト（仕様書の AC をテストにする）

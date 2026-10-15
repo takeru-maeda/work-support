@@ -88,6 +88,7 @@ symptoms:
 - Supabase Storage の `avatars` バケット（公開）。`<ユーザー ID>/avatar.<拡張子>`
 - Auth の `user_metadata.avatarUrl`（画像の公開 URL。キャッシュを避けるため `?t=<時刻>` を付ける）、`user_metadata.name`
 - `storage.objects` のポリシー（`authenticated` だけ。4 つとも本人のフォルダの条件）: `20261014000000_restrict_avatar_storage_to_own_folder.sql`
+- アカウントの削除で外部キーの連鎖で消える各テーブル（INV-3）は [database.md](../../reference/database.md) を参照
 
 ## 設計不変条件
 
