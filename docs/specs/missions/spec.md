@@ -9,8 +9,8 @@ code:
   - packages/api/src/features/missions/repository.ts :: upsertMission
   - packages/shared/src/schemas/missions.ts :: UpdateMissionRequestSchema
   - packages/web/src/features/reports/components/mission/MissionEditor.tsx :: MissionEditor
-  - packages/web/src/services/missions.ts :: useMission
-  - packages/web/src/services/missions.ts :: updateMission
+  - packages/web/src/features/reports/api/missions.ts :: useMission
+  - packages/web/src/features/reports/api/missions.ts :: updateMission
 related: [weekly-report]
 symptoms:
   - ミッションの取得に失敗し、英語のエラーの文が出る

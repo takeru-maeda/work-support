@@ -1,10 +1,10 @@
 import dayjs from "dayjs";
 import { useEffect, useMemo } from "react";
 
+import { reportUiError } from "@/api/logs";
+import { usePreviousWeekProgress } from "@/features/goals/api/goals";
 import type { Goal } from "@/features/goals/types";
 import { showErrorToast } from "@/lib/toast";
-import { usePreviousWeekProgress } from "@/services/goals";
-import { reportUiError } from "@/services/logs";
 import {
   calculateGoalSummaries,
   type GoalProgressSummary,

@@ -1,10 +1,10 @@
 import { format } from "date-fns";
 import { useCallback, useState } from "react";
 
+import { reportUiError } from "@/api/logs";
+import { createGoal } from "@/features/goals/api/goals";
 import type { NewGoal } from "@/features/goals/types";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { createGoal } from "@/services/goals";
-import { reportUiError } from "@/services/logs";
 
 interface UseAddGoalSaveOptions {
   goals: NewGoal[];

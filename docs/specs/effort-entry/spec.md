@@ -28,7 +28,7 @@ code:
   - packages/web/src/features/effort-entry/components/entries/DifferenceBadge.tsx :: DifferenceBadge
   - packages/web/src/features/effort-entry/components/ConfirmEffortSubmitDialog.tsx :: ConfirmEffortSubmitDialog
   - packages/web/src/features/effort-entry/hooks/modules/useEffortProjectsOptions.ts :: useEffortProjectsOptions
-  - packages/web/src/features/effort-entry/utils/formatHours.ts :: formatWorkHours
+  - packages/web/src/lib/formatHours.ts :: formatWorkHours
   - packages/web/src/features/effort-entry/hooks/useEffortFormManager.ts :: useEffortFormManager
   - packages/web/src/features/effort-entry/hooks/modules/useEffortHistory.ts :: useEffortHistory
   - packages/web/src/features/effort-entry/hooks/modules/useEffortEntriesActions.ts :: useEffortEntriesActions
@@ -37,7 +37,7 @@ code:
   - packages/web/src/features/effort-entry/utils/form-helpers.ts :: validateEffortEntry
   - packages/web/src/features/effort-entry/utils/form-helpers.ts :: mapFormEntryToRequest
   - packages/web/src/features/effort-entry/utils/projectGrouping.ts :: getProjectGroupKey
-  - packages/web/src/services/projects.ts :: useProjectsWithTasks
+  - packages/web/src/api/projects.ts :: useProjectsWithTasks
 related: [effort-draft, effort-ingest-gas, effort-list, user-settings]
 symptoms:
   - 工数の送信に失敗したので送り直したら、工数が 2 重に登録された

@@ -1,4 +1,4 @@
-import { useWorkRecords } from "@/services/reports";
+import { useWorkRecords } from "@/features/effort-list/api/workRecords";
 import type {
   WorkRecordListQuery,
   WorkRecordListResponse,

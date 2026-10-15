@@ -13,7 +13,7 @@ code:
   - packages/api/src/features/goals/repository.ts :: searchGoals
   - packages/shared/src/schemas/goals.ts :: GoalHistoryQuerySchema
   - packages/shared/src/utils/goalProgress.ts :: calculateGoalSummaries
-  - packages/web/src/services/goals.ts :: useCurrentGoals
+  - packages/web/src/features/goals/api/goals.ts :: useCurrentGoals
   - packages/web/src/features/goals/hooks/useGoalsTableManager.ts :: useGoalsTableManager
   - packages/web/src/features/goals/hooks/modules/current/useGoalsEditingState.ts :: useGoalsEditingState
   - packages/web/src/features/goals/hooks/modules/current/usePreviousWeekSummary.ts :: usePreviousWeekSummary

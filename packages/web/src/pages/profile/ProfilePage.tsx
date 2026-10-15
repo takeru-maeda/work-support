@@ -2,19 +2,19 @@ import { Mail } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { reportUiError } from "@/api/logs";
 import { SectionHeader } from "@/components/sections/SectionHeader";
 import CardContainer from "@/components/shared/CardContainer";
 import { PageContainer } from "@/components/shared/PageContainer";
 import LoadingSpinner from "@/components/spinner/LoadingSpinner";
 import { ROUTES } from "@/config/routes";
+import { deleteCurrentUser } from "@/features/profile/api/users";
 import { AccountDeletionSection } from "@/features/profile/components/AccountDeletionSection";
 import { ProfileHeader } from "@/features/profile/components/ProfileHeader";
 import { ProfileNameSection } from "@/features/profile/components/ProfileNameSection";
 import { useProfileManager } from "@/features/profile/hooks/useProfileManager";
 import { logout } from "@/lib/auth";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { reportUiError } from "@/services/logs";
-import { deleteCurrentUser } from "@/services/users";
 
 export default function ProfilePage() {
   const navigate = useNavigate();

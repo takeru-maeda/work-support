@@ -16,7 +16,7 @@ code:
   - packages/web/src/features/profile/components/AccountDeletionSection.tsx :: AccountDeletionSection
   - packages/web/src/pages/profile/ProfilePage.tsx :: ProfilePage
   - packages/web/src/lib/auth.ts :: updateProfile
-  - packages/web/src/services/users.ts :: deleteCurrentUser
+  - packages/web/src/features/profile/api/users.ts :: deleteCurrentUser
   - packages/api/src/features/users/index.ts :: users
   - packages/api/src/features/users/service.ts :: deleteCurrentUserAccount
   - packages/api/supabase/migrations/20261014000000_restrict_avatar_storage_to_own_folder.sql

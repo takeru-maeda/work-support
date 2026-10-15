@@ -1,7 +1,7 @@
 import CardContainer from "@/components/shared/CardContainer";
 import { Label } from "@/components/ui/label";
 import type { ProjectBreakdownItem } from "@/features/effort-entry/types";
-import { formatWorkHours } from "@/features/effort-entry/utils/formatHours";
+import { formatWorkHours } from "@/lib/formatHours";
 
 import DifferenceLabel from "../entries/DifferenceLabel";
 

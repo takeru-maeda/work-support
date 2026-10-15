@@ -65,7 +65,7 @@ UI を変える改修では、実装の前に必ず次を行う。
 
 ## 注意事項
 
-- API の呼び出しは `src/services/<feature>.ts`（axios の `apiClient` + SWR）に置く。コンポーネントから axios を直接呼ばない
+- API の呼び出しは `src/features/<feature>/api/`（axios の `apiClient` + SWR）に置く。2 つ目の機能から使うことになったら `src/api/` へ移す。コンポーネントから axios を直接呼ばない
 - 入出力の型は `@shared/schemas/*` から取る。web 側で同じ型を定義し直さない
 - 工数登録の下書きは端末間で同期している（`useEffortDraftSync`）。下書きや保存処理を変えるときは、effort-draft の仕様書の不変条件を必ず読む
 - 取り消せない操作の例（実行前にユーザーへ確認）: アカウント削除などの操作を実際のアカウントで試すこと、本番の API に向けた動作確認

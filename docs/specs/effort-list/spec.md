@@ -24,7 +24,7 @@ code:
   - packages/web/src/features/effort-list/components/list/EffortsTable.tsx :: EffortsTable
   - packages/web/src/features/effort-list/components/list/EffortsSummary.tsx :: EffortsSummary
   - packages/web/src/features/effort-list/storageKeys.ts :: getEffortListFilterStorageKey
-  - packages/web/src/services/reports.ts :: useWorkRecords
+  - packages/web/src/features/effort-list/api/workRecords.ts :: useWorkRecords
 related: [effort-entry, effort-ingest-gas]
 symptoms:
   - 工数一覧の集計が、絞り込んだ全体の合計と合わない

@@ -1,5 +1,5 @@
-import { formatWorkHours } from "@/features/effort-entry/utils/formatHours";
 import type { EffortListEntry } from "@/features/effort-list/types";
+import { formatWorkHours } from "@/lib/formatHours";
 import { cn } from "@/lib/utils";
 
 import type { JSX } from "react";

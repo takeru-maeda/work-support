@@ -31,12 +31,12 @@ src/
 src/
 ├── app/           # エントリポイント、ルーター（App.tsx）、Provider
 ├── pages/         # ルート単位のページ。レイアウトを組むだけにして、ロジックは features に置く
-├── features/{feature}/   # 機能ごとの components / hooks / utils / types
+├── features/{feature}/   # 機能ごとの api / components / hooks / utils / types
+├── api/           # 複数の機能（やページ）から使う API 呼び出しと SWR フック
 ├── components/
 │   ├── ui/        # shadcn/ui のコンポーネント（CLI で追加したもの）
 │   ├── layout/    # ヘッダー、モバイル下部ナビ、PageLayout
 │   └── 共通部品    # empty-state / skeleton / spinner / table-footer / filter / form など
-├── services/      # API 呼び出しと SWR フック（機能ごとに 1 ファイル）
 ├── store/         # Zustand ストア
 ├── lib/           # apiClient（axios）、auth、supabase、toast、storage、utils
 ├── hooks/         # 機能をまたぐ汎用フック
@@ -46,7 +46,6 @@ src/
 ```
 
 **移行途中の点**（ハーネス移行計画の P7 で整理する）:
-- API 呼び出しが `services/` と `features/` に分かれている。新しく書くコードは既存の `services/<feature>.ts` に合わせる
 - `hooks/use-mobile.ts` と `components/ui/` の重複、ファイル名の camelCase / kebab-case の混在
 
 ### `packages/shared/`

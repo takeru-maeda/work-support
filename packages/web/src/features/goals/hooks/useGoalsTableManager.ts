@@ -1,7 +1,9 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { reportUiError } from "@/api/logs";
 import { ROUTES } from "@/config/routes";
+import { updateGoal } from "@/features/goals/api/goals";
 import { useGoalContentDialog } from "@/features/goals/hooks/modules/current/useGoalContentDialog";
 import { useGoalDeletion } from "@/features/goals/hooks/modules/current/useGoalDeletion";
 import { useGoalProgressMetrics } from "@/features/goals/hooks/modules/current/useGoalProgressMetrics";
@@ -14,8 +16,6 @@ import type {
   SortDirection,
 } from "@/features/goals/types";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { updateGoal } from "@/services/goals";
-import { reportUiError } from "@/services/logs";
 
 interface UseGoalsTableManagerResult {
   period: { start?: Date; end?: Date };

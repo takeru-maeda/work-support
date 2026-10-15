@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
 
+import { reportUiError } from "@/api/logs";
+import { deleteGoal } from "@/features/goals/api/goals";
 import type { Goal } from "@/features/goals/types";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { deleteGoal } from "@/services/goals";
-import { reportUiError } from "@/services/logs";
 
 interface UseGoalDeletionOptions {
   mutateGoals: () => Promise<Goal[] | undefined>;

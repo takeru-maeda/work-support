@@ -360,7 +360,7 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 - [x] P5 で決めた直し（各機能の `docs/specs/<feature>/changes/v1.0.7-baseline.md` の「人間の判断」）は、effort-ingest-gas の一部（v1.1.2）を直したところで、残りを [バックログ](../backlog.md) に移した（2026-10-15。新規開発を優先するためのユーザーの判断）。主要な画面の E2E シナリオもバックログへ移した
 
 ### P7. 構造の整理（テストを安全網にして行う）
-- [ ] web の `services/` を `features/` に統合する
+- [x] web の `services/` を `features/` に統合する（2026-10-15。1 つの機能だけで使う API は `features/<feature>/api/`、複数の機能から使う API は `src/api/`。`reports.ts` は週報と工数一覧に分けた。機能をまたいでいた `formatWorkHours` は `lib/` へ、effort-list は `EffortProjectOption` の代わりに shared の `ProjectWithTasks` を使う）
 - [ ] 重複したファイルを解消し、ファイル名の付け方を統一する
 - [ ] 層のルールを ESLint で強制する（エラーメッセージに直し方を書く）
 

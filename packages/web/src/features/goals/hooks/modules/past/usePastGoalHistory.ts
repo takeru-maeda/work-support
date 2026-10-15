@@ -1,4 +1,4 @@
-import { useGoalHistory } from "@/services/goals";
+import { useGoalHistory } from "@/features/goals/api/goals";
 import type { GoalHistoryQuery } from "@shared/schemas/goals";
 
 interface UsePastGoalHistoryOptions {

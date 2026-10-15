@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { useWeeklyReportMutation } from "@/services/reports";
+import { useWeeklyReportMutation } from "@/features/reports/api/weeklyReport";
 import { type WeeklyReportResponse } from "@shared/schemas/reports";
 
 interface UseWeeklyReportResult {

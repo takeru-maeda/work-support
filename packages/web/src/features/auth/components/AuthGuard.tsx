@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { reportUiError } from "@/api/logs";
+import { ensureUserSettings } from "@/api/userSettings";
 import { PageSkeleton } from "@/components/skeleton/PageSkeleton";
 import { ROUTES } from "@/config/routes";
 import { getCurrentUser, type AuthUser } from "@/lib/auth";
-import { reportUiError } from "@/services/logs";
-import { ensureUserSettings } from "@/services/userSettings";
 import { useUserStore } from "@/store/user";
 import { useUserSettingsStore } from "@/store/userSettings";
 import type { UserSettings } from "@shared/schemas/userSettings";

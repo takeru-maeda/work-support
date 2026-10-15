@@ -11,7 +11,7 @@ paths:
 - ページは `PageLayout` で包む。独自の横幅、余白、色を持ち込まない（色は `globals.css` のトークン）
 - まず `components/ui/`（shadcn）と `components/` の共通部品を使う。同じ UI を 2 か所目で作るときは共通部品に切り出す
 - 読み込み中（Skeleton）、0 件（`EmptyState`）、エラー（トースト + `reportUiError`）を必ず用意する
-- API の呼び出しは `services/<feature>.ts`（`apiClient` + SWR）に置く。コンポーネントから axios を直接呼ばない
+- API の呼び出しは `features/<feature>/api/`（`apiClient` + SWR）に置く。複数の機能から使うものは `api/` に置く。コンポーネントから axios を直接呼ばない
 - 入出力の型は `@shared/schemas/*` から取る
 - ページ（`pages/`）にはロジックを書かず、`features/<feature>/hooks` に置く。純粋なロジックは `features/<feature>/utils` に切り出してテストする
 - import はパスエイリアス `@/` を使う。相対パスは同じ機能の中だけ

@@ -2,12 +2,12 @@ import { endOfWeek, startOfWeek } from "date-fns";
 import { FileText } from "lucide-react";
 import { useCallback, useState } from "react";
 
+import { reportUiError } from "@/api/logs";
 import { SectionHeader } from "@/components/sections/SectionHeader";
 import CardContainer from "@/components/shared/CardContainer";
 import { WeeklyReportControls } from "@/features/reports/components/weekly-report/WeeklyReportControls";
 import { WeeklyReportPreview } from "@/features/reports/components/weekly-report/WeeklyReportPreview";
 import { useWeeklyReport } from "@/features/reports/hooks/useWeeklyReport";
-import { reportUiError } from "@/services/logs";
 
 export function WeeklyReport() {
   const [date, setDate] = useState<Date>(new Date());

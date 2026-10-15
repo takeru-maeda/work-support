@@ -1,6 +1,8 @@
 import dayjs from "dayjs";
 import { useCallback, useMemo } from "react";
 
+import { reportUiError } from "@/api/logs";
+import { useCurrentGoals } from "@/features/goals/api/goals";
 import { usePastGoalFilters } from "@/features/goals/hooks/modules/past/usePastGoalFilters";
 import { usePastGoalHistory } from "@/features/goals/hooks/modules/past/usePastGoalHistory";
 import { usePastGoalsSelection } from "@/features/goals/hooks/modules/past/usePastGoalsSelection";
@@ -11,8 +13,6 @@ import type {
   SortDirection,
 } from "@/features/goals/types";
 import { showErrorToast } from "@/lib/toast";
-import { useCurrentGoals } from "@/services/goals";
-import { reportUiError } from "@/services/logs";
 import type {
   GoalHistoryQuery,
   GoalHistorySortOption,

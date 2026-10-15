@@ -10,7 +10,7 @@ code:
   - packages/web/src/features/effort-entry/utils/form-helpers.ts :: mapFormEntryToRequest
   - packages/web/src/features/effort-entry/utils/form-helpers.ts :: mapDraftEntryToFormEntry
   - packages/web/src/features/effort-entry/components/EffortForm.tsx :: EffortForm
-  - packages/web/src/services/effort.ts :: saveEffortDraft
+  - packages/web/src/features/effort-entry/api/effort.ts :: saveEffortDraft
   - packages/api/src/features/effort/service.ts :: upsertEffortDraftService
   - packages/api/src/features/effort/repository.ts :: getWorkEntryDraftByUser
   - packages/shared/src/schemas/effort.ts :: EffortDraftSchema

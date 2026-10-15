@@ -16,7 +16,7 @@ code:
   - packages/api/src/lib/mailer.ts :: sendEffortCompletionEmail
   - packages/api/src/features/logs/index.ts :: logs
   - packages/shared/src/schemas/logs.ts :: ErrorLogCreateRequestSchema
-  - packages/web/src/services/logs.ts :: reportUiError
+  - packages/web/src/api/logs.ts :: reportUiError
 related: [auth, effort-ingest-gas, effort-entry]
 symptoms:
   - ログインしているのに、どの画面でもデータが読み込めない（API が 401 を返す）
@@ -157,7 +157,7 @@ JWT の認証は、effort（GAS の取り込みを除く）、goals、logs、mis
 | AC-platform-16 | `packages/api/scripts/apiReference.test.ts`（全ルートの `describeRoute` と、`api.md` が定義と一致すること） | 単体 |
 | AC-platform-08、09、11〜17、INV-4、INV-5 | `packages/api/test/platform.int.test.ts`（アクセスログとエラーの記録、検証の失敗の形、CORS のヘッダー、OpenAPI、`POST /api/logs/error`） | 結合 |
 | AC-platform-10 | 確認のみ（`packages/api/wrangler.jsonc` の `observability`） | 確認のみ |
-| AC-platform-18 | `packages/web/src/services/logs.test.ts` | 単体 |
+| AC-platform-18 | `packages/web/src/api/logs.test.ts` | 単体 |
 | AC-platform-19 | `packages/api/src/lib/mailer.test.ts`（fetch を差し替えて失敗の判定を確かめる）、`packages/api/test/effort-entries.int.test.ts`（`test/setup.ts` が横取りした依頼の中身） | 単体、結合 |
 
 既知の落とし穴のうち、今の振る舞いをテストで固めたもの（P6 で直すときにテストを書き換える）: 壊れた JSON が 500（AC-11）、許可していない Origin でも処理する（AC-15）、OpenAPI と Swagger UI を認証なしで出す（AC-16）、メールの依頼で JSON でない応答が `AppError` にならない（AC-19）、`reportUiError` が送れないと例外を投げる（AC-18）。

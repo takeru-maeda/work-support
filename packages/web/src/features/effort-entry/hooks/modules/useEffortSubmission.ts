@@ -1,5 +1,10 @@
 import { useCallback, useState } from "react";
 
+import { reportUiError } from "@/api/logs";
+import {
+  removeEffortDraft,
+  submitEffortEntries,
+} from "@/features/effort-entry/api/effort";
 import type {
   EffortEntryError,
   EffortFormData,
@@ -10,8 +15,6 @@ import {
   validateEffortEntry,
 } from "@/features/effort-entry/utils/form-helpers";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { removeEffortDraft, submitEffortEntries } from "@/services/effort";
-import { reportUiError } from "@/services/logs";
 import type {
   EffortEntry as EffortEntryDto,
   EffortEntriesRequest,

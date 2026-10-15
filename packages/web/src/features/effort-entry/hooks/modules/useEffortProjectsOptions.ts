@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
+import { reportUiError } from "@/api/logs";
+import { useProjectsWithTasks } from "@/api/projects";
 import type { EffortProjectOption } from "@/features/effort-entry/types";
 import { showErrorToast } from "@/lib/toast";
-import { reportUiError } from "@/services/logs";
-import { useProjectsWithTasks } from "@/services/projects";
 import type { ProjectWithTasks } from "@shared/schemas/projects";
 
 import type { KeyedMutator } from "swr";

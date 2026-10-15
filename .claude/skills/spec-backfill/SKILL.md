@@ -18,7 +18,7 @@ description: 既存の機能の仕様書（docs/specs/<feature>/spec.md）を、
 ### 1. 材料を集める
 
 - **旧ドキュメント**: `docs/legacy/specs/` の該当する節だけを読む（要件は `requirements/index.md`、設計は `design/` の 03 画面、05 API、06 データ構造、08 ロジック、09 DB など）。全体を読み込まない
-- **コード**: 画面（`packages/web/src/pages`、`features/<feature>`、`services/<feature>.ts`）、API（`packages/api/src/features/<feature>`）、スキーマ（`packages/shared/src/schemas`）。広く読むときは `Explore` に任せ、「条件 → 結果の振る舞いの一覧、エラー時の挙動、状態の置き場所、関係するシンボル（`パス :: シンボル`）」を結論だけ受け取る
+- **コード**: 画面（`packages/web/src/pages`、`features/<feature>`。API の呼び出しは `features/<feature>/api/` と `api/`）、API（`packages/api/src/features/<feature>`）、スキーマ（`packages/shared/src/schemas`）。広く読むときは `Explore` に任せ、「条件 → 結果の振る舞いの一覧、エラー時の挙動、状態の置き場所、関係するシンボル（`パス :: シンボル`）」を結論だけ受け取る
 - **全体像**: `docs/reference/api.md`（エンドポイント）、`docs/reference/database.md`（テーブル）
 - **履歴**: `git log --format='%h %ad %s' --date=short -- <関係するパス>`。`fix` や「修正」のコミットは、ポストモーテムの候補として中身を読む
 - **既存のテスト**: 関係する `*.test.ts(x)`、`*.int.test.ts`、`packages/e2e/tests/`

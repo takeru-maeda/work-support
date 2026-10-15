@@ -2,11 +2,11 @@ import { Bell } from "lucide-react";
 import { useEffect, useState } from "react";
 import { shallow } from "zustand/shallow";
 
+import { reportUiError } from "@/api/logs";
+import { updateUserSettings } from "@/api/userSettings";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { reportUiError } from "@/services/logs";
-import { updateUserSettings } from "@/services/userSettings";
 import { useUserSettingsStore } from "@/store/userSettings";
 import type { UserSettings } from "@shared/schemas/userSettings";
 

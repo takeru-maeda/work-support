@@ -27,9 +27,9 @@ code:
   - packages/web/src/features/reports/components/weekly-report/index.tsx :: WeeklyReport
   - packages/web/src/features/reports/components/weekly-report/WeeklyReportControls.tsx :: WeeklyReportControls
   - packages/web/src/features/reports/components/weekly-report/WeeklyReportPreview.tsx :: WeeklyReportPreview
-  - packages/web/src/services/reports.ts :: getWeeklyReport
+  - packages/web/src/features/reports/api/weeklyReport.ts :: getWeeklyReport
   - packages/web/src/features/reports/hooks/useWeeklyReport.ts :: useWeeklyReport
-  - packages/web/src/services/reports.ts :: useWeeklyReportMutation
+  - packages/web/src/features/reports/api/weeklyReport.ts :: useWeeklyReportMutation
 related: [goals, missions, effort-entry]
 symptoms:
   - 週報の日別の時間が「3.3000000000000003h」のように長い小数になる

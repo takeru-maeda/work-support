@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { useEffect, useMemo } from "react";
 
+import { reportUiError } from "@/api/logs";
 import { useEffortListData } from "@/features/effort-list/hooks/modules/useEffortListData";
 import {
   useEffortListFilters,
@@ -14,7 +15,6 @@ import type {
   EffortSortDirection,
 } from "@/features/effort-list/types";
 import { showErrorToast } from "@/lib/toast";
-import { reportUiError } from "@/services/logs";
 import type {
   WorkRecordListQuery,
   WorkRecordSort,

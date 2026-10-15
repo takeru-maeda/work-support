@@ -9,10 +9,10 @@ code:
   - packages/api/src/features/user-settings/repository.ts :: createUserSettings
   - packages/api/src/features/user-settings/repository.ts :: updateUserSettings
   - packages/shared/src/schemas/userSettings.ts :: UpdateUserSettingsRequestSchema
-  - packages/web/src/services/userSettings.ts :: ensureUserSettings
-  - packages/web/src/services/userSettings.ts :: getUserSettings
+  - packages/web/src/api/userSettings.ts :: ensureUserSettings
+  - packages/web/src/api/userSettings.ts :: getUserSettings
   - packages/api/src/features/effort/service.ts :: sendEffortCompletionEmailIfNeeded
-  - packages/web/src/services/userSettings.ts :: updateUserSettings
+  - packages/web/src/api/userSettings.ts :: updateUserSettings
   - packages/web/src/store/userSettings.ts :: useUserSettingsStore
   - packages/web/src/features/auth/components/AuthGuard.tsx :: AuthGuard
   - packages/web/src/pages/settings/SettingsPage.tsx :: SettingsPage
