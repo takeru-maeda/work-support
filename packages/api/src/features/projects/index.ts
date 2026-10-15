@@ -10,7 +10,7 @@ import { ProjectsResponseSchema } from "./types";
 
 import type { ProjectsResponse } from "./types";
 import type { Database } from "../../../../shared/src/types/db";
-import type { AuthenticatedUser, HonoEnv } from "../../custom-types";
+import type { AuthenticatedUser, HonoEnv } from "../../customTypes";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const projects = new Hono<HonoEnv>();

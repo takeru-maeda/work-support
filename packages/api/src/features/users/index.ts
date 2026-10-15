@@ -8,7 +8,7 @@ import { jwtAuthMiddleware } from "../../middleware/auth";
 import { deleteCurrentUserAccount } from "./service";
 
 import type { Database } from "../../../../shared/src/types/db";
-import type { AuthenticatedUser, HonoEnv } from "../../custom-types";
+import type { AuthenticatedUser, HonoEnv } from "../../customTypes";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const users = new Hono<HonoEnv>();

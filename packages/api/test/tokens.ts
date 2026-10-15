@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { SignJWT, exportJWK, generateKeyPair } from "jose";
 import { vi } from "vitest";
 
-import type { HonoEnv } from "../src/custom-types";
+import type { HonoEnv } from "../src/customTypes";
 import type { JWK, JWTPayload, KeyLike } from "jose";
 
 /** テスト用の共有シークレット（HS256）。本番の値とは無関係 */

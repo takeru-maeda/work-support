@@ -15,7 +15,7 @@ import {
   formatDateOnly,
   mapDraftEntryToFormEntry,
   mapFormEntryToRequest,
-} from "@/features/effort-entry/utils/form-helpers";
+} from "@/features/effort-entry/utils/formHelpers";
 import { showErrorToast } from "@/lib/toast";
 import { buildUserScopedKey } from "@/lib/utils";
 import type { EffortDraft, EffortDraftResponse } from "@shared/schemas/effort";

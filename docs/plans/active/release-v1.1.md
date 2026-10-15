@@ -46,7 +46,6 @@ scope:                 # /release でバージョンをそろえるときに触�
 | 工数一覧 | `useEffortList` |
 | 目標（現在、過去） | `useGoalsData`、`usePastGoalFilters`、`usePastGoals` |
 | プロフィール | `useProfileManager` |
-| トースト（全画面） | `use-toast` |
 
 ## 2. 決定事項
 

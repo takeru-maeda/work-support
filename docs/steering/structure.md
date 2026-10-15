@@ -12,7 +12,7 @@
 ```
 src/
 ├── index.ts           # エントリポイント。CORS、ログ、エラーハンドラ、ルートの登録
-├── custom-types.ts    # HonoEnv（Bindings / Variables）の型
+├── customTypes.ts    # HonoEnv（Bindings / Variables）の型
 ├── lib/               # 横断的な部品（supabase クライアント、AppError、errorHandler、logger、mailer）
 ├── middleware/        # 認証（JWT / API キー）、アクセスログ
 └── features/{feature}/
@@ -45,9 +45,6 @@ src/
 └── types/         # 機能をまたぐ型
 ```
 
-**移行途中の点**（ハーネス移行計画の P7 で整理する）:
-- `hooks/use-mobile.ts` と `components/ui/` の重複、ファイル名の camelCase / kebab-case の混在
-
 ### `packages/shared/`
 **役割**: フロントエンドとバックエンドで共有する API 契約と純粋なロジック。
 
@@ -78,6 +75,7 @@ src/
 - **React コンポーネント**: PascalCase（`GoalCard.tsx`）
 - **コンポーネント以外の TS ファイル**: camelCase（`service.ts`、`goalProgress.ts`）。フックは `useXxx.ts`
 - **テストファイル**: `*.test.ts(x)`
+- **例外**: shadcn の CLI が作るファイル（`components/ui/*.tsx`、`hooks/use-mobile.ts`）は CLI の名前のまま（名前を変えると、次の `add` で同じものがもう一度作られる）。api の結合テストは機能の名前に合わせる（`test/effort-draft.int.test.ts`）
 
 ## import の順序
 

@@ -16,7 +16,7 @@ import { AppError } from "../lib/errors";
 
 import { apiKeyAuthMiddleware, jwtAuthMiddleware } from "./auth";
 
-import type { HonoEnv } from "../custom-types";
+import type { HonoEnv } from "../customTypes";
 
 /**
  * jwtAuthMiddleware を HTTP で通して、ステータスを確かめる（DB に触れない）。

@@ -13,7 +13,7 @@ import {
   formatDateOnly,
   mapFormEntryToRequest,
   validateEffortEntry,
-} from "@/features/effort-entry/utils/form-helpers";
+} from "@/features/effort-entry/utils/formHelpers";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import type {
   EffortEntry as EffortEntryDto,

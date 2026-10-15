@@ -6,7 +6,7 @@ import { verifySupabaseAccessToken } from "../lib/jwt";
 import { createSupabaseClient } from "../lib/supabase";
 
 import type { Database } from "../../../shared/src/types/db";
-import type { AuthenticatedUser, HonoEnv } from "../custom-types";
+import type { AuthenticatedUser, HonoEnv } from "../customTypes";
 import type { EffortRequest } from "../features/effort/types";
 import type { AuthError, SupabaseClient, User } from "@supabase/supabase-js";
 import type { JWTPayload } from "jose";

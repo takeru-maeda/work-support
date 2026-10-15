@@ -7,8 +7,8 @@ code:
   - packages/web/src/features/effort-entry/hooks/modules/useEffortDraftSync.ts :: useEffortDraftSync
   - packages/web/src/features/effort-entry/hooks/modules/useEffortSubmission.ts :: useEffortSubmission
   - packages/web/src/features/effort-entry/hooks/modules/useEffortHistory.ts :: useEffortHistory
-  - packages/web/src/features/effort-entry/utils/form-helpers.ts :: mapFormEntryToRequest
-  - packages/web/src/features/effort-entry/utils/form-helpers.ts :: mapDraftEntryToFormEntry
+  - packages/web/src/features/effort-entry/utils/formHelpers.ts :: mapFormEntryToRequest
+  - packages/web/src/features/effort-entry/utils/formHelpers.ts :: mapDraftEntryToFormEntry
   - packages/web/src/features/effort-entry/components/EffortForm.tsx :: EffortForm
   - packages/web/src/features/effort-entry/api/effort.ts :: saveEffortDraft
   - packages/api/src/features/effort/service.ts :: upsertEffortDraftService

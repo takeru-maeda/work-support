@@ -296,6 +296,40 @@ for (const rel of repoFiles.filter((f) =>
   }
 }
 
+// 9. ファイル名が docs/steering/structure.md の「命名」に沿っているか
+// shadcn の CLI が作るファイルと、機能の名前に合わせる api の結合テストは例外
+const namingExceptions = [
+  /^packages\/web\/src\/components\/ui\//,
+  /^packages\/web\/src\/hooks\/use-mobile\.ts$/,
+  /^packages\/api\/test\/[a-z-]+\.int\.test\.ts$/,
+];
+const kebabDir = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const camelFile = /^[a-z][A-Za-z0-9]*$/;
+const pascalFile = /^[A-Z][A-Za-z0-9]*$/;
+for (const rel of repoFiles.filter(
+  (f) =>
+    /^packages\/[^/]+\/(src|test|tests|support)\/.+\.tsx?$/.test(f) &&
+    !f.endsWith(".d.ts") &&
+    exists(f) &&
+    !namingExceptions.some((re) => re.test(f)),
+)) {
+  const parts = rel.split("/");
+  const [base, ...rest] = parts.at(-1).split(".");
+  const dirs = parts.slice(3, -1);
+  const badDir = dirs.find((d) => !kebabDir.test(d));
+  // .tsx はコンポーネント（PascalCase）か、フックやテスト用の部品（camelCase）
+  const isTsx = rest.at(-1) === "tsx";
+  const okName = isTsx
+    ? pascalFile.test(base) || camelFile.test(base)
+    : camelFile.test(base);
+  if (badDir || !okName) {
+    fail(
+      `${rel}: ${badDir ? `ディレクトリ名 "${badDir}" が kebab-case ではありません` : `ファイル名 "${base}" が命名の規約に沿っていません`}`,
+      "docs/steering/structure.md の「命名」に合わせて名前を変え、参照を直す（.ts は camelCase、コンポーネントの .tsx は PascalCase）",
+    );
+  }
+}
+
 if (errors.length > 0) {
   console.error(`ハーネスの自己点検: ${errors.length} 件の問題\n`);
   for (const e of errors) console.error(`- ${e}`);

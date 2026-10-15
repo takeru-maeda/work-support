@@ -9,7 +9,7 @@ import type {
 import {
   createEmptyEntry,
   validateEffortEntry,
-} from "@/features/effort-entry/utils/form-helpers";
+} from "@/features/effort-entry/utils/formHelpers";
 import { getProjectGroupKey } from "@/features/effort-entry/utils/projectGrouping";
 
 interface UseEffortEntriesActionsParams {

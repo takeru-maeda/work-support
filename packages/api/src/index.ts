@@ -15,7 +15,7 @@ import users from "./features/users";
 import { globalErrorHandler } from "./lib/errorHandler";
 import { accessLogMiddleware } from "./middleware/logger";
 
-import type { HonoEnv } from "./custom-types";
+import type { HonoEnv } from "./customTypes";
 
 const app = new Hono<HonoEnv>();
 

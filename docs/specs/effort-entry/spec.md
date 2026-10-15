@@ -34,8 +34,8 @@ code:
   - packages/web/src/features/effort-entry/hooks/modules/useEffortEntriesActions.ts :: useEffortEntriesActions
   - packages/web/src/features/effort-entry/hooks/modules/useEffortSubmission.ts :: useEffortSubmission
   - packages/web/src/features/effort-entry/hooks/modules/useEffortSummaryMetrics.ts :: useEffortSummaryMetrics
-  - packages/web/src/features/effort-entry/utils/form-helpers.ts :: validateEffortEntry
-  - packages/web/src/features/effort-entry/utils/form-helpers.ts :: mapFormEntryToRequest
+  - packages/web/src/features/effort-entry/utils/formHelpers.ts :: validateEffortEntry
+  - packages/web/src/features/effort-entry/utils/formHelpers.ts :: mapFormEntryToRequest
   - packages/web/src/features/effort-entry/utils/projectGrouping.ts :: getProjectGroupKey
   - packages/web/src/api/projects.ts :: useProjectsWithTasks
 related: [effort-draft, effort-ingest-gas, effort-list, user-settings]

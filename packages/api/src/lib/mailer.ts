@@ -6,7 +6,7 @@ import {
 import { AppError } from "./errors";
 
 import type { EmailRequest } from "../../../shared/src/schemas/email";
-import type { HonoEnv } from "../custom-types";
+import type { HonoEnv } from "../customTypes";
 
 interface EffortEmailOptions {
   to: string;

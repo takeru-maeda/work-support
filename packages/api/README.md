@@ -15,7 +15,7 @@
 ```
 packages/api/src/
 ├── index.ts           // Hono アプリのエントリポイント
-├── custom-types.ts    // Hono の型拡張
+├── customTypes.ts    // Hono の型拡張
 ├── lib/               // Supabase クライアント、メール送信などのユーティリティ
 ├── middleware/        // jwtAuthMiddleware, apiKeyAuthMiddleware, accessLogMiddleware 等
 └── features/

@@ -14,7 +14,7 @@ import {
 
 import type { MissionUpdateRequest } from "./types";
 import type { Database, Tables } from "../../../../shared/src/types/db";
-import type { AuthenticatedUser, HonoEnv } from "../../custom-types";
+import type { AuthenticatedUser, HonoEnv } from "../../customTypes";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const missions = new Hono<HonoEnv>();

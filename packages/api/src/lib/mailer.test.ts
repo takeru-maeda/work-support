@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { AppError } from "./errors";
 import { sendEffortCompletionEmail } from "./mailer";
 
-import type { HonoEnv } from "../custom-types";
+import type { HonoEnv } from "../customTypes";
 
 // メールの依頼（docs/specs/platform/spec.md の AC-19）。GAS の宛先への fetch を差し替える
 const env = {

@@ -5,7 +5,7 @@ import { AppError } from "./errors";
 import { createSupabaseClient } from "./supabase";
 
 import type { Database, Tables } from "../../../shared/src/types/db";
-import type { HonoEnv } from "../custom-types";
+import type { HonoEnv } from "../customTypes";
 import type { LoggerErrorOptions } from "./logger";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Context } from "hono";

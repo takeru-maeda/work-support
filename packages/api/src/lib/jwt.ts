@@ -1,6 +1,6 @@
 import { createRemoteJWKSet, errors, jwtVerify } from "jose";
 
-import type { HonoEnv } from "../custom-types";
+import type { HonoEnv } from "../customTypes";
 import type { JWTPayload, JWTVerifyGetKey } from "jose";
 
 /** 受け付ける署名方式。HS256 は共有シークレット、ES256 / RS256 は Supabase が JWKS で公開する鍵で検証する */

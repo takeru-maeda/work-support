@@ -5,7 +5,7 @@ import { inject, onTestFinished } from "vitest";
 
 import app from "../src";
 
-import type { HonoEnv } from "../src/custom-types";
+import type { HonoEnv } from "../src/customTypes";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /** メール送信（GAS）の宛先。テストでは `test/setup.ts` がこの宛先への fetch を横取りする */

@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "../../../shared/src/types/db";
-import type { HonoEnv } from "../custom-types";
+import type { HonoEnv } from "../customTypes";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 let client: SupabaseClient<Database> | null = null;

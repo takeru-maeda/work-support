@@ -361,7 +361,7 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 
 ### P7. 構造の整理（テストを安全網にして行う）
 - [x] web の `services/` を `features/` に統合する（2026-10-15。1 つの機能だけで使う API は `features/<feature>/api/`、複数の機能から使う API は `src/api/`。`reports.ts` は週報と工数一覧に分けた。機能をまたいでいた `formatWorkHours` は `lib/` へ、effort-list は `EffortProjectOption` の代わりに shared の `ProjectWithTasks` を使う）
-- [ ] 重複したファイルを解消し、ファイル名の付け方を統一する
+- [x] 重複したファイルを解消し、ファイル名の付け方を統一する（2026-10-15。重複していた `components/ui/use-mobile.tsx` と、どこからも使われていないファイル（古い Radix のトースト一式、`AppHeaderMobileNav`、表の列幅の変更）を消した。`form-helpers.ts` → `formHelpers.ts`、`custom-types.ts` → `customTypes.ts`。命名の規約は `scripts/harness-check.mjs` で確かめる。shadcn の CLI が作るファイルと api の結合テストは例外。shadcn の未使用の部品は、新規開発で使うかもしれないので残した）
 - [ ] 層のルールを ESLint で強制する（エラーメッセージに直し方を書く）
 
 ### P8. ワークフローの仕上げと試運転

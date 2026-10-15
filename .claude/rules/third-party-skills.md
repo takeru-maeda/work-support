@@ -21,7 +21,7 @@
 
 ## API（hono / workers-best-practices / wrangler）
 - Hono は 4.x。v5 向けの助言（`@hono/cloudflare-workers` など）は使わない。API は `node_modules` の実際のバージョンで確かめる。
-- 手書きの `HonoEnv`（`packages/api/src/custom-types.ts`）は残す。`compatibility_date` や observability の設定は、頼まれない限り変えない。
+- 手書きの `HonoEnv`（`packages/api/src/customTypes.ts`）は残す。`compatibility_date` や observability の設定は、頼まれない限り変えない。
 - `npx hono request/batch/snapshot` や `wrangler dev --remote` を、本物の接続情報で動かさない。API の確認は Vitest の `app.request()` で行う。
 
 ## UI（shadcn / vercel-react-best-practices / vercel-composition-patterns / frontend-design / web-design-guidelines）
