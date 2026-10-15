@@ -16,7 +16,7 @@ scope:                 # P2 の lint の一括修正と依存の整理、P4 の�
 ## 現在地
 
 - **フェーズ**: P4（テスト基盤）まで完了。CI の db ジョブ（ローカルの Supabase、結合テスト、E2E）が GitHub の上で通ることを確かめた（2026-10-14）
-- **次にやること**: P5（仕様書への変換）。effort-ingest-gas、effort-draft、goals、weekly-report、missions、effort-entry、effort-list は済み、次は user-settings。本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
+- **次にやること**: P5（仕様書への変換）。effort-ingest-gas、effort-draft、goals、weekly-report、全機能の spec を作った（auth、landing、app-shell、profile、user-settings、platform はレビュー待ち）。次は P5 の残り（`docs/reference/` へのリンク、旧ドキュメントの削除）本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
 - **ブロッカー**: なし（Context7 は `mcp__context7__resolve-library-id` / `mcp__context7__query-docs` で使えることを 2026-10-10 に確認した）
 
 ---
@@ -336,19 +336,19 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 
 | # | 機能（仮の ID） | spec | レビュー |
 |---|---|---|---|
-| 1 | auth（ログイン、新規登録、パスワード再設定、ログアウト、AuthGuard） | [ ] | [ ] |
-| 2 | landing（未ログイン時のルーティングを含む） | [ ] | [ ] |
-| 3 | app-shell（ヘッダー、モバイルの下部ナビ、PWA） | [ ] | [ ] |
+| 1 | auth（ログイン、新規登録、パスワード再設定、ログアウト、AuthGuard） | [x] | [ ] |
+| 2 | landing（未ログイン時のルーティングは auth に書いた） | [x] | [ ] |
+| 3 | app-shell（ヘッダー、モバイルの下部ナビ、ホーム。PWA は未導入） | [x] | [ ] |
 | 4 | effort-entry（工数登録、案件とタスクの候補、undo/redo、完了メール） | [x] | [x] |
 | 5 | effort-draft（下書きの同期と競合制御） | [x] | [x] |
 | 6 | effort-ingest-gas（GAS / Google Form からのテキスト取り込み） | [x] | [x] |
-| 7 | effort-list（工数一覧） | [x] | [ ] |
+| 7 | effort-list（工数一覧） | [x] | [x] |
 | 8〜10 | goals（現在の目標、重みの合計 100% ルール、前週の進捗、目標の追加、過去の目標。1 つの仕様書にまとめた） | [x] | [x] |
 | 11 | missions | [x] | [x] |
 | 12 | weekly-report（週報の出力。ミッションの編集は #11） | [x] | [x] |
-| 13 | profile（アバター、アカウント削除） | [ ] | [ ] |
-| 14 | user-settings（ユーザー設定） | [ ] | [ ] |
-| 15 | platform（ログ、エラー処理、認証ミドルウェア、CORS、OpenAPI、メール送信。認証の部分は v1.1.0 で作成済み） | [ ] | [ ] |
+| 13 | profile（アバター、アカウント削除） | [x] | [ ] |
+| 14 | user-settings（ユーザー設定） | [x] | [ ] |
+| 15 | platform（ログ、エラー処理、認証ミドルウェア、CORS、OpenAPI、メール送信。認証の部分は v1.1.0 で作成済み） | [x] | [ ] |
 
 - [x] 直近のバグ修正（例: a8a5c14 の下書き同期の競合）を、ポストモーテムと incidents.md に初期データとして登録する（effort-draft の spec.md）
 - [x] `spec-backfill` スキルを作る（変換の手順。旧ドキュメントとコードの照合、食い違いの扱い、baseline の記録）
@@ -412,6 +412,13 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
   - 保存した条件を確かめない（件数が壊れていると失敗が続く、日付が壊れていると画面全体が落ちる）
   - 読み込み中も集計だけ前の条件の数字が出る。最初の取得に失敗すると「工数データがまだ登録されていません」が出る
   - 集計の小数の誤差（「-0.00h」「0.30h」）。表と集計で小数の桁が違う
+- [ ] P5 で決めた残りの機能の直し（各機能の `docs/specs/<feature>/changes/v1.0.7-baseline.md` の「人間の判断」と「見つけた不具合」。それぞれ改修の記録を通す）
+  - auth: ログイン済みなら `/login`・`/signup`・`/landing` と存在しないパスをホームへ。ヘッダーのログアウトをこの端末だけにする。別のタブでアカウントが替わると別人のデータが混ざる（`onAuthStateChange` で受けてストアと SWR を消す）。通信の失敗で未ログイン扱い。画面を移るたびの確かめ直し。ローカルの再設定のリンクの戻り先。ほか
+  - platform: 本番では OpenAPI と Swagger UI を出さない。DB のエラーの文を応答に出さない。壊れた JSON を 400 にする。アクセスログが書けないと全部止まる。開発用の Origin が本番で許可される。エラーの記録の API の上限。`reportUiError` が失敗を投げる。ほか
+  - profile: アカウントの削除の途中の失敗で 500 になりログインのまま残る、2 回目の削除が 500。削除のたびのアクセスログの更新の失敗。削除のあとにストアと端末のデータを消さない。画像の保存の失敗で前の画像が消える。名前が空のユーザーにメールアドレスが保存される。ほか
+  - user-settings: 作成の同時送信で 500。最初の 404 が ERROR として残る。初期化の失敗で前の値が残る。ログアウトで設定のストアを消さない。テーマのちらつき。ほか
+  - app-shell: 画面全体のエラーの受け止め（真っ白になる）。下の階層でナビが選ばれない。ホームとプロフィールの器。本文の最後がナビに隠れうる。拡大の停止。ほか
+  - landing: 「Google連携に対応」の文言を消す。影と模様が描かれない。リンクの中のボタン。よくある質問のアクセシビリティ。ほか
 - [ ] P4 で見つけた潜在的な不具合: 目標の履歴の検索で `minProgress` / `maxProgress` に空文字か null を渡すと、「指定なし」にならず 400 になる（`GoalHistoryQuerySchema` の前処理のあとで `z.coerce.number()` が NaN にする）。web は値があるときだけ送るので画面からは起きない。`packages/shared/src/schemas/goals.test.ts` の `it.fails` を `it` に戻す形で、改修の記録を通して直す
 - [ ] P2 で保留にしたフックの依存配列の 2 件を、テストを書いてから改修の記録を通して直す（コードに `TODO(P6)` の印）
   - `useEffortSummaryMetrics`: `projectOptions` の読み込みが終わっても案件名が更新されない可能性

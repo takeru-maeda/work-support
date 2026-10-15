@@ -25,7 +25,7 @@
 - **エラー時**: `globalErrorHandler` が次の形で返す。
 
 ```json
-{ "error": "エラーメッセージ", "accessLogId": "uuid" }
+{ "error": "エラーメッセージ", "accessLogId": 123 }
 ```
 
 `accessLogId` で `access_logs` / `error_logs` をたどれる。

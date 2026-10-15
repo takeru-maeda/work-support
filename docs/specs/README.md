@@ -25,9 +25,9 @@ docs/specs/
 
 | feature | 内容 | spec |
 | --- | --- | --- |
-| auth | ログイン、新規登録、パスワード再設定、ログアウト、AuthGuard | 未作成 |
-| landing | ランディングページ、未ログイン時のルーティング | 未作成 |
-| app-shell | ヘッダー、モバイルの下部ナビ、PWA | 未作成 |
+| auth | ログイン、新規登録、パスワード再設定、ログアウト、AuthGuard | [spec.md](auth/spec.md) |
+| landing | ランディングページ（未ログイン時のルーティングは auth） | [spec.md](landing/spec.md) |
+| app-shell | ヘッダー、モバイルの下部ナビ、ホーム、ページの器（PWA は未導入） | [spec.md](app-shell/spec.md) |
 | effort-entry | 工数登録（入れ子の入力、案件とタスクの候補、undo / redo、完了メール） | [spec.md](effort-entry/spec.md) |
 | effort-draft | 工数登録の下書きの同期と競合の制御 | [spec.md](effort-draft/spec.md) |
 | effort-ingest-gas | GAS / Google Form からのテキスト取り込み | [spec.md](effort-ingest-gas/spec.md) |
@@ -35,6 +35,6 @@ docs/specs/
 | goals | 目標管理（現在の目標、重みの合計 100%、前週の進捗、目標の追加、過去の目標） | [spec.md](goals/spec.md) |
 | missions | ミッション（週報の画面で編集する自由記述） | [spec.md](missions/spec.md) |
 | weekly-report | 週報の出力（工数と目標の進捗から雛形を作る） | [spec.md](weekly-report/spec.md) |
-| profile | プロフィール、アバター、アカウント削除 | [作成中](profile/spec.md)（プロフィール画像の保存だけ） |
-| user-settings | ユーザー設定（メール通知、テーマ） | 未作成 |
-| platform | ログ、エラー処理、認証ミドルウェア、CORS、OpenAPI、メール送信 | [作成中](platform/spec.md)（認証のみ。残りは P5） |
+| profile | プロフィール、アバター、アカウント削除 | [spec.md](profile/spec.md) |
+| user-settings | ユーザー設定（メール通知、テーマ） | [spec.md](user-settings/spec.md) |
+| platform | ログ、エラー処理、認証ミドルウェア、CORS、OpenAPI、メール送信 | [spec.md](platform/spec.md) |

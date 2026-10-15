@@ -28,6 +28,16 @@
 | 工数登録の完了メールが届かない | effort-entry | [effort-entry/spec.md](effort-entry/spec.md) | AC-09（送る条件）、既知の落とし穴（完了メールの失敗が記録されない） |
 | 工数一覧の集計が、絞り込んだ全体の合計と合わない | effort-list | [effort-list/spec.md](effort-list/spec.md) | AC-10、既知の落とし穴（集計は表示中のページだけ） |
 | 工数一覧のページを送ると、同じ行が 2 回出る / 出ない行がある | effort-list | [effort-list/spec.md](effort-list/spec.md) | AC-04、既知の落とし穴（ページ送りで重複や抜け） |
+| 設定の画面で「設定の取得に失敗しました」が出る / メール通知の設定が保存されていない | user-settings | [user-settings/spec.md](user-settings/spec.md) | ポストモーテム 2025-11-17（`91bc403`）、INV-1、既知の落とし穴（行が無いと画面から直せない） |
+| メール通知を切ったのに、工数登録の完了メールが届く | user-settings | [user-settings/spec.md](user-settings/spec.md) | AC-08、INV-2 |
+| ログインしているのに、ランディングページやログインの画面に戻される | auth | [auth/spec.md](auth/spec.md) | AC-02、既知の落とし穴（通信が不安定、認証の状態の変化を聞いていない） |
+| パスワード再設定のメールのリンクを開いても、新しいパスワードの入力に進まない | auth | [auth/spec.md](auth/spec.md) | AC-09、INV-4、既知の落とし穴（リンクの読み取りの競合） |
+| iPhone でホーム画面に追加して開くと、下のナビが切れる | app-shell | [app-shell/spec.md](app-shell/spec.md) | ポストモーテム 2026-01-13（`5eb29b9`）、INV-2 |
+| 画面が真っ白になる | app-shell | [app-shell/spec.md](app-shell/spec.md) | エラー時の挙動（画面全体のエラーの受け止めが無い） |
+| アカウントの削除で失敗と出たのに、アカウントが消えている | profile | [profile/spec.md](profile/spec.md) | AC-14、既知の落とし穴（削除は途中で失敗しても戻らない） |
+| プロフィール画像の保存に失敗したら、前の画像まで消えた | profile | [profile/spec.md](profile/spec.md) | AC-11、既知の落とし穴（画像の保存に失敗すると前の画像が消える） |
+| どの画面でも通信がエラーになり、コンソールに CORS のエラーが出る | platform | [platform/spec.md](platform/spec.md) | AC-14、INV-5、既知の落とし穴（アクセスログが書けないと全部止まる） |
+| エラーの画面やトーストに、DB のエラーの文がそのまま出る | platform | [platform/spec.md](platform/spec.md) | 既知の落とし穴（DB のエラーの文が応答に出る） |
 
 
 ## 直したあとにやること

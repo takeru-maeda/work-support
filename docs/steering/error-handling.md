@@ -22,7 +22,7 @@ throw new AppError(500, "Critical failure", error, "CRITICAL");
 
 1. ステータスコードとメッセージを取り出す
 2. 裏側（`executionCtx.waitUntil`）で `error_logs` に記録し、`access_logs` を更新する
-3. `{ "error": "...", "accessLogId": "uuid" }` を返す
+3. `{ "error": "...", "accessLogId": 123 }` を返す
 
 ## ログの水準
 
