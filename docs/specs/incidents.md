@@ -26,6 +26,8 @@
 | 工数の送信に失敗して送り直したら 2 重に登録された / 一部だけ登録されている | effort-entry | [effort-entry/spec.md](effort-entry/spec.md) | 既知の落とし穴（保存はまとめて行われない）、AC-06 |
 | 登録した新しい案件やタスクが候補に出てこない | effort-entry | [effort-entry/spec.md](effort-entry/spec.md) | INV-2、AC-07、既知の落とし穴（失敗した送信で作った案件） |
 | 工数登録の完了メールが届かない | effort-entry | [effort-entry/spec.md](effort-entry/spec.md) | AC-09（送る条件）、既知の落とし穴（完了メールの失敗が記録されない） |
+| 工数一覧の集計が、絞り込んだ全体の合計と合わない | effort-list | [effort-list/spec.md](effort-list/spec.md) | AC-10、既知の落とし穴（集計は表示中のページだけ） |
+| 工数一覧のページを送ると、同じ行が 2 回出る / 出ない行がある | effort-list | [effort-list/spec.md](effort-list/spec.md) | AC-04、既知の落とし穴（ページ送りで重複や抜け） |
 
 
 ## 直したあとにやること

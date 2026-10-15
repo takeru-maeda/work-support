@@ -31,7 +31,7 @@ docs/specs/
 | effort-entry | 工数登録（入れ子の入力、案件とタスクの候補、undo / redo、完了メール） | [spec.md](effort-entry/spec.md) |
 | effort-draft | 工数登録の下書きの同期と競合の制御 | [spec.md](effort-draft/spec.md) |
 | effort-ingest-gas | GAS / Google Form からのテキスト取り込み | [spec.md](effort-ingest-gas/spec.md) |
-| effort-list | 工数一覧（絞り込み、並べ替え、ページ送り、集計） | 未作成 |
+| effort-list | 工数一覧（絞り込み、並べ替え、ページ送り、集計） | [spec.md](effort-list/spec.md) |
 | goals | 目標管理（現在の目標、重みの合計 100%、前週の進捗、目標の追加、過去の目標） | [spec.md](goals/spec.md) |
 | missions | ミッション（週報の画面で編集する自由記述） | [spec.md](missions/spec.md) |
 | weekly-report | 週報の出力（工数と目標の進捗から雛形を作る） | [spec.md](weekly-report/spec.md) |

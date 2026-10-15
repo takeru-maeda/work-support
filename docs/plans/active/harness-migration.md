@@ -16,7 +16,7 @@ scope:                 # P2 の lint の一括修正と依存の整理、P4 の�
 ## 現在地
 
 - **フェーズ**: P4（テスト基盤）まで完了。CI の db ジョブ（ローカルの Supabase、結合テスト、E2E）が GitHub の上で通ることを確かめた（2026-10-14）
-- **次にやること**: P5（仕様書への変換）。effort-ingest-gas、effort-draft、goals、weekly-report、missions、effort-entry は済み、次は effort-list。本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
+- **次にやること**: P5（仕様書への変換）。effort-ingest-gas、effort-draft、goals、weekly-report、missions、effort-entry、effort-list は済み、次は user-settings。本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
 - **ブロッカー**: なし（Context7 は `mcp__context7__resolve-library-id` / `mcp__context7__query-docs` で使えることを 2026-10-10 に確認した）
 
 ---
@@ -339,10 +339,10 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 | 1 | auth（ログイン、新規登録、パスワード再設定、ログアウト、AuthGuard） | [ ] | [ ] |
 | 2 | landing（未ログイン時のルーティングを含む） | [ ] | [ ] |
 | 3 | app-shell（ヘッダー、モバイルの下部ナビ、PWA） | [ ] | [ ] |
-| 4 | effort-entry（工数登録、案件とタスクの候補、undo/redo、完了メール） | [x] | [ ] |
+| 4 | effort-entry（工数登録、案件とタスクの候補、undo/redo、完了メール） | [x] | [x] |
 | 5 | effort-draft（下書きの同期と競合制御） | [x] | [x] |
 | 6 | effort-ingest-gas（GAS / Google Form からのテキスト取り込み） | [x] | [x] |
-| 7 | effort-list（工数一覧） | [ ] | [ ] |
+| 7 | effort-list（工数一覧） | [x] | [ ] |
 | 8〜10 | goals（現在の目標、重みの合計 100% ルール、前週の進捗、目標の追加、過去の目標。1 つの仕様書にまとめた） | [x] | [x] |
 | 11 | missions | [x] | [x] |
 | 12 | weekly-report（週報の出力。ミッションの編集は #11） | [x] | [x] |
@@ -404,6 +404,14 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
   - 案件名を打っている途中で、既存の案件名と一致した瞬間に候補の一覧が閉じる
   - 開発用サーバーで undo の 1 歩が 2 回ずつ記録される（履歴の記録を状態の更新の外に出す）
   - 案件を変えたときに、2 つ目以降のタスクの「必須入力」が消えないことがある（直すときに確かめる）
+- [ ] P5 で決めた effort-list の直し（`docs/specs/effort-list/changes/v1.0.7-baseline.md` の「人間の判断」。それぞれ改修の記録を通す）
+  - 集計を、絞り込んだ全体の合計にする（API で合計を返し、画面はそれを出す）
+  - 並べ替えの同じ値の行の順番が決まらず、ページ送りで重複・抜けが起きうる（最後に ID で並べる）
+  - 最後のページより先で 500（goals の過去の目標の検索と同じ直し方にする）
+  - 絞り込みで案件を変えても、前に選んだタスクが残って 0 件になる
+  - 保存した条件を確かめない（件数が壊れていると失敗が続く、日付が壊れていると画面全体が落ちる）
+  - 読み込み中も集計だけ前の条件の数字が出る。最初の取得に失敗すると「工数データがまだ登録されていません」が出る
+  - 集計の小数の誤差（「-0.00h」「0.30h」）。表と集計で小数の桁が違う
 - [ ] P4 で見つけた潜在的な不具合: 目標の履歴の検索で `minProgress` / `maxProgress` に空文字か null を渡すと、「指定なし」にならず 400 になる（`GoalHistoryQuerySchema` の前処理のあとで `z.coerce.number()` が NaN にする）。web は値があるときだけ送るので画面からは起きない。`packages/shared/src/schemas/goals.test.ts` の `it.fails` を `it` に戻す形で、改修の記録を通して直す
 - [ ] P2 で保留にしたフックの依存配列の 2 件を、テストを書いてから改修の記録を通して直す（コードに `TODO(P6)` の印）
   - `useEffortSummaryMetrics`: `projectOptions` の読み込みが終わっても案件名が更新されない可能性
