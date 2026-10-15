@@ -12,6 +12,8 @@ export default mergeConfig(
       globalSetup: ["./test/globalSetup.ts"],
       setupFiles: ["./test/setup.ts"],
       testTimeout: 30000,
+      // リクエストのたびのログ（Hono の logger）は、失敗したテストの分だけ出す（成功は静かに）
+      silent: "passed-only",
       hookTimeout: 30000,
     },
   }),

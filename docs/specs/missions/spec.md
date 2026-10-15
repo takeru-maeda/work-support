@@ -100,15 +100,9 @@ symptoms:
 
 | AC | テスト | 種類 |
 | --- | --- | --- |
-| AC-missions-01 | `packages/api/test/fresh-user.int.test.ts`（一部。確かめているのは、ミッションの無いユーザーで 500 にならないことだけ） | 結合 |
-| AC-missions-04 | `MissionEditor.test.tsx`「取得したミッションを表示する」「未設定なら、未設定の案内を表示する」（一部。読み込み中の表示、改行、内容が NULL の行は未） | 部品 |
-| AC-missions-05 | `MissionEditor.test.tsx`「内容が変わっていないときは保存できない」（一部。空・空白だけの入力、保存中、キャンセルは未） | 部品 |
-| AC-missions-06 | `MissionEditor.test.tsx`「編集して保存すると、前後の空白を除いた内容を送り、表示を更新する」（一部。成功のトースト、「保存中...」、取り直さないこと、失敗の場合は未） | 部品 |
-| AC-missions-07 | `MissionEditor.test.tsx`「取得に失敗したら、編集のボタンの代わりに再読み込みのボタンを出す」（一部。エラーの文、「再読み込み」で取り直すこと、編集中の失敗は未） | 部品 |
-| AC-missions-01〜03、INV-1、INV-2（API） | 未（P6。`*.int.test.ts`） | 結合 |
-| 入力が失われる経路（既知の落とし穴） | 未（P6。直すときに先に落ちるテストを書く） | 部品 |
-
-`MissionEditor.test.tsx` は `packages/web/src/features/reports/components/mission/` にある。テストの名前に `AC-missions-NN` はまだ入っていない（P6 で付ける）。
+| AC-missions-01〜03、INV-1、INV-2（API） | `packages/api/test/missions.int.test.ts`（AC-01 のミッションの無いユーザーは `fresh-user.int.test.ts` でも） | 結合 |
+| AC-missions-04〜07 | `packages/web/src/features/reports/components/mission/MissionEditor.test.tsx` | 部品 |
+| 入力が失われる経路（既知の落とし穴）、編集中の取得の失敗（AC-07 の後半） | 未（P6 で直すときに、先に落ちるテストを書く） | 部品 |
 
 ## 変更履歴
 

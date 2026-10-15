@@ -91,7 +91,8 @@ symptoms:
 
 | AC | テスト | 種類 |
 | --- | --- | --- |
-| AC-landing-01〜05 | 未（P6。E2E で見出しとリンクの行き先、3 幅の表示） | E2E |
+| AC-landing-01〜04 | `packages/web/src/pages/landing/LandingPage.test.tsx`（節の順番、リンクの行き先、スクロール、よくある質問の開閉） | 部品 |
+| AC-landing-01、05 | `packages/e2e/tests/screens.spec.ts`（見出しが出ること、横のはみ出しが無いこと。375 / 768 / 1280px）。節ごとの列の数は未（CSS の出し分けなので、確かめるなら E2E で計算済みのスタイルを見る） | E2E |
 
 ## 変更履歴
 

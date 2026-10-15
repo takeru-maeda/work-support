@@ -79,8 +79,8 @@ symptoms:
 - **AC-goals-15**: `GET /api/goals/history` は、そのユーザーの目標（現在の期間も含む）を次の条件で絞って返す。`query` は目標名か内容の部分一致（大文字小文字を区別しない）、`startDate` は `start_date >= startDate`、`endDate` は `end_date <= endDate`、`minProgress` / `maxProgress` は進捗率の下限・上限（両端を含む、0〜100）。`minProgress > maxProgress` は 400。`query` の `%` と `_` はワイルドカードとして働く
 - **AC-goals-16**: 並び順は `sort`（`title` / `weight` / `progress` / `start_date` / `end_date`、先頭に `-` で降順）、既定は `-end_date`。一覧に無い `sort` は 400。`page` は既定 1、`pageSize` は既定 20 で 1〜100。応答は `{ items, meta: { page, pageSize, total, totalPages }, aggregations: { totalCount } }`
 - **AC-goals-17**: 画面は、現在の期間の目標を出さない。終了日の条件が空なら、現在の目標の開始日の最小の前日を `endDate` として送り、さらに応答から終了日が現在の期間の終了日より前のものだけを出す（件数もその分を引く）。1 ページの件数の既定は 10。現在の目標の読み込みが終わる前や失敗したときは除かないので、現在の期間の目標も出る
-- **AC-goals-18**: 絞り込みの条件（目標名、開始日、終了日、進捗率の下限・上限。進捗率は整数に切り捨てる）は「適用」で反映し、1 ページ目に戻る。「クリア」で条件・並び順・件数を初期に戻す。列の見出しを押すと、昇順 → 降順 → 並べ替えなし の順に変わり、1 ページ目に戻る。条件・並び順・1 ページの件数（ページ番号は除く）は localStorage（キー `goals:past:filters_<ユーザー ID>`）に保存し、次に開いたときに戻してから最初の検索をする。「クリア」でキーを消す
-- **AC-goals-19**: 行を押すと、内容を読むだけのダイアログを出す。内容が空なら「内容が設定されていません。」。該当が無ければ「該当する目標は見つかりませんでした」を出す
+- **AC-goals-18**: 絞り込みの条件（目標名、開始日、終了日、進捗率の下限・上限。進捗率は整数に切り捨てる）は「絞り込み条件」を開いて入力し、「絞り込み」で反映して 1 ページ目に戻る。「クリア」で条件・並び順・件数を初期に戻す。列の見出しを押すと、昇順 → 降順 → 並べ替えなし の順に変わり、1 ページ目に戻る。条件・並び順・1 ページの件数（ページ番号は除く）は localStorage（キー `goals:past:filters_<ユーザー ID>`）に保存し、次に開いたときに戻してから最初の検索をする。「クリア」でキーを消す
+- **AC-goals-19**: 行の目の印を押すと、内容を読むだけのダイアログを出す。内容が空なら「内容が設定されていません。」。該当が無ければ「該当する目標は見つかりませんでした」を出す
 
 ### 共通（API）
 
@@ -159,12 +159,15 @@ symptoms:
 
 | AC | テスト | 種類 |
 | --- | --- | --- |
-| AC-goals-01 | `packages/api/test/fresh-user.int.test.ts`（一部。目標の無いユーザーで 500 にならないことだけ） | 結合 |
-| AC-goals-02 | `packages/shared/src/utils/goalProgress.test.ts`（計算の部分だけ） | 単体 |
-| AC-goals-15、16 | `packages/shared/src/schemas/goals.test.ts`（入力の検証の部分だけ） | 単体 |
-| AC-goals-01、06、10、15、16、20〜22、INV-2、INV-5（API） | 未（P6。`*.int.test.ts`。AC-10 は実行環境のタイムゾーンで結果が変わるので、`TZ=UTC` に固定するか時刻を差し替えて書く） | 結合 |
-| AC-goals-02〜05、07〜09、11〜14、17〜19 | 未（P6。Testing Library + MSW） | 部品 |
+| AC-goals-01、06、08（API）、10、15、16、20〜22、INV-2、INV-5 | `packages/api/test/goals.int.test.ts`（AC-01 の目標の無いユーザーは `fresh-user.int.test.ts` でも。AC-10 は本番と同じ UTC で回す） | 結合 |
+| AC-goals-15、16（入力の検証） | `packages/shared/src/schemas/goals.test.ts` | 単体 |
+| AC-goals-02（計算） | `packages/shared/src/utils/goalProgress.test.ts` | 単体 |
+| AC-goals-02〜05、07〜09 | `packages/web/src/features/goals/components/current/GoalsTable.test.tsx` | 部品 |
+| AC-goals-11〜14 | `packages/web/src/pages/goals/AddGoalsPage.test.tsx`（期間はカレンダーを操作せず、入力途中の内容として置いて確かめる） | 部品 |
+| AC-goals-17〜19 | `packages/web/src/features/goals/components/past/PastGoalsTable.test.tsx` | 部品 |
 | 画面を開いて主な見出しが出ること | `packages/e2e/tests/screens.spec.ts`（`/goals`） | E2E |
+
+既知の落とし穴のうち、今の振る舞いをテストで固めたもの（P6 で直すときにテストを書き換える）: 前週の値で履歴が無い目標を今の進捗率で数える（AC-10）、「更新」の 2 件目以降の失敗で編集が消える（AC-05）、本文が空の `PUT` が 400（AC-06）、期間の前後と重みの合計を API で確かめない（AC-21）、期間の変更を受け付ける（AC-22）、目標の追加を 1 件ずつ作り途中の失敗で一部が残る（AC-13）。
 
 ## 変更履歴
 

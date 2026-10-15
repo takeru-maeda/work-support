@@ -99,11 +99,15 @@ export function adminClient(): SupabaseClient {
 }
 
 interface ApiRequest {
-  method?: "GET" | "POST" | "PUT" | "DELETE";
+  method?: "GET" | "POST" | "PUT" | "DELETE" | "OPTIONS";
   user?: TestUser;
   /** `user` の代わりに送る Bearer トークン（GAS 用の API キーなど） */
   bearer?: string;
   body?: unknown;
+  /** 追加・上書きするヘッダー（`Bearer ` で始まらない Authorization、Origin など） */
+  headers?: Record<string, string>;
+  /** JSON にせずにそのまま送る本文（壊れた JSON など）。`body` より優先する */
+  rawBody?: string;
 }
 
 /**
@@ -112,7 +116,14 @@ interface ApiRequest {
  */
 export async function callApi(
   path: string,
-  { method = "GET", user, bearer, body }: ApiRequest = {},
+  {
+    method = "GET",
+    user,
+    bearer,
+    body,
+    headers: extra,
+    rawBody,
+  }: ApiRequest = {},
 ): Promise<Response> {
   const pending: Promise<unknown>[] = [];
   const executionCtx = {
@@ -123,14 +134,17 @@ export async function callApi(
   const headers: Record<string, string> = {};
   const token: string | undefined = bearer ?? user?.accessToken;
   if (token) headers.Authorization = `Bearer ${token}`;
-  if (body !== undefined) headers["Content-Type"] = "application/json";
+  if (body !== undefined || rawBody !== undefined) {
+    headers["Content-Type"] = "application/json";
+  }
+  Object.assign(headers, extra);
 
   const res = await app.request(
     path,
     {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: rawBody ?? (body === undefined ? undefined : JSON.stringify(body)),
     },
     testEnv(),
     executionCtx,

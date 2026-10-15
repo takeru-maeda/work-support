@@ -44,7 +44,7 @@ symptoms:
 ```
 
 - `■` で始まる行が案件。次の `■` の行までの `・` の行が、その案件のタスク
-- タスクの行は `・<タスク名>：[<見積>]<実績>` の形。`：` は全角、`[ ]` と `< >` は半角。タスク名は最初の `：` まで
+- タスクの行は `・<タスク名>：[<見積>]<実績>` の形。`：` は全角、`[ ]` と `< >` は半角。タスク名は、後ろが `[<見積>]<実績>` として読める最初の `：` まで（`・設計：詳細：[2]<1>` のタスク名は `設計：詳細`）
 - 行の前後の空白は無視する。括弧の中の前後の空白も無視する。`]` と `<` の間や、`>` のあとに文字（空白を含む）があると、その行は読めない
 - 見積と実績は数値。空にできる
 
@@ -114,12 +114,17 @@ symptoms:
 
 | AC | テスト | 種類 |
 | --- | --- | --- |
-| AC-effort-ingest-gas-01 | `packages/api/test/gas-effort.int.test.ts`（一部。登録した案件が一覧に出ることだけ。`work_records` の中身と応答の本文は未） | 結合 |
-| AC-effort-ingest-gas-02 | `packages/api/test/gas-effort.int.test.ts`（一部。API キーの違いと JWT だけ。`Authorization` が無い・`Bearer ` で始まらないは未） | 結合 |
-| AC-effort-ingest-gas-03〜08 | 未（P6） | — |
-| INV-1 | `packages/api/test/gas-effort.int.test.ts` | 結合 |
+| AC-effort-ingest-gas-01 | `packages/api/test/gas-effort.int.test.ts` | 結合 |
+| AC-effort-ingest-gas-02 | `packages/api/test/gas-effort.int.test.ts` | 結合 |
+| AC-effort-ingest-gas-03 | `packages/api/test/gas-effort.int.test.ts` | 結合 |
+| AC-effort-ingest-gas-04 | `packages/api/test/gas-effort.int.test.ts`、`packages/api/src/features/effort/service.test.ts`（解析） | 結合、単体 |
+| AC-effort-ingest-gas-05 | `packages/api/test/gas-effort.int.test.ts` | 結合 |
+| AC-effort-ingest-gas-06 | `packages/api/test/gas-effort.int.test.ts`（保存される値）、`packages/api/src/features/effort/service.test.ts`（解析） | 結合、単体 |
+| AC-effort-ingest-gas-07 | `packages/api/test/gas-effort.int.test.ts`、`packages/api/src/features/effort/service.test.ts`（読み飛ばす行の種類） | 結合、単体 |
+| AC-effort-ingest-gas-08 | `packages/api/test/gas-effort.int.test.ts` | 結合 |
+| INV-1、INV-2、INV-3 | `packages/api/test/gas-effort.int.test.ts` | 結合 |
 
-テストの名前に AC の ID はまだ入っていない（P6 で付け直す）。
+既知の落とし穴のうち、今の振る舞いをテストで固めたもの（P6 で直すときにテストを書き換える）: 大文字小文字だけが違う名前をまとめる（AC-05）、数値の書き間違いと負の値を通す（AC-06）、読めない行を黙って読み飛ばす（AC-07）、名前が空白だけのタスク。途中の失敗で一部だけ残ることと、ユーザーの検索の失敗が 400 になることは、直す改修の記録でテストを書く。
 
 ## 変更履歴
 

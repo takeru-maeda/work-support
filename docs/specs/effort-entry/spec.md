@@ -194,11 +194,12 @@ symptoms:
 
 | AC | テスト | 種類 |
 | --- | --- | --- |
-| AC-effort-entry-02、03、04、07、11 | `packages/api/test/fresh-user.int.test.ts`（一部。新しい案件とタスクで登録でき、候補に出ること、候補が空で返ること） | 結合 |
-| AC-effort-entry-12〜14、17、18 | `packages/e2e/tests/effort.spec.ts`（一部。案件とタスクを打ち込んで登録し、工数一覧に出ること） | E2E |
-| AC-effort-entry-12 | `packages/e2e/tests/screens.spec.ts`（見出しが出ること） | E2E |
-| AC-effort-entry-01〜11、INV-1〜3（API） | 未（P6。`*.int.test.ts`。メールは `test/setup.ts` が横取りした内容で確かめる。メールの日付のため `TZ=UTC` に固定する） | 結合 |
-| AC-effort-entry-13〜19 | 未（P6。Testing Library + MSW） | 部品 |
+| AC-effort-entry-01〜11、INV-1〜3（API） | `packages/api/test/effort-entries.int.test.ts`（メールは `test/setup.ts` が横取りした内容で確かめる。日付は本番と同じ UTC） | 結合 |
+| AC-effort-entry-12〜19 | `packages/web/src/features/effort-entry/components/EffortForm.test.tsx`（フォームの初期の内容は、サーバーの下書きとして渡す） | 部品 |
+| AC-effort-entry-12〜14、17、18 | `packages/e2e/tests/effort.spec.ts`（案件とタスクを打ち込んで登録し、工数一覧に出ること）、`screens.spec.ts`（見出し） | E2E |
+| 案件のカードのドラッグでの並べ替え（AC-13）、送信中の編集（AC-18） | 未（並べ替えは E2E で足す。送信中の編集は P6 で直すときに先に落ちるテストを書く） | — |
+
+既知の落とし穴のうち、今の振る舞いをテストで固めたもの（P6 で直すときにテストを書き換える）: 1 回の送信の中で大文字小文字だけが違う名前をまとめる（AC-03）、検証で負の値を止めない（AC-17）。
 
 ## 変更履歴
 

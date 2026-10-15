@@ -158,9 +158,11 @@ symptoms:
 
 | AC | テスト | 種類 |
 | --- | --- | --- |
-| AC-weekly-report-08 | `packages/shared/src/utils/goalProgress.test.ts`（平均の計算だけ） | 単体 |
-| AC-weekly-report-01〜10、INV-1〜3 | 未（P6。`*.int.test.ts`。`TZ=UTC` に固定し、リクエストの時点を差し替えられるようにして書く。AC-01 は 2 人のユーザーで混ざらないことを確かめる） | 結合 |
-| AC-weekly-report-11〜13 | 未（P6。Testing Library + MSW。失敗のテストには `error_logs` の通信のハンドラーも要る） | 部品 |
+| AC-weekly-report-01〜10、INV-3 | `packages/api/test/weekly-report.int.test.ts`（本番と同じ UTC で回す。期待値はリクエストの時点で変わるので、目標の期間を今日からの相対で作る） | 結合 |
+| AC-weekly-report-08（平均の計算） | `packages/shared/src/utils/goalProgress.test.ts` | 単体 |
+| AC-weekly-report-11〜13 | `packages/web/src/features/reports/components/weekly-report/WeeklyReport.test.tsx`（端末の今日は Date だけを偽にして固定する） | 部品 |
+
+既知の落とし穴のうち、今の振る舞いをテストで固めたもの（P6 で直すときにテストを書き換える）: 土日の工数を合計にだけ含め日別に出さない、日別の時間を丸めない（AC-04）、履歴の無い目標の週の始まりを 0 にする（AC-09）。INV-1（週の境目を goals とそろえる）は、日本時間に直す改修で両方のテストを書き換える。
 
 ## 変更履歴
 

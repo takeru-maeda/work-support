@@ -16,6 +16,8 @@ export default mergeConfig(
       environmentOptions: { jsdom: { url: `${TEST_ORIGIN}/` } },
       setupFiles: ["./src/test/setup.ts"],
       env: {
+        // 利用者は日本時間で使う。日付の計算（端末の今日、期間の比較）を、手元のタイムゾーンに左右されずに確かめる
+        TZ: "Asia/Tokyo",
         VITE_SUPABASE_URL: "http://supabase.test",
         VITE_SUPABASE_ANON_KEY: "test-anon-key",
         VITE_API_BASE_URL: TEST_ORIGIN,

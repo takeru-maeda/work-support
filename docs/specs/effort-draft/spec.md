@@ -122,10 +122,12 @@ symptoms:
 
 | AC | テスト | 種類 |
 | --- | --- | --- |
-| AC-effort-draft-01 | `packages/api/test/fresh-user.int.test.ts`（一部。下書きの無いユーザーで 500 にならないことだけ） | 結合 |
-| AC-effort-draft-02〜05、INV-1、INV-4（API） | 未（P6。`*.int.test.ts`） | 結合 |
-| AC-effort-draft-06〜14、INV-2、INV-3 | 未（P6。Testing Library + MSW + 偽のタイマー） | 部品 |
-| 端末をまたぐ復元（AC-09、AC-10） | 未（P6。E2E で 2 つのブラウザのコンテキスト） | E2E |
+| AC-effort-draft-01〜05、INV-1、INV-4（API） | `packages/api/test/effort-draft.int.test.ts`（AC-01 の下書きの無いユーザーは `fresh-user.int.test.ts` でも） | 結合 |
+| AC-effort-draft-06〜14、INV-2、INV-3 | `packages/web/src/features/effort-entry/hooks/useEffortFormManager.test.tsx`（フック全体を描画し、通信は MSW で受ける） | 部品 |
+
+- INV-2 のテストは、登録の応答を 800 ミリ秒より遅らせて確かめる（応答が速いと、フォームを空に戻したときにも保存の予約が消えるので、送信の最初の取り消しを外しても通ってしまう）
+- 端末をまたぐ復元（AC-09、AC-10）は、ブラウザとサーバーの下書きの組み合わせをフックのテストで確かめている。2 つのブラウザで通す E2E は作っていない
+- 既知の落とし穴のうち、今の振る舞いをテストで固めたもの: 下書きを消したあとの古い保存を作り直す（AC-02）、登録に失敗したあと次に編集するまで保存し直さない（AC-13）。P6 で直すときにテストを書き換える
 
 ## 変更履歴
 

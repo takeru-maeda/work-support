@@ -114,10 +114,11 @@ symptoms:
 
 | AC | テスト | 種類 |
 | --- | --- | --- |
-| AC-user-settings-01 | `packages/api/test/fresh-user.int.test.ts`（一部。行の無いユーザーで 500 にならないことだけ） | 結合 |
-| AC-user-settings-01〜04、INV-3 | 未（P6。`*.int.test.ts`） | 結合 |
-| AC-user-settings-08、INV-2 | 未（P6。`notify_effort_email: false` で完了メールを送らないこと、行が無くても送ること） | 結合 |
-| AC-user-settings-05〜07、09 | 未（P6。Testing Library + MSW） | 部品 |
+| AC-user-settings-01〜04、INV-3 | `packages/api/test/user-settings.int.test.ts`（AC-01 の行の無いユーザーは `fresh-user.int.test.ts` でも） | 結合 |
+| AC-user-settings-05、INV-1 | `packages/web/src/app/App.test.tsx`（`AuthGuard` の初期化） | 部品 |
+| AC-user-settings-06、07 | `packages/web/src/pages/settings/SettingsPage.test.tsx` | 部品 |
+| AC-user-settings-08、INV-2 | `packages/api/test/effort-entries.int.test.ts`（行が無い・true・false）、`gas-effort.int.test.ts`（GAS は送らない） | 結合 |
+| AC-user-settings-09 | `packages/web/src/components/layout/AppShell.test.tsx`（「テーマ切り替え」） | 部品 |
 | テーマのちらつき | 手動（`docs/testing/manual-checklist.md` の M-002） | 手動 |
 
 ## 変更履歴

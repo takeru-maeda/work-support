@@ -155,10 +155,12 @@ JWT の認証は、effort（GAS の取り込みを除く）、goals、logs、mis
 | INV-1 | `packages/api/src/lib/jwt.test.ts` | 単体 |
 | INV-2 | jose の実装の確認（`jwks/remote.js` の Workers の分岐）。Node のテストでは再現できない | 確認のみ |
 | AC-platform-16 | `packages/api/scripts/apiReference.test.ts`（全ルートの `describeRoute` と、`api.md` が定義と一致すること） | 単体 |
-| AC-platform-08、09、11〜15、17、INV-4、INV-5 | 未（P6。`*.int.test.ts` でアクセスログとエラーの記録、CORS のヘッダー） | 結合 |
+| AC-platform-08、09、11〜17、INV-4、INV-5 | `packages/api/test/platform.int.test.ts`（アクセスログとエラーの記録、検証の失敗の形、CORS のヘッダー、OpenAPI、`POST /api/logs/error`） | 結合 |
 | AC-platform-10 | 確認のみ（`packages/api/wrangler.jsonc` の `observability`） | 確認のみ |
-| AC-platform-18 | 未（P6。Testing Library + MSW） | 部品 |
-| AC-platform-19 | 未（P6。`mailer.ts` の単体テストで fetch を差し替え、失敗の判定を確かめる。結合テストでは `packages/api/test/setup.ts` がメールの依頼を横取りする） | 単体、結合 |
+| AC-platform-18 | `packages/web/src/services/logs.test.ts` | 単体 |
+| AC-platform-19 | `packages/api/src/lib/mailer.test.ts`（fetch を差し替えて失敗の判定を確かめる）、`packages/api/test/effort-entries.int.test.ts`（`test/setup.ts` が横取りした依頼の中身） | 単体、結合 |
+
+既知の落とし穴のうち、今の振る舞いをテストで固めたもの（P6 で直すときにテストを書き換える）: 壊れた JSON が 500（AC-11）、許可していない Origin でも処理する（AC-15）、OpenAPI と Swagger UI を認証なしで出す（AC-16）、メールの依頼で JSON でない応答が `AppError` にならない（AC-19）、`reportUiError` が送れないと例外を投げる（AC-18）。
 
 ## 変更履歴
 

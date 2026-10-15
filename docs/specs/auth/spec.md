@@ -131,10 +131,14 @@ symptoms:
 
 | AC | テスト | 種類 |
 | --- | --- | --- |
-| AC-auth-02 | `packages/e2e/tests/auth.spec.ts`（一部。未ログインで `/efforts/new` を開くと工数登録の画面が出ないことだけ。`/landing` に移ることとストアを空にすることは未） | E2E |
-| AC-auth-04、05 | `packages/e2e/tests/auth.spec.ts`（一部。ログインすると `/` に移ること） | E2E |
-| AC-auth-01、03、06、07、11、12 と AC-02、04、05 の残り | 未（P6。Testing Library + MSW、E2E） | 部品、E2E |
-| AC-auth-08〜10 | 未（P6。ローカルの Supabase のメールの受け口（`[local_smtp]`）を使えば E2E にできる見込み。INV-4 をローカルで守るのが先）。それまでは手動（`docs/testing/manual-checklist.md` の M-003） | E2E、手動 |
+| AC-auth-01〜03 | `packages/web/src/app/App.test.tsx`（アプリ全体をメモリの上のルーターで描画し、`getCurrentUser` を差し替える） | 部品 |
+| AC-auth-04〜10 | `packages/web/src/pages/auth/AuthPages.test.tsx`（`@/lib/auth` の関数と、再設定のリンクでの `supabase.auth.setSession` を差し替える） | 部品 |
+| AC-auth-11 | `packages/web/src/components/layout/AppShell.test.tsx`（ヘッダーの「ログアウト」） | 部品 |
+| AC-auth-02、04、05 | `packages/e2e/tests/auth.spec.ts`（本物の Supabase でログインし `/` に移ること、未ログインで保護された画面が出ないこと） | E2E |
+| AC-auth-08〜10 の本物のメール | 手動（`docs/testing/manual-checklist.md` の M-003）。ローカルの Supabase のメールの受け口で E2E にする見込み（INV-4 をローカルで守るのが先） | 手動 |
+| AC-auth-12、INV-2（別のタブでのアカウントの切り替え） | 未（P6 で直すときに先に落ちるテストを書く） | — |
+
+既知の落とし穴のうち、今の振る舞いをテストで固めたもの（P6 で直すときにテストを書き換える）: ログインしたまま `/login` を出す、存在しないパスはログインしていても `/landing`（AC-01、03）、画面を移るたびに確かめ直す（AC-02）。
 
 ## 変更履歴
 

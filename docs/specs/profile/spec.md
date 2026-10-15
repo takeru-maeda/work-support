@@ -133,9 +133,11 @@ symptoms:
 | --- | --- | --- |
 | AC-profile-01〜08、INV-1 | `packages/api/test/avatar-storage.int.test.ts`（ブラウザと同じ権限のクライアントで Storage を呼ぶ） | 結合 |
 | INV-1（古いポリシーの残り） | マイグレーションの最後の検査（残っていればエラーで止まる） | 適用時 |
-| AC-profile-14（一部。画像のあるユーザーの削除が 204 になること） | `packages/api/test/avatar-storage.int.test.ts` | 結合 |
-| AC-profile-09〜13 | 未（P6。Testing Library + MSW） | 部品 |
-| AC-profile-14、15、INV-3 | 未（P6。`*.int.test.ts` で CASCADE で消えること、画像の無いユーザー、401。各段の失敗の 500 は、`service.test.ts` で Supabase のクライアントを差し替えて確かめる） | 結合、単体 |
+| AC-profile-09〜13 | `packages/web/src/pages/profile/ProfilePage.test.tsx`（`@/lib/auth` と `@/lib/storage` を差し替える） | 部品 |
+| AC-profile-14、15、INV-3 | `packages/api/test/account-deletion.int.test.ts`（CASCADE で消えること、アクセスログが残ること、画像の無いユーザー、401）、`avatar-storage.int.test.ts`（画像のあるユーザー） | 結合 |
+| AC-profile-14（各段の失敗の 500 と順番） | `packages/api/src/features/users/service.test.ts`（Supabase のクライアントを差し替える） | 単体 |
+
+既知の落とし穴のうち、今の振る舞いをテストで固めたもの（P6 で直すときにテストを書き換える）: ユーザーを消したあとの画像の削除の失敗で 500（AC-14）、確認の一致が大文字小文字まで厳しい（AC-12）、名前を前後の空白ごと保存する（AC-10）。
 
 ## 変更履歴
 

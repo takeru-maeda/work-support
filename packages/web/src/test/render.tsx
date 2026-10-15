@@ -1,10 +1,10 @@
-import { render } from "@testing-library/react";
+import { render, renderHook } from "@testing-library/react";
 import { SWRConfig } from "swr";
 
 import type { AuthUser } from "@/lib/auth";
 import { useUserStore } from "@/store/user";
 
-import type { RenderResult } from "@testing-library/react";
+import type { RenderHookResult, RenderResult } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 
 /**
@@ -40,3 +40,14 @@ const TestProviders = ({ children }: { children: ReactNode }) => (
  */
 export const renderWithProviders = (ui: ReactElement): RenderResult =>
   render(ui, { wrapper: TestProviders });
+
+/**
+ * アプリと同じ Provider（SWR の設定）で包んでフックを描画します。
+ *
+ * @param hook 描画するフック
+ * @returns Testing Library の描画結果
+ */
+export const renderHookWithProviders = <Result,>(
+  hook: () => Result,
+): RenderHookResult<Result, unknown> =>
+  renderHook(hook, { wrapper: TestProviders });

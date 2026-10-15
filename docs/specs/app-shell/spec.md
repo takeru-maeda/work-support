@@ -98,9 +98,12 @@ symptoms:
 
 | AC | テスト | 種類 |
 | --- | --- | --- |
-| AC-app-shell-01、06、07 | `packages/e2e/tests/screens.spec.ts`（一部。主な画面の h1 の見出し、横のはみ出しが無いこと、ページのエラーが無いことだけ。375 / 768 / 1280px） | E2E |
-| AC-app-shell-02〜05 | 未（P6。E2E でナビの項目と選ばれた状態、ユーザーメニュー） | E2E |
+| AC-app-shell-02〜06、INV-1 | `packages/web/src/components/layout/AppShell.test.tsx`（選ばれた状態はクラスで確かめる。`md` での出し分けは CSS なので部品テストでは見ない） | 部品 |
+| AC-app-shell-01、06、07 | `packages/e2e/tests/screens.spec.ts`（主な画面の h1 の見出し、横のはみ出しが無いこと、ページのエラーが無いこと。375 / 768 / 1280px） | E2E |
+| AC-app-shell-08 | 未（`index.html` の内容。P6 で直すとき（拡大の停止）に確かめる） | — |
 | INV-2、ホーム画面に追加したときの見え方 | 手動（`docs/testing/manual-checklist.md` の M-001） | 手動 |
+
+既知の落とし穴のうち、今の振る舞いをテストで固めたもの（P6 で直すときにテストを書き換える）: 下の階層ではナビがどれも選ばれない（AC-03）。
 
 ## 変更履歴
 

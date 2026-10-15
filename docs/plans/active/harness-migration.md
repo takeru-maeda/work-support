@@ -16,7 +16,7 @@ scope:                 # P2 の lint の一括修正と依存の整理、P4 の�
 ## 現在地
 
 - **フェーズ**: P4（テスト基盤）まで完了。CI の db ジョブ（ローカルの Supabase、結合テスト、E2E）が GitHub の上で通ることを確かめた（2026-10-14）
-- **次にやること**: P6（既存機能のテストと、P5 で決めた直し）。P5 は全機能の spec を作り、レビューも済んだ。旧ドキュメント（`docs/legacy/`）の削除は人間の判断でしばらく残す。本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
+- **次にやること**: P6 の直し（P5 で決めたもの）を、改修の記録を通して 1 件ずつ進める。テスト（AC の対応表）は全機能でそろった。旧ドキュメント（`docs/legacy/`）の削除は人間の判断でしばらく残す。本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
 - **ブロッカー**: なし（Context7 は `mcp__context7__resolve-library-id` / `mcp__context7__query-docs` で使えることを 2026-10-10 に確認した）
 
 ---
@@ -356,7 +356,7 @@ features: [主となる機能, 関連する機能…] / created / approved_at / 
 - [ ] 全機能の変換が終わったら、旧 requirements、design、tasks（`docs/legacy/`）を削除し、`packages/*/README.md` の旧ドキュメントへの参照を `docs/specs/` に直す
 
 ### P6. 既存機能のテスト（仕様書の AC をテストにする）
-- [ ] 機能ごとに AC からテストへの対応表を埋める（優先順: effort-ingest-gas → effort-draft → goals → weekly-report → その他）
+- [x] 機能ごとに AC からテストへの対応表を埋める（優先順: effort-ingest-gas → effort-draft → goals → weekly-report → その他）。全機能の AC にテストを付けた（2026-10-15。単体・部品 263 件、結合 213 件）。直す予定の不具合は、今の振る舞いを「既知の落とし穴」として固め、直す改修で書き換える
 - [ ] P5 で決めた effort-ingest-gas の直し（`docs/specs/effort-ingest-gas/changes/v1.0.7-baseline.md` の「人間の判断」。それぞれ改修の記録を通す）
   - 書式や数値の書き間違い（読めない行、半角の `:`、`1,5`、負の値など）は 400 にして何も保存しない
   - 1 回の送信を、全部保存するか全部保存しないかにする（途中で失敗すると一部だけ残り、送り直すと 2 重になるため）

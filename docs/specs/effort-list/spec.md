@@ -122,10 +122,12 @@ symptoms:
 
 | AC | テスト | 種類 |
 | --- | --- | --- |
-| AC-effort-list-01 | `packages/shared/src/schemas/workRecords.test.ts`（既定値、ID の数値への変換、開始日と終了日の前後、`pageSize` の上限） | 単体 |
-| AC-effort-list-07 | `packages/e2e/tests/effort.spec.ts`（一部。登録した工数が一覧に `2.00` / `1.50` で出ること） | E2E |
-| AC-effort-list-01〜04、INV-1、INV-2（API） | 未（P6。`*.int.test.ts`） | 結合 |
-| AC-effort-list-05〜14 | 未（P6。Testing Library + MSW。キャッシュの無い条件に変えたときに読み込み中の表示が出て集計が前の値でないこと、小数の誤差が出る組み合わせを境界の例に入れる） | 部品 |
+| AC-effort-list-01〜04、INV-1、INV-2（API） | `packages/api/test/work-records.int.test.ts` | 結合 |
+| AC-effort-list-01（入力の検証） | `packages/shared/src/schemas/workRecords.test.ts`（既定値、ID の数値への変換、開始日と終了日の前後、`pageSize` の上限） | 単体 |
+| AC-effort-list-05〜14 | `packages/web/src/pages/efforts/EffortsPage.test.tsx` | 部品 |
+| AC-effort-list-07 | `packages/e2e/tests/effort.spec.ts`（登録した工数が一覧に `2.00` / `1.50` で出ること） | E2E |
+
+既知の落とし穴のうち、今の振る舞いをテストで固めたもの（P6 で直すときにテストを書き換える）: 集計を表示中のページの行だけから出す（AC-10）、並べ替えの同じ値の行の順番（AC-04 は値の重ならないデータで確かめている）。キャッシュの無い条件に変えたときに集計が前の値で出ること、最初の取得の失敗で「まだ登録されていません」が出ることは、直す改修で先に落ちるテストを書く。
 
 ## 変更履歴
 

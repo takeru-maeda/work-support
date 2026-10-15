@@ -17,5 +17,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
+    // 本番の Workers は UTC で動く。日付と時刻の計算（週の境目など）を、手元のタイムゾーンに左右されずに
+    // 本番と同じ条件で確かめる
+    env: { TZ: "UTC" },
   },
 });
