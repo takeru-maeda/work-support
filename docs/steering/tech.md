@@ -24,6 +24,7 @@ pnpm ワークスペースのモノレポ。バックエンドは Cloudflare Wor
 - **hono-openapi + Zod**: 入力の検証と OpenAPI の自動生成
 - **@supabase/supabase-js**: DB アクセス（service role キーで接続）
 - **jose**: Supabase JWT の検証
+- **@modelcontextprotocol/server（MCP の公式 SDK v2）**: `/mcp`（状態を持たない Streamable HTTP）。認可は Supabase の OAuth 2.1 サーバー
 - **メール送信**: GAS のエンドポイント（`GAS_EMAIL_ENDPOINT`）へ fetch で依頼する（`src/lib/mailer.ts`）。メール送信のライブラリは使わない
 
 ### フロントエンド（`packages/web`）
@@ -67,7 +68,7 @@ pnpm dev:web          # Web（Vite, localhost:5173）
 
 1. **仕様書が正**: 機能ごとの仕様書（`docs/specs/`）を現在の姿の正とし、改修のたびに更新する
 2. **型共有**: API の入出力は `packages/shared` の Zod スキーマで定義し、両側で使う
-3. **認証方式**: Web からは Supabase JWT、外部連携（GAS）からは API キー
+3. **認証方式**: Web からは Supabase JWT、外部連携（GAS）からは API キー、MCP のアプリからは Supabase の OAuth 2.1 のトークン（`/mcp` だけ）
 4. **ホスティング**: API は Cloudflare Workers、Web は Vercel
 
 ---

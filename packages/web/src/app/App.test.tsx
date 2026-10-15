@@ -8,6 +8,7 @@ import { API_ENDPOINTS } from "@/config/api";
 import { getCurrentUser } from "@/lib/auth";
 import type * as Auth from "@/lib/auth";
 import type { AuthUser } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 import { useUserStore } from "@/store/user";
 import { useUserSettingsStore } from "@/store/userSettings";
 import { renderWithProviders } from "@/test/render";
@@ -120,6 +121,19 @@ describe("ルートと保護（App）", () => {
       expect(useUserSettingsStore.getState().settings).toBeNull();
     },
   );
+
+  it("AC-auth-01 / AC-mcp-14: /oauth/consent は AuthGuard の外で、未ログインなら /landing ではなくログインへ移る", async () => {
+    mockApi();
+    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    vi.spyOn(supabase.auth, "getUser").mockResolvedValue({
+      data: { user: null },
+      error: null,
+    } as unknown as Awaited<ReturnType<typeof supabase.auth.getUser>>);
+    renderAt("/oauth/consent?authorization_id=abc");
+
+    await waitFor(() => expect(location()).toBe("/login"));
+    expect(getCurrentUser).not.toHaveBeenCalled();
+  });
 
   it("AC-auth-01: どれにも当たらないパスは、ログインしていても /landing に移る", async () => {
     mockApi();

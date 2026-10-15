@@ -1,6 +1,7 @@
 import { describe, expect, it, onTestFinished } from "vitest";
 
 import { adminClient, browserClient, callApi, createTestUser } from "./helpers";
+import { getOAuthAccessToken } from "./oauthHelpers";
 
 import type { TestUser } from "./helpers";
 
@@ -191,5 +192,30 @@ describe("プロフィール画像の保存先の権限（avatars）", () => {
       expect(await readAs(target)).toBeNull();
     }
     expect(await readAs(myPath)).toBe("mine");
+  });
+});
+
+describe("MCP の OAuth のトークン（INV-mcp-2、docs/specs/mcp/spec.md）", () => {
+  it("OAuth のクライアントのトークンでは、自分のフォルダでも読み書き・削除ができない", async () => {
+    const me = await createTestUser();
+    const { accessToken } = await getOAuthAccessToken(me);
+    const asOAuthClient = { ...me, accessToken };
+    const existing = await placeAvatar(me, "web で置いた画像");
+    const newPath = `${me.id}/oauth.png`;
+    cleanUp(newPath);
+    const storage = browserClient(asOAuthClient).storage.from(BUCKET);
+
+    const upload = await storage.upload(newPath, image("x"));
+    expect(upload.error).not.toBeNull();
+    const overwrite = await storage.upload(existing, image("上書き"), {
+      upsert: true,
+    });
+    expect(overwrite.error).not.toBeNull();
+    await storage.remove([existing]);
+    const listed = await storage.list(me.id);
+    expect(listed.data ?? []).toEqual([]);
+
+    expect(await readAs(newPath)).toBeNull();
+    expect(await readAs(existing)).toBe("web で置いた画像");
   });
 });

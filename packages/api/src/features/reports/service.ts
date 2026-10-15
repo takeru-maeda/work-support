@@ -1,11 +1,13 @@
 import dayjs from "dayjs";
 
 import { calculateGoalSummaries } from "../../../../shared/src/utils/goalProgress";
+import { AppError } from "../../lib/errors";
 
 import {
   getGoalsForReport,
   getGoalProgressHistories,
   getWorkRecordList,
+  getWorkRecordsByName,
   getWorkRecordsForReport,
 } from "./repository";
 
@@ -36,17 +38,180 @@ export const generateFormattedReport = async (
   userId: string,
   targetDate: Date,
 ): Promise<WeeklyReportResponse> => {
-  const reportData = await getWeeklyReportData(supabase, userId, targetDate);
-
-  const weeklyReport: string = formatWeeklyReport(
-    reportData.startDate,
-    reportData.workRecords,
-    reportData.goals,
-    reportData.goalSummary,
+  const { weeklyReport } = await getWeeklyReportDetailService(
+    supabase,
+    userId,
+    targetDate,
   );
-
   return { weeklyReport };
 };
+
+/** 週報の本文と、その材料を構造化した値 */
+export interface WeeklyReportDetail {
+  weeklyReport: string;
+  /** 週の月曜日（YYYY-MM-DD） */
+  weekStart: string;
+  /** 週の日曜日（YYYY-MM-DD） */
+  weekEnd: string;
+  totalHours: number;
+  projects: {
+    name: string;
+    totalHours: number;
+    tasks: { name: string; hours: number }[];
+  }[];
+  goals: {
+    title: string;
+    weight: number;
+    progress: number;
+    progressDiff: number;
+  }[];
+  goalSummary: GoalSummary | null;
+}
+
+/**
+ * 週報の本文（画面と同じ）と、工数のまとめ・目標の進捗を構造化した値を返します（MCP の get_weekly_report）。
+ *
+ * @param supabase Supabaseクライアント
+ * @param userId ユーザーID
+ * @param targetDate 週報出力対象の日付
+ * @returns 週報の本文と構造化した値
+ */
+export const getWeeklyReportDetailService = async (
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  targetDate: Date,
+): Promise<WeeklyReportDetail> => {
+  const data = await getWeeklyReportData(supabase, userId, targetDate);
+  const weeklyReport: string = formatWeeklyReport(
+    data.startDate,
+    data.workRecords,
+    data.goals,
+    data.goalSummary,
+  );
+
+  const projects = new Map<
+    string,
+    { name: string; totalHours: number; tasks: Map<string, number> }
+  >();
+  for (const record of data.workRecords) {
+    const projectName: string = record.tasks.projects.name;
+    const project = projects.get(projectName) ?? {
+      name: projectName,
+      totalHours: 0,
+      tasks: new Map<string, number>(),
+    };
+    project.totalHours += record.hours;
+    project.tasks.set(
+      record.tasks.name,
+      (project.tasks.get(record.tasks.name) ?? 0) + record.hours,
+    );
+    projects.set(projectName, project);
+  }
+
+  return {
+    weeklyReport,
+    weekStart: dayjs(data.startDate).format("YYYY-MM-DD"),
+    weekEnd: dayjs(data.endDate).format("YYYY-MM-DD"),
+    totalHours: roundHours(
+      data.workRecords.reduce((sum, record) => sum + record.hours, 0),
+    ),
+    projects: [...projects.values()].map((project) => ({
+      name: project.name,
+      totalHours: roundHours(project.totalHours),
+      tasks: [...project.tasks].map(([name, hours]) => ({
+        name,
+        hours: roundHours(hours),
+      })),
+    })),
+    goals: data.goals.map((goal) => ({
+      title: goal.title,
+      weight: goal.weight,
+      progress: goal.progress,
+      // 引き算の浮動小数点の誤差を消す（本文は formatNumber で丸めて出している）
+      progressDiff: Math.round(goal.progressDiff * 100) / 100,
+    })),
+    goalSummary: data.goalSummary,
+  };
+};
+
+/** 名前で探す工数の、返す行の上限 */
+export const WORK_RECORD_SEARCH_LIMIT = 500;
+
+/** 名前で探す工数の、期間の日数の上限（両端を含む） */
+export const WORK_RECORD_SEARCH_MAX_DAYS = 366;
+
+/** 名前で探した工数 */
+export interface WorkRecordSearchResult {
+  records: {
+    date: string;
+    projectName: string;
+    taskName: string;
+    estimatedHours: number | null;
+    hours: number;
+  }[];
+  /** 絞り込みに当たったすべての行の数（records は上限まで） */
+  count: number;
+  totalHours: number;
+  totalEstimatedHours: number;
+  /** 上限を超えて、records を切り詰めたか */
+  truncated: boolean;
+}
+
+/**
+ * 期間の工数を、案件名・タスク名の完全一致で探します（MCP の search_work_records）。
+ * 行は上限まで返し、件数と合計は当たったすべての行で数える。
+ *
+ * @param supabase Supabaseクライアント
+ * @param userId ユーザーID
+ * @param filter 期間（両端を含む YYYY-MM-DD）と、案件名・タスク名
+ * @returns 行と件数・合計
+ * @throws 終了日が開始日より前か、期間が上限の日数を超えたら AppError(400)
+ */
+export const searchWorkRecordsByNameService = async (
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  filter: {
+    startDate: string;
+    endDate: string;
+    projectName?: string;
+    taskName?: string;
+  },
+): Promise<WorkRecordSearchResult> => {
+  const days: number =
+    dayjs(filter.endDate).diff(dayjs(filter.startDate), "day") + 1;
+  if (days < 1) {
+    throw new AppError(
+      400,
+      "終了日は開始日と同じか、それより後にしてください。",
+    );
+  }
+  if (days > WORK_RECORD_SEARCH_MAX_DAYS) {
+    throw new AppError(
+      400,
+      `期間は ${WORK_RECORD_SEARCH_MAX_DAYS} 日以内にしてください。`,
+    );
+  }
+
+  const rows = await getWorkRecordsByName(supabase, userId, filter);
+  return {
+    records: rows.slice(0, WORK_RECORD_SEARCH_LIMIT).map((row) => ({
+      date: row.work_date,
+      projectName: row.tasks.projects.name,
+      taskName: row.tasks.name,
+      estimatedHours: row.estimated_hours,
+      hours: row.hours,
+    })),
+    count: rows.length,
+    totalHours: roundHours(rows.reduce((sum, row) => sum + row.hours, 0)),
+    totalEstimatedHours: roundHours(
+      rows.reduce((sum, row) => sum + (row.estimated_hours ?? 0), 0),
+    ),
+    truncated: rows.length > WORK_RECORD_SEARCH_LIMIT,
+  };
+};
+
+/** 時間の合計を、列と同じ小数第 2 位に丸める（足し算の浮動小数点の誤差を消す） */
+const roundHours = (hours: number): number => Math.round(hours * 100) / 100;
 
 /**
  * 工数一覧を取得します。

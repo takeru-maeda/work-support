@@ -4,6 +4,8 @@ feature: goals
 status: current
 updated: 2026-10-16
 code:
+  - packages/api/src/features/goals/service.ts :: getGoalsOverviewService
+  - packages/api/src/features/goals/service.ts :: updateCurrentGoalProgressService
   - packages/api/src/features/goals/index.ts :: goals
   - packages/api/src/features/goals/service.ts :: createGoalPeriodService
   - packages/api/src/features/goals/service.ts :: validateGoalPeriod
@@ -30,7 +32,7 @@ code:
   - packages/web/src/features/goals/hooks/modules/add/useGoalDraft.ts :: useGoalDraft
   - packages/web/src/features/goals/hooks/usePastGoals.ts :: usePastGoals
   - packages/web/src/features/goals/hooks/modules/past/usePastGoalFilters.ts :: usePastGoalFilters
-related: [weekly-report]
+related: [weekly-report, mcp]
 symptoms:
   - 日曜日に更新した進捗が、翌週の「前週からの差分」に入らない
   - 月曜日の朝（9 時より前）に更新した進捗が、前週の分として扱われる
@@ -191,3 +193,4 @@ symptoms:
 | --- | --- | --- | --- |
 | v1.0.7 | 2026-10-14 | 移行時点の基準 | [v1.0.7-baseline](changes/v1.0.7-baseline.md) |
 | v1.2.0 | 2026-10-16 | 期間をまとめて作る API（`POST /api/goals/periods`）。全部作るか何も作らないか、確認を API でも行う。`POST /api/goals` を廃止し、`PUT` は期間を拒む | [v1.2.0-goal-period-api](changes/v1.2.0-goal-period-api.md) |
+| v1.2.0 | 2026-10-16 | MCP の `get_goals`、`update_goal_progress`、`create_goal_period` のために、目標のまとめと、現在の期間に限った進捗の更新の service の関数を足した（API の振る舞いは変えない） | [mcp v1.2.0-mcp-server](../mcp/changes/v1.2.0-mcp-server.md) |

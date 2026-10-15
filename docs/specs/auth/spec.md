@@ -2,7 +2,7 @@
 title: 認証（ログイン、新規登録、パスワードの再設定、ログアウト、未ログイン時の扱い）
 feature: auth
 status: current
-updated: 2026-10-15
+updated: 2026-10-16
 code:
   - packages/web/src/lib/auth.ts :: login
   - packages/web/src/lib/auth.ts :: signup
@@ -18,6 +18,7 @@ code:
   - packages/web/src/features/auth/components/AuthGuard.tsx :: AuthGuard
   - packages/web/src/app/AuthenticatedLayout.tsx :: AuthenticatedLayout
   - packages/web/src/pages/auth/LoginPage.tsx :: LoginPage
+  - packages/web/src/features/auth/utils/redirect.ts :: safeRedirectPath
   - packages/web/src/pages/auth/SignupPage.tsx :: SignupPage
   - packages/web/src/pages/auth/ResetPasswordPage.tsx :: ResetPasswordPage
   - packages/web/src/features/auth/hooks/useResetPasswordManager.ts :: useResetPasswordManager
@@ -54,14 +55,14 @@ symptoms:
 
 ### ルートと保護
 
-- **AC-auth-01**: `/landing`、`/login`、`/signup`、`/reset-password` はログインなしで開ける。`/`、`/efforts`、`/efforts/new`、`/goals`、`/goals/add`、`/weekly-report`、`/profile`、`/settings` は保護された画面。どれにも当たらないパスは `/landing` に移す（ログインしていても）
+- **AC-auth-01**: `/landing`、`/login`、`/signup`、`/reset-password` はログインなしで開ける。`/oauth/consent`（MCP のアプリとの連携の同意。mcp の AC-14）もログインなしで開け、画面の中でセッションを確かめてログインへ移す。`/`、`/efforts`、`/efforts/new`、`/goals`、`/goals/add`、`/weekly-report`、`/profile`、`/settings` は保護された画面。どれにも当たらないパスは `/landing` に移す（ログインしていても）
 - **AC-auth-02**: 保護された画面を開くと、`supabase.auth.getUser()` でユーザーを確かめる。最初に開いたときだけ、確かめている間は画面の形の読み込み中の表示を出す（やり直しのあいだは今の画面を出したまま）。ユーザーがいなければ（取得の失敗を含む）、ユーザーと設定のストアを空にして `/landing` に移す（履歴を置き換える）。元のパスは覚えない。ユーザーがいれば、ユーザーのストアに入れ、設定を初期化する（user-settings の AC-05）。保護された画面のあいだを移るたびに、この確かめをやり直す
 - **AC-auth-03**: ログインしたまま `/landing`、`/login`、`/signup` を開いても、そのまま表示する（ホームに移さない）
 
 ### ログイン（`/login`）
 
 - **AC-auth-04**: 「ログイン」「アカウントにログインしてください」の見出しの下に、「メールアドレス」（必須）、「パスワード」（必須、表示の切り替えボタン付き）、「ログイン」ボタン（送信中は「ログイン中...」）を出す。「パスワードをお忘れですか？」は `/reset-password`、「新規登録」は `/signup` へのリンク
-- **AC-auth-05**: 成功したら `/` に移る。失敗したら、Supabase のエラーの文（英語。例: `Invalid login credentials`）をそのまま赤い枠で出す（文が無ければ「ログインに失敗しました」）。`error_logs` には送らない
+- **AC-auth-05**: 成功したら、`redirect` のクエリがあれば AC-auth-13 に従って移り、無ければ `/` に移る。失敗したら、Supabase のエラーの文（英語。例: `Invalid login credentials`）をそのまま赤い枠で出す（文が無ければ「ログインに失敗しました」）。`error_logs` には送らない
 
 ### 新規登録（`/signup`）
 
@@ -94,12 +95,16 @@ symptoms:
 - ブラウザ: supabase-js のセッション（localStorage）、ユーザーのストア（Zustand。`{ id, name, email, avatarUrl }`。保存しない。名前が無ければメールアドレスを名前にする）
 - パスワードの最小の長さは 6（Supabase の設定 `minimum_password_length` と画面の検査）
 
+### ログインの戻り先
+
+- **AC-auth-13**: `/login?redirect=…` は、ログインのあとで `redirect` に移る。`/` で始まり、`//` と `/\` で始まらない（このサイトの中の）パスだけを受け付け、それ以外はホームへ移す（外のサイトへ飛ばされないように）。新規登録の画面には引き継がない（新規登録のあとはホーム）。今これを使うのは `/oauth/consent` だけ（`AuthGuard` が `/landing` に移す保護された画面は付けない）
+
 ## 設計不変条件
 
-- **INV-1**: ユーザーのデータを扱う画面は、すべて `AuthenticatedLayout`（`AuthGuard`）の下に置く。破ると、未ログインで画面が開き、API の 401 で中途半端な表示になる
+- **INV-1**: ユーザーのデータを扱う画面は、すべて `AuthenticatedLayout`（`AuthGuard`）の下に置く。破ると、未ログインで画面が開き、API の 401 で中途半端な表示になる。例外は `/oauth/consent`（未ログインのときの行き先を `/landing` ではなく `/login?redirect=` にするため、画面の中で自分でセッションを確かめる。ユーザーのデータは表示しない）
 - **INV-2**: SWR のキーと localStorage のキーにはユーザー ID を含める（`buildUserScopedKey` など）。ログアウトでキャッシュを消していないので、破ると、同じタブで次にログインしたユーザーに前のユーザーのデータが見える。ただしこの守りは、ストアのユーザー ID とトークンの持ち主が一致しているときだけ効く（別のタブでアカウントが替わると崩れる。[§既知の落とし穴](#既知の落とし穴)）。設定のストアはキーを持たないので守られない（user-settings）
 - **INV-3**: API に渡すユーザーの身元はアクセストークンだけ。web からユーザー ID を本文やクエリで送って身元を決めない（platform の INV-3）
-- **INV-4**: 再設定のリンクの戻り先（`<web の origin>/reset-password`）は、Supabase の許可する戻り先の一覧に入れる（クラウドはダッシュボードの設定、ローカルは `packages/api/supabase/config.toml` の `site_url` と `additional_redirect_urls`）。破ると、リンクが Supabase の既定の URL に戻り、再設定できない。**ローカルの設定には今入っていない**（`127.0.0.1:3000` だけ）。クラウドの設定はリポジトリからは確かめられない
+- **INV-4**: 再設定のリンクの戻り先（`<web の origin>/reset-password`）は、Supabase の許可する戻り先の一覧に入れる（クラウドはダッシュボードの設定、ローカルは `packages/api/supabase/config.toml` の `site_url` と `additional_redirect_urls`）。破ると、リンクが Supabase の既定の URL に戻り、再設定できない。ローカルは `site_url` を `http://localhost:5183`（`pnpm dev:local` と E2E の web）にし、`additional_redirect_urls` に `/reset-password` も入れた（mcp v1.2.0。`site_url` は OAuth の同意の画面の置き場所にもなる）。クラウドの設定はリポジトリからは確かめられない
 
 ## エラー時の挙動
 
@@ -115,7 +120,7 @@ symptoms:
 - **通信が不安定だとログアウトされたように見える**: ユーザーの確かめ（`getUser()`）がネットワークの往復で、失敗すると未ログインとして `/landing` に移す
 - **画面を移るたびに確かめをやり直す**: `AuthGuard` の確かめと設定の取得が、保護された画面を移るたびに走る（`useNavigate` が変わるため。`pnpm dev:local` で確かめた）
 - **ログイン済みでもログインの画面が出る**: `/login`、`/signup`、`/landing` はログインしていても表示する（確かめた）。旧ドキュメントはホームに移すとしていた。P6 以降にホームに移すように直す予定（[v1.0.7-baseline](changes/v1.0.7-baseline.md) の人間の判断 1）
-- **ログインのあとに元の画面に戻らない**: 未ログインで開いたパスを覚えないので、ログインのあとはいつも `/` に移る
+- **ログインのあとに元の画面に戻らない**: `AuthGuard` は未ログインで開いたパスを覚えないので、保護された画面からログインしたあとはいつも `/` に移る。戻るのは、`/oauth/consent` が `redirect` を付けてログインへ移したときだけ（AC-13）
 - **新規登録のトーストがいつも出る**: メールの確認が要らない設定（ローカルの Supabase など）でも「確認メールをお送りしました」を出す。確認が要る設定では、`/` に移ったあと説明なく `/landing` に戻る
 - **再設定のあとの案内が出ない**: `/login?reset=success` に移るが、ログインの画面はこのクエリを見ないので、何も表示しない
 - **再設定のリンクの読み取りが競合しうる**: supabase-js も URL のトークンを読み取ってハッシュを消すので、画面が読む前に消えると、セッションはできているのに最初の段のままになることがある（コードから。未確認）
@@ -131,7 +136,8 @@ symptoms:
 
 | AC | テスト | 種類 |
 | --- | --- | --- |
-| AC-auth-01〜03 | `packages/web/src/app/App.test.tsx`（アプリ全体をメモリの上のルーターで描画し、`getCurrentUser` を差し替える） | 部品 |
+| AC-auth-01〜03（`/oauth/consent` を含む） | `packages/web/src/app/App.test.tsx`（アプリ全体をメモリの上のルーターで描画し、`getCurrentUser` を差し替える） | 部品 |
+| AC-auth-13 | `packages/web/src/pages/auth/AuthPages.test.tsx`、`packages/web/src/features/auth/utils/redirect.test.ts`、`packages/e2e/tests/mcpOAuth.spec.ts` | 部品 / 単体 / E2E |
 | AC-auth-04〜10 | `packages/web/src/pages/auth/AuthPages.test.tsx`（`@/lib/auth` の関数と、再設定のリンクでの `supabase.auth.setSession` を差し替える） | 部品 |
 | AC-auth-11 | `packages/web/src/components/layout/AppShell.test.tsx`（ヘッダーの「ログアウト」） | 部品 |
 | AC-auth-02、04、05 | `packages/e2e/tests/auth.spec.ts`（本物の Supabase でログインし `/` に移ること、未ログインで保護された画面が出ないこと） | E2E |
@@ -145,3 +151,4 @@ symptoms:
 | バージョン | 日付 | 内容 | 改修の記録 |
 | --- | --- | --- | --- |
 | v1.0.7 | 2026-10-15 | 移行時点の基準 | [v1.0.7-baseline](changes/v1.0.7-baseline.md) |
+| v1.2.0 | 2026-10-16 | ログインの戻り先（`?redirect=`）と、AuthGuard の外の `/oauth/consent`（mcp） | [mcp v1.2.0-mcp-server](../mcp/changes/v1.2.0-mcp-server.md) |

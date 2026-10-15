@@ -2,8 +2,9 @@
 title: プロフィール（プロフィール画像、ユーザー名、アカウント削除）
 feature: profile
 status: current
-updated: 2026-10-15
+updated: 2026-10-16
 code:
+  - packages/api/supabase/migrations/20261016020000_block_oauth_clients_on_avatars.sql
   - packages/web/src/lib/storage.ts :: uploadAvatarImage
   - packages/web/src/lib/storage.ts :: deleteAvatarImage
   - packages/web/src/features/profile/hooks/modules/useAvatarUpload.ts :: useAvatarUpload
@@ -20,7 +21,7 @@ code:
   - packages/api/src/features/users/index.ts :: users
   - packages/api/src/features/users/service.ts :: deleteCurrentUserAccount
   - packages/api/supabase/migrations/20261014000000_restrict_avatar_storage_to_own_folder.sql
-related: [auth, app-shell, user-settings]
+related: [auth, app-shell, user-settings, mcp]
 symptoms:
   - プロフィール画像を変更すると「プロフィール画像の更新に失敗しました」と出る
   - プロフィール画像の保存に失敗したら、前の画像まで消えた
@@ -92,7 +93,7 @@ symptoms:
 
 ## 設計不変条件
 
-- **INV-1**: ブラウザ（`authenticated` のロール）から触れる Storage のオブジェクトは、パスの最初のフォルダが自分のユーザー ID（`auth.uid()`）と一致するものだけ。SELECT / INSERT / UPDATE / DELETE のすべてに同じ条件をかけ、UPDATE は移動先（`WITH CHECK`）にもかける。avatars に触れるポリシーをほかに足さない（permissive なポリシーは OR で効くので、1 つでも緩いものがあると絞り込みが無意味になる）。破ると、他人のプロフィール画像を差し替えたり消したりできる
+- **INV-1**: ブラウザ（`authenticated` のロール）から触れる Storage のオブジェクトは、パスの最初のフォルダが自分のユーザー ID（`auth.uid()`）と一致するものだけ。SELECT / INSERT / UPDATE / DELETE のすべてに同じ条件をかけ、UPDATE は移動先（`WITH CHECK`）にもかける。avatars に触れるポリシーをほかに足さない（permissive なポリシーは OR で効くので、1 つでも緩いものがあると絞り込みが無意味になる）。破ると、他人のプロフィール画像を差し替えたり消したりできる。4 つのポリシーとも、`client_id` の claim があるトークン（MCP のアプリに出した OAuth のトークン）を拒む（mcp の INV-mcp-2）
 - **INV-2**: 画像の保存先の名前は `<ユーザー ID>/...` の形を保つ。フォルダの外や別の形に置くと、INV-1 のポリシーで本人も上書き・削除できなくなる。アカウント削除の後始末（`<ユーザー ID>/` の一覧）からも漏れる
 - **INV-3**: アカウントの削除は、Auth のユーザーを消すことで DB のデータを外部キーの CASCADE に任せる。ユーザーを根とする表は `auth.users` に、子の表は親の表に `ON DELETE CASCADE` を付け、どこかで `auth.users` までつながるようにする。`user_id` を持つログの表（`access_logs`）は `SET NULL`。破ると、アカウントを消してもデータが残る
 
@@ -131,7 +132,7 @@ symptoms:
 
 | AC | テスト | 種類 |
 | --- | --- | --- |
-| AC-profile-01〜08、INV-1 | `packages/api/test/avatar-storage.int.test.ts`（ブラウザと同じ権限のクライアントで Storage を呼ぶ） | 結合 |
+| AC-profile-01〜08、INV-1（OAuth のトークンを含む） | `packages/api/test/avatar-storage.int.test.ts`（ブラウザと同じ権限のクライアントで Storage を呼ぶ） | 結合 |
 | INV-1（古いポリシーの残り） | マイグレーションの最後の検査（残っていればエラーで止まる） | 適用時 |
 | AC-profile-09〜13 | `packages/web/src/pages/profile/ProfilePage.test.tsx`（`@/lib/auth` と `@/lib/storage` を差し替える） | 部品 |
 | AC-profile-14、15、INV-3 | `packages/api/test/account-deletion.int.test.ts`（CASCADE で消えること、アクセスログが残ること、画像の無いユーザー、401）、`avatar-storage.int.test.ts`（画像のあるユーザー） | 結合 |
@@ -145,3 +146,4 @@ symptoms:
 | --- | --- | --- | --- |
 | v1.0.7 | 2026-10-15 | 移行時点の基準（ユーザー名、画像のアップロードの画面、アカウントの削除の節を足した） | [v1.0.7-baseline](changes/v1.0.7-baseline.md) |
 | v1.1.1 | 2026-10-14 | プロフィール画像の保存先の権限を、本人のフォルダだけに絞った。この spec.md をプロフィール画像の保存の部分から作成 | [v1.1.1-avatar-storage-own-folder](changes/v1.1.1-avatar-storage-own-folder.md) |
+| v1.2.0 | 2026-10-16 | MCP のアプリに出した OAuth のトークン（`client_id` あり）では、自分のフォルダでも読み書きできないようにした（INV-1 に追記） | [mcp v1.2.0-mcp-server](../mcp/changes/v1.2.0-mcp-server.md) |

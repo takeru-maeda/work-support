@@ -1,4 +1,4 @@
-import { fetchProjectsWithTasks } from "./repository";
+import { fetchProjectNames, fetchProjectsWithTasks } from "./repository";
 
 import type { ProjectsViewRow } from "./repository";
 import type { ProjectWithTasks } from "./types";
@@ -63,4 +63,22 @@ export const getProjectsWithTasks = async (
   }
 
   return Array.from(projectMap.values());
+};
+
+/**
+ * 案件とその中のタスクの名前を、元の表から返します（MCP の list_projects）。
+ *
+ * @param supabase Supabaseクライアント
+ * @param userId ユーザーID
+ * @returns 作った順の案件と、作った順のタスクの名前
+ */
+export const listProjectNamesService = async (
+  supabase: SupabaseClient<Database>,
+  userId: string,
+): Promise<{ name: string; tasks: string[] }[]> => {
+  const rows = await fetchProjectNames(supabase, userId);
+  return rows.map((row) => ({
+    name: row.name,
+    tasks: row.tasks.map((task) => task.name),
+  }));
 };

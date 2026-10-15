@@ -2,8 +2,9 @@
 title: 週報の出力
 feature: weekly-report
 status: current
-updated: 2026-10-14
+updated: 2026-10-16
 code:
+  - packages/api/src/features/reports/service.ts :: getWeeklyReportDetailService
   - packages/api/src/features/reports/index.ts :: reports
   - packages/api/src/features/reports/service.ts :: generateFormattedReport
   - packages/api/src/features/reports/service.ts :: getWeekRange
@@ -30,7 +31,7 @@ code:
   - packages/web/src/features/reports/api/weeklyReport.ts :: getWeeklyReport
   - packages/web/src/features/reports/hooks/useWeeklyReport.ts :: useWeeklyReport
   - packages/web/src/features/reports/api/weeklyReport.ts :: useWeeklyReportMutation
-related: [goals, missions, effort-entry]
+related: [goals, missions, effort-entry, mcp]
 symptoms:
   - 週報の日別の時間が「3.3000000000000003h」のように長い小数になる
   - 週報の平均が日別の時間と合わない / 合計が日別の時間の合計より大きい
@@ -169,3 +170,4 @@ symptoms:
 | バージョン | 日付 | 内容 | 改修の記録 |
 | --- | --- | --- | --- |
 | v1.0.7 | 2026-10-14 | 移行時点の基準 | [v1.0.7-baseline](changes/v1.0.7-baseline.md) |
+| v1.2.0 | 2026-10-16 | MCP の `get_weekly_report` のために、週報の本文と構造化した値を返す service の関数を足した（API の振る舞いは変えない） | [mcp v1.2.0-mcp-server](../mcp/changes/v1.2.0-mcp-server.md) |

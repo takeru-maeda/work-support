@@ -302,3 +302,143 @@ function getPreviousWeekSunday(referenceDate: string): {
     previousSunday: formatDate(sunday),
   };
 }
+
+/** 現在の期間の目標でないものの進捗率を変えようとしたときの文 */
+export const CURRENT_GOAL_NOT_FOUND_MESSAGE =
+  "現在の期間の目標が見つかりません。";
+
+/**
+ * 現在の期間の目標に限って、進捗率を変えて履歴を残します（MCP の update_goal_progress）。
+ * 過去の期間の目標は画面でも編集できないので、AI からも変えさせない。
+ *
+ * @param supabase Supabaseクライアント
+ * @param userId ユーザーID
+ * @param goalId 目標ID
+ * @param progress 進捗率（0〜100）
+ * @returns 更新後の目標
+ * @throws 現在の期間の、そのユーザーの目標でなければ AppError(400)
+ */
+export const updateCurrentGoalProgressService = async (
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  goalId: number,
+  progress: number,
+): Promise<Tables<"goals">> => {
+  const current: Tables<"goals">[] = await getLatestGoals(supabase, userId);
+  if (!current.some((goal) => goal.id === goalId)) {
+    throw new AppError(400, CURRENT_GOAL_NOT_FOUND_MESSAGE);
+  }
+  return await updateGoalService(supabase, userId, goalId, { progress });
+};
+
+/** 目標の一覧の 1 件 */
+export interface GoalOverviewItem {
+  id: number;
+  title: string;
+  content: string;
+  weight: number;
+  progress: number;
+}
+
+/** 現在と過去の目標のまとめ */
+export interface GoalsOverview {
+  period: { startDate: string; endDate: string } | null;
+  goals: (GoalOverviewItem & { progressDiff: number })[];
+  summary: {
+    simpleAverageProgress: number;
+    weightedAchievementRate: number;
+  } | null;
+  pastPeriods?: {
+    startDate: string;
+    endDate: string;
+    goals: GoalOverviewItem[];
+  }[];
+}
+
+/**
+ * 現在の期間の目標と前週からの差、全体進捗と加重進捗を返します（MCP の get_goals）。
+ * 前週からの差は、目標の画面と同じ前週の進捗（`getPreviousWeekProgressService`）から出す。
+ *
+ * @param supabase Supabaseクライアント
+ * @param userId ユーザーID
+ * @param referenceDate 前週を決める基準日（YYYY-MM-DD）
+ * @param includePast 過去の目標も期間ごとに返すか
+ * @returns 目標のまとめ
+ */
+export const getGoalsOverviewService = async (
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  referenceDate: string,
+  includePast: boolean,
+): Promise<GoalsOverview> => {
+  const all: Tables<"goals">[] = await getGoalsByUser(supabase, userId);
+  const periods = groupGoalsByPeriod(all);
+  const [current, ...past] = periods;
+  const pastPeriods = includePast
+    ? {
+        pastPeriods: past.map((period) => ({
+          startDate: period.startDate,
+          endDate: period.endDate,
+          goals: period.goals.map(toOverviewItem),
+        })),
+      }
+    : {};
+  if (!current)
+    return { period: null, goals: [], summary: null, ...pastPeriods };
+
+  const previous: GoalPreviousWeekProgress =
+    await getPreviousWeekProgressService(supabase, userId, referenceDate);
+  const previousById = new Map(
+    previous.progress.map((item) => [item.goal_id, item.progress]),
+  );
+  const summary = getGoalSummaryMetrics(current.goals);
+
+  return {
+    period: { startDate: current.startDate, endDate: current.endDate },
+    goals: current.goals.map((goal) => ({
+      ...toOverviewItem(goal),
+      progressDiff: roundTenth(
+        goal.progress - (previousById.get(goal.id) ?? goal.progress),
+      ),
+    })),
+    // calculateGoalSummaries が小数第 1 位に丸めて返す
+    summary,
+    ...pastPeriods,
+  };
+};
+
+/**
+ * 目標を期間（同じ終了日）ごとにまとめ、終了日の新しい順に並べます。
+ * 期間の開始日は、その期間の目標の開始日のいちばん早いもの（画面の「期間」と同じ）。
+ */
+function groupGoalsByPeriod(goals: Tables<"goals">[]): {
+  startDate: string;
+  endDate: string;
+  goals: Tables<"goals">[];
+}[] {
+  const byEndDate = new Map<string, Tables<"goals">[]>();
+  for (const goal of goals) {
+    byEndDate.set(goal.end_date, [
+      ...(byEndDate.get(goal.end_date) ?? []),
+      goal,
+    ]);
+  }
+  return [...byEndDate]
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([endDate, items]) => ({
+      startDate: items.map((goal) => goal.start_date).sort()[0],
+      endDate,
+      goals: items.toSorted((a, b) => a.id - b.id),
+    }));
+}
+
+const toOverviewItem = (goal: Tables<"goals">): GoalOverviewItem => ({
+  id: goal.id,
+  title: goal.title,
+  content: goal.content,
+  weight: goal.weight,
+  progress: goal.progress,
+});
+
+/** 画面と同じく小数第 1 位に丸める */
+const roundTenth = (value: number): number => Math.round(value * 10) / 10;

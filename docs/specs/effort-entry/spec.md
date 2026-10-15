@@ -4,6 +4,7 @@ feature: effort-entry
 status: current
 updated: 2026-10-16
 code:
+  - packages/api/src/features/projects/service.ts :: listProjectNamesService
   - packages/api/src/features/effort/index.ts :: appEffort
   - packages/api/src/features/effort/service.ts :: saveStructuredEffortEntries
   - packages/api/src/features/effort/service.ts :: toWorkRecordInput
@@ -39,7 +40,7 @@ code:
   - packages/web/src/features/effort-entry/utils/formHelpers.ts :: mapFormEntryToRequest
   - packages/web/src/features/effort-entry/utils/projectGrouping.ts :: getProjectGroupKey
   - packages/web/src/api/projects.ts :: useProjectsWithTasks
-related: [effort-draft, effort-ingest-gas, effort-list, user-settings]
+related: [effort-draft, effort-ingest-gas, effort-list, user-settings, mcp]
 symptoms:
   - 工数の送信に失敗したので送り直したら、工数が 2 重に登録された
   - 送信に失敗したのに、一部の工数だけ登録されている
@@ -216,3 +217,4 @@ symptoms:
 | --- | --- | --- | --- |
 | v1.0.7 | 2026-10-15 | 移行時点の基準 | [v1.0.7-baseline](changes/v1.0.7-baseline.md) |
 | v1.1.3 | 2026-10-16 | 1 回の送信を全部保存するか何も保存しないかにした。100 以上を 400 にし、画面でも負と 100 以上を止める。送信の中でも大文字小文字を区別する。候補の作り直しの失敗を保存の成功として扱う | [v1.1.3-atomic-save](changes/v1.1.3-atomic-save.md) |
+| v1.2.0 | 2026-10-16 | MCP の `log_effort` は、この保存（全部か何もないか）と完了メールの関数をそのまま使う。`list_projects` のために、元の表から案件とタスクの名前を返す関数を足した | [mcp v1.2.0-mcp-server](../mcp/changes/v1.2.0-mcp-server.md) |

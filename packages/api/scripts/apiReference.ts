@@ -13,6 +13,9 @@ export const NON_API_ROUTES: readonly string[] = [
   "GET /",
   "GET /openapi",
   "GET /ui",
+  // MCP の入口（/mcp は ALL で登録するので一覧に出ない）。仕様は docs/specs/mcp/spec.md
+  "GET /.well-known/oauth-protected-resource",
+  "GET /.well-known/oauth-protected-resource/mcp",
 ];
 
 const METHODS = ["get", "post", "put", "patch", "delete"] as const;

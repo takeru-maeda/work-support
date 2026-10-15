@@ -9,6 +9,8 @@ scope:                 # この計画で編集してよいパス（glob）。spe
   - "packages/api/src/**"
   - "packages/api/test/**"
   - "packages/api/supabase/**"
+  - "packages/api/scripts/**"
+  - "packages/shared/supabase-gen-types.sh"
   - "packages/api/package.json"
   - "packages/api/wrangler.jsonc"
   - "packages/shared/src/**"
@@ -28,8 +30,8 @@ scope:                 # この計画で編集してよいパス（glob）。spe
 
 ## 現在地
 
-- **フェーズ**: P1〜P3 完了（effort-entry v1.1.3 はコミット済み、goals v1.2.0 は人間のレビュー待ち）。次は P4
-- **次にやること**: mcp v1.2.0 の実装（P4〜P6）。`packages/api/scripts/**` と `packages/shared/supabase-gen-types.sh` を `scope:` に足すかは人間の判断待ち
+- **フェーズ**: P4〜P6 完了（mcp v1.2.0。人間のレビュー待ち）。次は P7（クラウドの設定、デプロイ、4 つのアプリからの接続。人間と一緒に行う）
+- **次にやること**: mcp v1.2.0 のレビューとコミット。P7 の手順（開発用の Supabase で OAuth サーバー・自動登録・同意の画面の URL を有効にする）を人間に渡す
 - **ブロッカー**: なし
 
 ## 1. 目的
@@ -103,20 +105,20 @@ packages/web/src/pages/oauth/ConsentPage.tsx   # 同意の画面
 - [x] バックログから、直した項目を消す
 
 ### P4. MCP の土台と読むツール（mcp の改修の記録）
-- [ ] 改修の記録を作り、承認を得る（仕様書 `docs/specs/mcp/spec.md` も新しく作る）
-- [ ] `/mcp`、保護されたリソースのメタデータ、401 の `WWW-Authenticate`、D5 のトークンの範囲の判定（`/api/*` で OAuth のトークンを 401 にするテストを先に書く）
-- [ ] 読むツール 5 つ。SDK のクライアントからの結合テスト（ユーザーごとに自分のデータしか見えないことを含める）
+- [x] 改修の記録を作り、承認を得る（仕様書 `docs/specs/mcp/spec.md` も新しく作る）
+- [x] `/mcp`、保護されたリソースのメタデータ、401 の `WWW-Authenticate`、D5 のトークンの範囲の判定（`/api/*` で OAuth のトークンを 401 にするテストを先に書く）
+- [x] 読むツール 5 つ。SDK のクライアントからの結合テスト（ユーザーごとに自分のデータしか見えないことを含める）
 
 ### P5. 書くツール（mcp の改修の記録）
-- [ ] 改修の記録を作り、承認を得る
-- [ ] `log_effort`、`update_goal_progress`、`update_mission`
-- [ ] `create_goal_period` のプレビューと確定。確認トークンの不一致（入力の変更）、プレビューのあとに状況が変わった場合に保存しないことをテストする
+- [x] 改修の記録を作り、承認を得る
+- [x] `log_effort`、`update_goal_progress`、`update_mission`
+- [x] `create_goal_period` のプレビューと確定。確認トークンの不一致（入力の変更）、プレビューのあとに状況が変わった場合に保存しないことをテストする
 
 ### P6. OAuth の同意の画面と、ローカルでの通しの確認
-- [ ] ローカルの `config.toml` で OAuth サーバーと動的なクライアント登録を有効にする
-- [ ] web の `/oauth/consent`（未ログインならログインに回して戻す。許可・拒否）。3 幅の確認
-- [ ] E2E: ローカルで、クライアントの登録 → 同意 → トークン → `/mcp` のツールの呼び出しまで通す
-- [ ] Claude Code から `pnpm dev:local` の MCP につないで確かめる（エージェントが確かめられる範囲）
+- [x] ローカルの `config.toml` で OAuth サーバーと動的なクライアント登録を有効にする
+- [x] web の `/oauth/consent`（未ログインならログインに回して戻す。許可・拒否）。3 幅の確認
+- [x] E2E: ローカルで、クライアントの登録 → 同意 → トークン → `/mcp` のツールの呼び出しまで通す
+- [ ] Claude Code から `pnpm dev:local` の MCP につないで確かめる（エージェントが確かめられる範囲）→ 未。E2E で同じ流れ（自動登録 → 同意 → トークン → `/mcp`）を通したので、P7 の手動の確認（M-006）でまとめて行う
 
 ### P7. ⚠️ クラウドの設定、デプロイ、4 つのアプリからの接続（人間と一緒に行う）
 - [ ] ⚠️ 開発用の Supabase で、OAuth サーバー、動的なクライアント登録、同意の画面の URL を有効にする（ダッシュボードの操作。必要なら非対称の署名の鍵への切り替え）。人間が行い、エージェントは手順を用意する
@@ -151,3 +153,5 @@ packages/web/src/pages/oauth/ConsentPage.tsx   # 同意の画面
 | 2026-10-16 | 改修の記録は 3 つにする: effort-entry v1.1.3（工数の保存を全部か何もないかに。不具合の直し）、goals v1.2.0（期間をまとめて作る API）、mcp v1.2.0（P4〜P6 をまとめる） | ユーザーの指示（フェーズに捉われず進める）。承認のやり取りを減らす |
 | 2026-10-16 | D10 を変更（人間の承認待ち）: `confirmToken` は、ユーザー ID・入力・今の期間の状態から作る SHA-256 のハッシュにし、秘密の値も期限も持たない | 目的は「プレビューを見た」ことと「状況が変わっていない」ことの確認で、状態に結び付けたハッシュで足りる。シークレットの追加（人の操作）が要らない。飛ばされても goals の API の確認は必ず通る |
 | 2026-10-16 | D14 を変更: ツールの結合テストは `callApi` から JSON-RPC を直接送る（MCP のクライアントの SDK は足さない）。`/mcp` は web のトークンも受け付ける（完成形で「P1 で決める」とした点） | 依存を増やさない。同じユーザーで権限も同じなので、受け付けても守りは変わらない |
+| 2026-10-16 | P3 を終えた（goals v1.2.0、`5084c5f`）。人間の判断で、1 つの期間の目標を 20 件までにした。`scope:` に `packages/api/scripts/**` と `packages/shared/supabase-gen-types.sh` を足した（人間の了承） | `/mcp` を API の一覧の生成から外すため（`apiReference.ts`）。生成型の作り方を見直す余地を残すため（H-022） |
+| 2026-10-16 | P4〜P6 を終えた。計画からの変更: ツールに `outputSchema` は付けない（`structuredContent` だけ）。同意の画面は、ローカルの Supabase の実際の応答（supabase-js の型と違う）に合わせて読む。web の同意の画面のセッションの確認は `getUser`。`features/mcp/auth.ts` を足した | 理由は mcp の spec.md の既知の落とし穴と、改修の記録の「計画からの変更」 |

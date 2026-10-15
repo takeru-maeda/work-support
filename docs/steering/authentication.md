@@ -13,7 +13,8 @@ Web からのリクエスト用。
 
 1. `Authorization: Bearer <jwt>` を取り出す（ない・形式が違うときは 401）
 2. `lib/jwt.ts` の `verifySupabaseAccessToken` で検証する（失敗は 401）。署名方式はトークンのヘッダーで決まり、HS256 は `SUPABASE_JWT_SECRET`、ES256 / RS256 は Supabase が公開する JWKS で確かめる。共有シークレットを公開鍵方式の検証に使わない（方式の取り違えでなりすましを許すため。詳しくは `docs/specs/platform/spec.md`）
-3. `c.set("user", { id, email })` でコンテキストに入れる
+3. `client_id` の claim があるトークン（MCP のアプリに出した OAuth のトークン）は 401（`isOAuthClientToken`）
+4. `c.set("user", { id, email })` でコンテキストに入れる
 
 OPTIONS（CORS のプリフライト）は認証をとばす。
 
@@ -23,6 +24,9 @@ OPTIONS（CORS のプリフライト）は認証をとばす。
 1. `Authorization: Bearer <API_KEY>` を環境変数 `API_KEY` と照合する（違えば 401）
 2. 本文を `EffortRequestSchema` で検証し、`email` から Supabase のユーザーを探す（見つからなければ 400）
 3. 見つけたユーザーを `c.set("user", ...)` に入れる
+
+### 3. MCP（`/mcp`、`features/mcp/auth.ts`）
+MCP のアプリ用。SDK の `requireBearerAuth` に、`verifySupabaseAccessToken` を包んだ verifier を渡す（401 と `WWW-Authenticate` は SDK が作る）。OAuth のトークンも web のトークンも受け付ける。OAuth のトークンでできることは `/mcp` のツールに限る: `/api/*` は上の 3、ブラウザから直接触る Supabase（Storage）はポリシーで `client_id` のあるトークンを拒む。Supabase Auth は止められない（`docs/specs/mcp/spec.md`）
 
 ## AuthenticatedUser
 

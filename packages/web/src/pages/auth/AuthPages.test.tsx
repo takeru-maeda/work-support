@@ -146,6 +146,37 @@ describe("ログイン（/login）", () => {
     expect(await screen.findByText(shown)).toBeInTheDocument();
     expect(location()).toBe("/login");
   });
+  it.each([
+    [
+      "このサイトの中のパス",
+      "/login?redirect=%2Foauth%2Fconsent%3Fauthorization_id%3Dabc",
+      "/oauth/consent?authorization_id=abc",
+    ],
+    ["ほかのサイト（//）", "/login?redirect=%2F%2Fevil.example", "/"],
+    ["ほかのサイト（/ とタブ）", "/login?redirect=%2F%09%2Fevil.example", "/"],
+    [
+      "ほかのサイト（https://）",
+      "/login?redirect=https%3A%2F%2Fevil.example",
+      "/",
+    ],
+  ])(
+    "AC-auth-13: redirect が%sなら、ログインのあとで決まった先に移る（外のサイトはホーム）",
+    async (_label, path, expected) => {
+      vi.mocked(login).mockResolvedValue({
+        success: true,
+        user: null,
+        session: null,
+      });
+      const ui = userEvent.setup();
+      renderAt(path);
+
+      await ui.type(screen.getByLabelText("メールアドレス"), "a@example.com");
+      await ui.type(screen.getByLabelText("パスワード"), "secret1");
+      await ui.click(screen.getByRole("button", { name: "ログイン" }));
+
+      await waitFor(() => expect(location()).toBe(expected));
+    },
+  );
 });
 
 describe("新規登録（/signup）", () => {

@@ -2,9 +2,10 @@
 title: 基盤（認証、ログ、エラー処理、CORS、OpenAPI、メール送信）
 feature: platform
 status: current
-updated: 2026-10-15
+updated: 2026-10-16
 code:
   - packages/api/src/middleware/auth.ts :: jwtAuthMiddleware
+  - packages/api/src/middleware/auth.ts :: isOAuthClientToken
   - packages/api/src/middleware/auth.ts :: apiKeyAuthMiddleware
   - packages/api/src/lib/jwt.ts :: verifySupabaseAccessToken
   - packages/api/src/index.ts :: app
@@ -54,7 +55,7 @@ OPTIONS（CORS のプリフライト）は認証をとばす。
 
 ### リクエストの流れとアクセスログ
 
-- **AC-platform-08**: リクエストは、CORS、アクセスログ、コンソールのログ、各機能のルート（それぞれの認証）の順に通る。ルートは `/api/effort`、`/api/missions`、`/api/goals`、`/api/projects`、`/api/reports`、`/api/user-settings`、`/api/users`、`/api/logs` の下と、`GET /`（「Hello Work Support」）、`GET /openapi`、`GET /ui`。どれにも当たらないパスは 404（本文は「404 Not Found」の文字）。機能の下の存在しないパスは、トークンが無い・無効なら 401（認証が先にかかる）、有効なら 404。`/api/effort` の下は、GAS の API キーで呼んでも JWT が求められて 401
+- **AC-platform-08**: リクエストは、CORS、アクセスログ、コンソールのログ、各機能のルート（それぞれの認証）の順に通る。ルートは `/api/effort`、`/api/missions`、`/api/goals`、`/api/projects`、`/api/reports`、`/api/user-settings`、`/api/users`、`/api/logs` の下と、`GET /`（「Hello Work Support」）、`GET /openapi`、`GET /ui`、MCP の `/mcp` と `GET /.well-known/oauth-protected-resource`（`/mcp` の付いたものも。mcp の AC-01、02。OpenAPI には載せない）。どれにも当たらないパスは 404（本文は「404 Not Found」の文字）。機能の下の存在しないパスは、トークンが無い・無効なら 401（認証が先にかかる）、有効なら 404。`/api/effort` の下は、GAS の API キーで呼んでも JWT が求められて 401
 - **AC-platform-09**: OPTIONS 以外のすべてのリクエストで、処理の前に `access_logs` に 1 行（IP、パス（クエリは含まない）、メソッド）を書き、応答のあとで（`waitUntil`）同じ行にユーザー ID、ステータス、処理時間（ミリ秒）を入れる。アクセスログを書けなければ処理を続けない（`{ error, accessLogId }` の形にはならず、Workers の例外の 500 になる。[§既知の落とし穴](#既知の落とし穴)）。ルートで例外が出たときは、アクセスログの更新が `globalErrorHandler` とミドルウェアの両方から 2 回走る
 - **AC-platform-10**: Workers のログ（observability）も有効で、全リクエストを残す（`wrangler.jsonc` の設定）
 
@@ -80,7 +81,11 @@ OPTIONS（CORS のプリフライト）は認証をとばす。
 
 ### メールの依頼
 
-- **AC-platform-19**: メールは自前で送らず、GAS の宛先（`GAS_EMAIL_ENDPOINT`）に `{ to, subject, body, apikey: <API_KEY> }` を POST して頼む。応答は `{ success, status, message }`。通信の失敗、HTTP のエラー、`success: false` なら失敗（`AppError` 500）。2xx で本文の形が合わないときは成功として扱う。送り先などの形が合わないと ZodError になる。今は工数登録の完了メールだけが、応答のあとで（`waitUntil`）使うので、失敗は利用者への応答に出ない（effort-entry の AC-09、10）
+- **AC-platform-19**: メールは自前で送らず、GAS の宛先（`GAS_EMAIL_ENDPOINT`）に `{ to, subject, body, apikey: <API_KEY> }` を POST して頼む。応答は `{ success, status, message }`。通信の失敗、HTTP のエラー、`success: false` なら失敗（`AppError` 500）。2xx で本文の形が合わないときは成功として扱う。送り先などの形が合わないと ZodError になる。今は工数登録の完了メールだけが、応答のあとで（`waitUntil`）使うので、失敗は利用者への応答に出ない（effort-entry の AC-09、10）。MCP の `log_effort` も同じ関数で送る（mcp の AC-09）
+
+### OAuth のクライアントのトークン
+
+- **AC-platform-20**: `jwtAuthMiddleware` を使うすべてのルート（`/api/*` の JWT のルート）は、`client_id` の claim があるトークン（Supabase の OAuth 2.1 サーバーが MCP のアプリに出したもの）を 401 にする。web のトークン（`client_id` が無い）は今までどおり。テストはアプリのルートの一覧から作り、ルートを足しても漏れないようにする（mcp の INV-mcp-2）
 
 ## 画面と API
 
@@ -106,7 +111,7 @@ JWT の認証は、effort（GAS の取り込みを除く）、goals、logs、mis
 - **INV-1**: 共有シークレット（`SUPABASE_JWT_SECRET`）は HS256 のトークンの検証にだけ使い、公開鍵方式のトークンは JWKS の鍵でだけ検証する。許可する署名方式は HS256 / ES256 / RS256 だけ。破ると、署名方式を偽ったトークン（`alg: none` や、公開されている情報で作った署名）で、任意のユーザーになりすませる
 - **INV-2**: Cloudflare Workers では、あるリクエストで始めた通信を別のリクエストから待たない。JWKS は jose の `createRemoteJWKSet` で取得する（Workers の上では取得中の通信を共有しない作り）。破ると、同時に来たリクエストが失敗する
 - **INV-3**: ユーザー ID は検証済みのトークンの `sub` からだけ取る。リクエストの本文やクエリの値を信用しない（`docs/steering/authentication.md`）。破ると、他人のデータを読み書きできる
-- **INV-4**: `globalErrorHandler` を通るエラーの応答は `{ error, accessLogId }` の形にし、`accessLogId` で `access_logs` と `error_logs` をたどれるようにする（`docs/steering/error-handling.md`）。新しいエラーは `AppError` で投げてここを通す。破ると、利用者が伝えた番号から原因をたどれなくなる。今の例外は、入力の検証の失敗（AC-13）と 404（AC-08）
+- **INV-4**: `globalErrorHandler` を通るエラーの応答は `{ error, accessLogId }` の形にし、`accessLogId` で `access_logs` と `error_logs` をたどれるようにする（`docs/steering/error-handling.md`）。新しいエラーは `AppError` で投げてここを通す。破ると、利用者が伝えた番号から原因をたどれなくなる。今の例外は、入力の検証の失敗（AC-13）、404（AC-08）、`/mcp` の 401（SDK の形で返し、`error_logs` に残さない）と、MCP のツールの誤り（HTTP 200 の MCP の結果で返す。mcp の AC-13）
 - **INV-5**: CORS で許可する Origin は、環境変数の完全一致だけ。ワイルドカードや前方一致にしない（資格情報を許可しているので）。破ると、ほかのサイトから利用者のトークンで API を呼ばれうる
 
 ## エラー時の挙動
@@ -158,6 +163,7 @@ JWT の認証は、effort（GAS の取り込みを除く）、goals、logs、mis
 | AC-platform-08、09、11〜17、INV-4、INV-5 | `packages/api/test/platform.int.test.ts`（アクセスログとエラーの記録、検証の失敗の形、CORS のヘッダー、OpenAPI、`POST /api/logs/error`） | 結合 |
 | AC-platform-10 | 確認のみ（`packages/api/wrangler.jsonc` の `observability`） | 確認のみ |
 | AC-platform-18 | `packages/web/src/api/logs.test.ts` | 単体 |
+| AC-platform-20 | `packages/api/test/oauthTokenScope.int.test.ts`（本物の OAuth のトークンで、JWT のすべてのルートが 401） | 結合 |
 | AC-platform-19 | `packages/api/src/lib/mailer.test.ts`（fetch を差し替えて失敗の判定を確かめる）、`packages/api/test/effort-entries.int.test.ts`（`test/setup.ts` が横取りした依頼の中身） | 単体、結合 |
 
 既知の落とし穴のうち、今の振る舞いをテストで固めたもの（P6 で直すときにテストを書き換える）: 壊れた JSON が 500（AC-11）、許可していない Origin でも処理する（AC-15）、OpenAPI と Swagger UI を認証なしで出す（AC-16）、メールの依頼で JSON でない応答が `AppError` にならない（AC-19）、`reportUiError` が送れないと例外を投げる（AC-18）。
@@ -167,4 +173,5 @@ JWT の認証は、effort（GAS の取り込みを除く）、goals、logs、mis
 | バージョン | 日付 | 内容 | 改修の記録 |
 | --- | --- | --- | --- |
 | v1.0.7 | 2026-10-15 | 移行時点の基準（リクエストの流れ、ログ、エラー処理、CORS、OpenAPI、メールの依頼の節を足した） | [v1.0.7-baseline](changes/v1.0.7-baseline.md) |
+| v1.2.0 | 2026-10-16 | OAuth のクライアントのトークンを `/api/*` で 401 にする（AC-20）。`/mcp` と `.well-known` のルート | [mcp v1.2.0-mcp-server](../mcp/changes/v1.2.0-mcp-server.md) |
 | v1.1.0 | 2026-10-13 | API の認証を公開鍵方式（JWKS）のアクセストークンにも対応させた。この spec.md を認証の部分から作成 | [v1.1.0-auth-asymmetric-jwt](changes/v1.1.0-auth-asymmetric-jwt.md) |

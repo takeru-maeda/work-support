@@ -73,3 +73,7 @@ updated: 2026-10-15
   - `useEffortSummaryMetrics`: `projectOptions` の読み込みが終わっても案件名が更新されない可能性
   - `useEffortSubmission`: `cancelSync`（`useEffortDraftSync` で毎回作り直される）が依存に無い
 - 主要な画面の E2E シナリオ
+- mcp v1.2.0 のレビューで見つけたもの（直すなら改修の記録を通す）
+  - OAuth のトークンでも、`authenticated` に実行を許している DB の関数（`refresh_projects_with_tasks_mv` など、baseline の既定の権限）を呼べる。必要な関数だけ `service_role` に絞る
+  - 同意の画面から来た人が「新規登録」に進むと、登録のあと同意の画面に戻らない（auth の AC-13 で引き継がないと決めた。使ってみて困るなら引き継ぐ）
+  - `get_goals` が目標を 2 回読む（前週の進捗の関数が中でもう一度読む）、`search_work_records` が合計のために期間のすべての行を読む（行数が多いユーザーで遅くなれば集計を DB に寄せる）

@@ -149,6 +149,17 @@ export async function callApi(
     testEnv(),
     executionCtx,
   );
+  // SSE の応答（MCP）は、本文を読み進めるあいだに処理が進み、waitUntil もそこで呼ばれる。
+  // 本文を読み切ってから待ち合わせ、読んだ本文で応答を作り直す
+  if ((res.headers.get("content-type") ?? "").includes("text/event-stream")) {
+    const text = await res.text();
+    await Promise.allSettled(pending);
+    return new Response(text, {
+      status: res.status,
+      statusText: res.statusText,
+      headers: res.headers,
+    });
+  }
   await Promise.allSettled(pending);
   return res;
 }

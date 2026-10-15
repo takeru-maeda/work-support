@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,12 +9,14 @@ import { AuthBrand } from "@/features/auth/components/AuthBrand";
 import { AuthErrorAlert } from "@/features/auth/components/AuthErrorAlert";
 import { AuthPageContainer } from "@/features/auth/components/AuthPageContainer";
 import { PasswordInput } from "@/features/auth/components/PasswordInput";
+import { safeRedirectPath } from "@/features/auth/utils/redirect";
 import { login } from "@/lib/auth";
 
 import type { FormEvent } from "react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -28,7 +30,7 @@ export default function LoginPage() {
     const result = await login(email, password);
 
     if (result.success) {
-      navigate(ROUTES.home);
+      navigate(safeRedirectPath(searchParams.get("redirect")));
     } else {
       setError(result.error || "ログインに失敗しました");
     }

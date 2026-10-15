@@ -2,8 +2,10 @@
 title: 工数一覧（絞り込み、並べ替え、ページ送り、集計）
 feature: effort-list
 status: current
-updated: 2026-10-15
+updated: 2026-10-16
 code:
+  - packages/api/src/features/reports/service.ts :: searchWorkRecordsByNameService
+  - packages/api/src/features/reports/repository.ts :: getWorkRecordsByName
   - packages/api/src/features/reports/index.ts :: reports
   - packages/api/src/features/reports/service.ts :: getWorkRecordListService
   - packages/api/src/features/reports/repository.ts :: getWorkRecordList
@@ -25,7 +27,7 @@ code:
   - packages/web/src/features/effort-list/components/list/EffortsSummary.tsx :: EffortsSummary
   - packages/web/src/features/effort-list/storageKeys.ts :: getEffortListFilterStorageKey
   - packages/web/src/features/effort-list/api/workRecords.ts :: useWorkRecords
-related: [effort-entry, effort-ingest-gas]
+related: [effort-entry, effort-ingest-gas, mcp]
 symptoms:
   - 工数一覧の集計が、絞り込んだ全体の合計と合わない
   - 工数一覧のページを送ると、同じ行が 2 回出る / 出ない行がある
@@ -134,3 +136,4 @@ symptoms:
 | バージョン | 日付 | 内容 | 改修の記録 |
 | --- | --- | --- | --- |
 | v1.0.7 | 2026-10-15 | 移行時点の基準 | [v1.0.7-baseline](changes/v1.0.7-baseline.md) |
+| v1.2.0 | 2026-10-16 | MCP の `search_work_records` のために、名前の完全一致で元の表から探す service の関数を足した（API の振る舞いは変えない） | [mcp v1.2.0-mcp-server](../mcp/changes/v1.2.0-mcp-server.md) |

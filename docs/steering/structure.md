@@ -22,7 +22,7 @@ src/
     └── types.ts       # その機能の型（入出力スキーマは shared から再利用）
 ```
 
-**層の依存の向き**: `index.ts → service.ts → repository.ts`。逆向きの依存は作らない。他機能のデータが必要なときは、その機能の service を通すことを基本とする（ほかの機能の repository / index / types は直接 import しない）。
+**層の依存の向き**: `index.ts → service.ts → repository.ts`。`features/mcp` は例外で service / repository を持たず、ツール（`tools/`）がほかの機能の service を呼んで入出力を変換するだけにする。逆向きの依存は作らない。他機能のデータが必要なときは、その機能の service を通すことを基本とする（ほかの機能の repository / index / types は直接 import しない）。
 
 ### `packages/web/`（フロントエンド）
 **構成**: Bulletproof React を下敷きにした機能単位の構成。

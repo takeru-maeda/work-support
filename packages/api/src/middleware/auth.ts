@@ -40,10 +40,24 @@ export const jwtAuthMiddleware = createMiddleware(async (c, next) => {
     throw new AppError(401, "Unauthorized", error as Error);
   }
 
+  // MCP のクライアントに出した OAuth のトークンは /mcp だけで受け付ける（AC-platform-20）。
+  // アプリに渡したトークンで、アカウントの削除のような画面だけの操作を呼べないようにする
+  if (isOAuthClientToken(payload)) throw new AppError(401, "Unauthorized");
+
   const user: AuthenticatedUser = buildAuthenticatedUserFromPayload(payload);
   c.set("user", user);
   await next();
 });
+
+/**
+ * Supabase の OAuth 2.1 サーバーがクライアント（MCP のアプリ）に出したトークンかを返します。
+ * そのトークンには `client_id` の claim が入り、web のログインのトークンには入らない。
+ *
+ * @param payload 検証済みの JWT のペイロード
+ * @returns OAuth のクライアントのトークンなら true
+ */
+export const isOAuthClientToken = (payload: JWTPayload): boolean =>
+  typeof payload.client_id === "string" && payload.client_id !== "";
 
 /**
  * APIキー認証を検証します。
@@ -127,8 +141,12 @@ const findUserByEmail = async (
 
 /**
  * JWT ペイロードから認証ユーザーを構築します。
+ *
+ * @param payload 検証済みの JWT のペイロード
+ * @returns ユーザー ID とメールアドレス
+ * @throws `sub` が無ければ AppError(401)
  */
-const buildAuthenticatedUserFromPayload = (
+export const buildAuthenticatedUserFromPayload = (
   payload: JWTPayload,
 ): AuthenticatedUser => {
   const userId: string | undefined = payload.sub;

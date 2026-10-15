@@ -7,6 +7,7 @@ import { openAPIRouteHandler } from "hono-openapi";
 import effort from "./features/effort";
 import goals from "./features/goals";
 import logs from "./features/logs";
+import mcp from "./features/mcp";
 import missions from "./features/missions";
 import projects from "./features/projects";
 import reports from "./features/reports";
@@ -58,6 +59,8 @@ app.route("/api/reports", reports);
 app.route("/api/user-settings", userSettings);
 app.route("/api/users", users);
 app.route("/api/logs", logs);
+// MCP サーバー（/mcp）と、その保護されたリソースの情報（/.well-known/oauth-protected-resource）
+app.route("/", mcp);
 
 app.get(
   "/openapi",

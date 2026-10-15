@@ -12,6 +12,7 @@ import AddGoalsPage from "@/pages/goals/AddGoalsPage";
 import GoalsPage from "@/pages/goals/GoalsPage";
 import HomePage from "@/pages/home/HomePage";
 import LandingPage from "@/pages/landing/LandingPage";
+import ConsentPage from "@/pages/oauth/ConsentPage";
 import ProfilePage from "@/pages/profile/ProfilePage";
 import WeeklyReportPage from "@/pages/reports/WeeklyReportPage";
 import SettingsPage from "@/pages/settings/SettingsPage";
@@ -50,6 +51,8 @@ const App = (): JSX.Element => {
               path={ROUTES.resetPassword}
               element={<ResetPasswordPage />}
             />
+            {/* AuthGuard の外。未ログインなら画面の中でログインへ移す（AC-mcp-14） */}
+            <Route path={ROUTES.oauthConsent} element={<ConsentPage />} />
             <Route
               path="*"
               element={<Navigate to={ROUTES.landing} replace />}

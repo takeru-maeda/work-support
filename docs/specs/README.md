@@ -37,4 +37,5 @@ docs/specs/
 | weekly-report | 週報の出力（工数と目標の進捗から雛形を作る） | [spec.md](weekly-report/spec.md) |
 | profile | プロフィール、アバター、アカウント削除 | [spec.md](profile/spec.md) |
 | user-settings | ユーザー設定（メール通知、テーマ） | [spec.md](user-settings/spec.md) |
+| mcp | MCP サーバー（AI のアプリから読み書きするツール、OAuth の同意の画面） | [spec.md](mcp/spec.md) |
 | platform | ログ、エラー処理、認証ミドルウェア、CORS、OpenAPI、メール送信 | [spec.md](platform/spec.md) |
