@@ -7,6 +7,7 @@ import { useAddGoalPeriodValidation } from "@/features/goals/hooks/modules/add/u
 import { useAddGoalSave } from "@/features/goals/hooks/modules/add/useAddGoalSave";
 import { useGoalDraft } from "@/features/goals/hooks/modules/add/useGoalDraft";
 import { useGoalsData } from "@/features/goals/hooks/modules/current/useGoalsData";
+import { MAX_GOALS_PER_PERIOD } from "@shared/schemas/goals";
 
 import type { NewGoal } from "../types";
 
@@ -17,6 +18,8 @@ interface UseAddGoalsManagerResult {
   setPeriodEnd: (date?: Date) => void;
   goals: NewGoal[];
   addGoal: () => void;
+  /** 行の数が上限（`MAX_GOALS_PER_PERIOD`）に届いていないか */
+  canAddGoal: boolean;
   removeGoal: (id: string) => void;
   updateGoal: (
     id: string,
@@ -92,6 +95,7 @@ export function useAddGoalsManager(): UseAddGoalsManagerResult {
     setPeriodEnd,
     goals,
     addGoal,
+    canAddGoal: goals.length < MAX_GOALS_PER_PERIOD,
     removeGoal,
     updateGoal,
     handleSave,

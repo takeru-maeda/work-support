@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   missions: "/api/missions",
   goals: "/api/goals",
   goalsCurrent: "/api/goals/current",
+  goalsPeriods: "/api/goals/periods",
   goalsHistory: "/api/goals/history",
   goalsPreviousWeekProgress: "/api/goals/progress/previous-week",
   projects: "/api/projects",

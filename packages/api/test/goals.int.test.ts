@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { adminClient, callApi, createTestUser } from "./helpers";
+import { validateGoalPeriod } from "../src/features/goals/service";
+
+import { adminClient, browserClient, callApi, createTestUser } from "./helpers";
 
 import type { TestUser } from "./helpers";
 
@@ -111,59 +113,296 @@ describe("GET /api/goals/current", () => {
   });
 });
 
-describe("POST /api/goals", () => {
-  const body = {
-    title: "目標A",
-    content: "内容",
-    start_date: "2026-10-01",
-    end_date: "2026-12-31",
-    weight: 33.333,
-  };
-
-  it("AC-goals-21: 作った目標を 201 で返す。進捗率は 0、重みは小数第 2 位に丸め、履歴は残さない", async () => {
-    const user = await createTestUser();
-    const res = await callApi("/api/goals", { method: "POST", user, body });
-
-    expect(res.status, await res.clone().text()).toBe(201);
-    const { created } = await json<{ created: GoalRow }>(res);
-    expect(created).toMatchObject({
-      title: "目標A",
-      content: "内容",
-      start_date: "2026-10-01",
-      end_date: "2026-12-31",
-      weight: 33.33,
-      progress: 0,
-    });
-    expect(await historiesOf(created.id)).toEqual([]);
+describe("POST /api/goals/periods", () => {
+  const PERIOD = { start_date: "2027-01-01", end_date: "2027-03-31" };
+  const goalOf = (title: string, weight: number, content = "") => ({
+    title,
+    content,
+    weight,
   });
+  const body = {
+    ...PERIOD,
+    goals: [goalOf("目標A", 60, "内容A"), goalOf("目標B", 40)],
+  };
+  const END_BEFORE_START = "終了日は開始日より未来の日付を選択してください。";
+  const TITLE_REQUIRED = "目標名を入力してください。";
+  const WEIGHT_TOTAL = "重みの合計を100%にしてください。";
+  const overlapMessage = (endDate: string) =>
+    `開始日は既存目標の終了日（${endDate}）より未来の日付を選択してください。`;
 
-  it("AC-goals-21: 期間の前後は確かめない（終了日が開始日より前でも作れる）", async () => {
-    const user = await createTestUser();
-    const res = await callApi("/api/goals", {
+  async function goalsOf(user: TestUser): Promise<GoalRow[]> {
+    const { data, error } = await adminClient()
+      .from("goals")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("id");
+    if (error) throw new Error(error.message);
+    return data as GoalRow[];
+  }
+
+  async function post(user: TestUser, payload: unknown) {
+    return callApi("/api/goals/periods", {
       method: "POST",
       user,
-      body: { ...body, start_date: "2026-12-31", end_date: "2026-10-01" },
+      body: payload,
+    });
+  }
+
+  it("AC-goals-23: すべての目標を進捗率 0 で作り、201 で本文の順に返す。履歴は残さず、現在の目標になる", async () => {
+    const user = await createTestUser();
+    await seedGoal(user, { start_date: "2026-10-01", end_date: "2026-12-31" });
+
+    const res = await post(user, body);
+
+    expect(res.status, await res.clone().text()).toBe(201);
+    const { created } = await json<{ created: GoalRow[] }>(res);
+    expect(created).toEqual([
+      expect.objectContaining({
+        ...PERIOD,
+        title: "目標A",
+        content: "内容A",
+        weight: 60,
+        progress: 0,
+      }),
+      expect.objectContaining({ ...PERIOD, title: "目標B", weight: 40 }),
+    ]);
+    for (const goal of created) expect(await historiesOf(goal.id)).toEqual([]);
+    const current = await json<{ goals: GoalRow[] }>(
+      await callApi("/api/goals/current", { user }),
+    );
+    expect(current.goals.map((g) => g.id).sort()).toEqual(
+      created.map((g) => g.id).sort(),
+    );
+  });
+
+  it("AC-goals-23: 目標名は前後の空白を含めて入力のまま保存し、1 行ずつ丸めた重みの合計が 100.00 なら通す", async () => {
+    const user = await createTestUser();
+    const res = await post(user, {
+      ...PERIOD,
+      goals: [
+        goalOf(" 目標A ", 33.334),
+        goalOf("B", 33.333),
+        goalOf("C", 33.333),
+      ],
+    });
+
+    // 33.334 → 33.33、33.333 → 33.33 で合計 99.99 になるので 400
+    expect(res.status).toBe(400);
+    expect(await errorOf(res)).toBe(WEIGHT_TOTAL);
+
+    const ok = await post(user, {
+      ...PERIOD,
+      goals: [
+        goalOf(" 目標A ", 33.335),
+        goalOf("B", 33.33),
+        goalOf("C", 33.334),
+      ],
+    });
+    expect(ok.status, await ok.clone().text()).toBe(201);
+    const { created } = await json<{ created: GoalRow[] }>(ok);
+    expect(created.map((g) => [g.title, g.weight])).toEqual([
+      [" 目標A ", 33.34],
+      ["B", 33.33],
+      ["C", 33.33],
+    ]);
+  });
+
+  it("AC-goals-23: 目標が無いユーザーは、期間の前後だけを確かめる", async () => {
+    const user = await createTestUser();
+    const res = await post(user, {
+      ...body,
+      start_date: "2000-01-01",
+      end_date: "2000-01-02",
     });
 
     expect(res.status).toBe(201);
   });
 
+  it("AC-goals-23: 他人の期間は、現在の期間に数えない", async () => {
+    const other = await createTestUser();
+    await seedGoal(other, { end_date: "2099-12-31" });
+    const user = await createTestUser();
+
+    expect((await post(user, body)).status).toBe(201);
+  });
+
   it.each([
-    ["目標名が空", { title: "" }],
-    ["内容が null", { content: null }],
-    ["内容が無い", { content: undefined }],
-    ["日付の形が違う", { start_date: "2026/10/01" }],
-    ["重みが 100 を超える", { weight: 101 }],
-    ["重みが負", { weight: -1 }],
-  ])("AC-goals-21: %s と 400", async (_label, override) => {
+    ["終了日が開始日と同じ", { end_date: PERIOD.start_date }, END_BEFORE_START],
+    ["終了日が開始日より前", { end_date: "2026-12-31" }, END_BEFORE_START],
+    [
+      "開始日が現在の期間の終了日と同じ",
+      { start_date: "2026-12-31" },
+      overlapMessage("2026/12/31"),
+    ],
+    [
+      "目標名が空白だけ",
+      { goals: [goalOf("A", 50), goalOf("　 ", 50)] },
+      TITLE_REQUIRED,
+    ],
+    [
+      "重みの合計が 100.01",
+      { goals: [goalOf("A", 50), goalOf("B", 50.01)] },
+      WEIGHT_TOTAL,
+    ],
+    [
+      "DB と同じく送る 10 進の値で丸めると、合計が 99.99（33.33499999999999 / 33.33 / 33.33）",
+      {
+        goals: [
+          goalOf("A", 33.33499999999999),
+          goalOf("B", 33.33),
+          goalOf("C", 33.33),
+        ],
+      },
+      WEIGHT_TOTAL,
+    ],
+    [
+      "丸めると 0.00 になる重みがある",
+      { goals: [goalOf("A", 100), goalOf("B", 0.004)] },
+      WEIGHT_TOTAL,
+    ],
+    [
+      "誤りが複数あれば、決まった順の最初（終了日 → 重なり → 目標名 → 重み）",
+      {
+        start_date: "2026-11-01",
+        end_date: "2026-10-01",
+        goals: [goalOf("", 10)],
+      },
+      END_BEFORE_START,
+    ],
+    [
+      "重なりと目標名と重みの誤りでは、重なり",
+      { start_date: "2026-11-01", goals: [goalOf("", 10)] },
+      overlapMessage("2026/12/31"),
+    ],
+    [
+      "目標名と重みの誤りでは、目標名",
+      { goals: [goalOf("", 10)] },
+      TITLE_REQUIRED,
+    ],
+  ])(
+    "AC-goals-23: %s と、その文の 400。何も作らない",
+    async (_label, override, message) => {
+      const user = await createTestUser();
+      await seedGoal(user, {
+        start_date: "2026-10-01",
+        end_date: "2026-12-31",
+      });
+
+      const res = await post(user, { ...body, ...override });
+
+      expect(res.status).toBe(400);
+      expect(await errorOf(res)).toBe(message);
+      expect(await goalsOf(user)).toHaveLength(1);
+    },
+  );
+
+  it.each([
+    ["goals が空", { goals: [] }],
+    [
+      "goals が 21 件（上限は 20）",
+      { goals: Array.from({ length: 21 }, (_, i) => goalOf(`目標${i}`, 1)) },
+    ],
+    ["日付の形が違う", { start_date: "2027/01/01" }],
+    ["内容が null", { goals: [{ title: "A", content: null, weight: 100 }] }],
+    ["内容が無い", { goals: [{ title: "A", weight: 100 }] }],
+    ["重みが 0", { goals: [goalOf("A", 0), goalOf("B", 100)] }],
+    ["重みが 100 を超える", { goals: [goalOf("A", 100.01)] }],
+    [
+      "目標名が文字列でない",
+      { goals: [{ title: 1, content: "", weight: 100 }] },
+    ],
+  ])(
+    "AC-goals-23: 形の誤り（%s）は入力の検証の 400。何も作らない",
+    async (_label, override) => {
+      const user = await createTestUser();
+
+      const res = await post(user, { ...body, ...override });
+
+      expect(res.status).toBe(400);
+      expect(await json<{ success: boolean }>(res)).toMatchObject({
+        success: false,
+      });
+      expect(await goalsOf(user)).toEqual([]);
+    },
+  );
+
+  it("AC-goals-24: 同じ期間を同時に 2 回送ると、片方だけが 201、もう片方は先の期間の終了日を添えた 400", async () => {
+    const user = await createTestUser();
+
+    const responses = await Promise.all([post(user, body), post(user, body)]);
+
+    const statuses = responses.map((r) => r.status).sort();
+    expect(statuses).toEqual([201, 400]);
+    const rejected = responses.find((r) => r.status === 400);
+    expect(await errorOf(rejected as Response)).toBe(
+      overlapMessage("2027/03/31"),
+    );
+    expect(await goalsOf(user)).toHaveLength(2);
+  });
+
+  it("AC-goals-21 の廃止: POST /api/goals は無い（404）", async () => {
     const user = await createTestUser();
     const res = await callApi("/api/goals", {
       method: "POST",
       user,
-      body: { ...body, ...override },
+      body: { ...PERIOD, title: "A", content: "", weight: 100 },
     });
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(404);
+    expect(await goalsOf(user)).toEqual([]);
+  });
+
+  it("AC-goals-24: DB の関数は、ロックの中で現在の期間と比べ直し、重なれば WG001 と終了日を返して何も作らない", async () => {
+    const user = await createTestUser();
+    await seedGoal(user, { start_date: "2026-10-01", end_date: "2026-12-31" });
+
+    const { error } = await adminClient().rpc("create_goal_period", {
+      p_user_id: user.id,
+      p_start_date: "2026-12-31",
+      p_end_date: "2027-03-31",
+      p_goals: [goalOf("A", 100)],
+    });
+
+    expect(error).toMatchObject({ code: "WG001", details: "2026-12-31" });
+    expect(await goalsOf(user)).toHaveLength(1);
+  });
+
+  it("validateGoalPeriod: 作らずに誤りを返し、この期間で編集できなくなる今の目標を返す", async () => {
+    const user = await createTestUser();
+    await seedGoal(user, { title: "過去", end_date: "2026-09-30" });
+    const current = await seedGoal(user, { end_date: "2026-12-31" });
+
+    const ok = await validateGoalPeriod(adminClient(), user.id, body);
+    expect(ok.errors).toEqual([]);
+    expect(ok.lockedGoals.map((g) => g.id)).toEqual([current.id]);
+
+    const ng = await validateGoalPeriod(adminClient(), user.id, {
+      ...body,
+      start_date: "2026-12-01",
+      goals: [goalOf("", 10)],
+    });
+    expect(ng.errors).toEqual([
+      overlapMessage("2026/12/31"),
+      TITLE_REQUIRED,
+      WEIGHT_TOTAL,
+    ]);
+    expect(await goalsOf(user)).toHaveLength(2);
+  });
+
+  it("DB の関数は、anon と、ログインしたユーザーのキーからは呼べない（引数のユーザー ID で他人の目標を作れないように）", async () => {
+    const user = await createTestUser();
+
+    for (const client of [browserClient(), browserClient(user)]) {
+      const { error } = await client.rpc("create_goal_period", {
+        p_user_id: user.id,
+        p_start_date: PERIOD.start_date,
+        p_end_date: PERIOD.end_date,
+        p_goals: [goalOf("A", 100)],
+      });
+      // 42501: 実行の権限が無い（関数が無いときの PGRST202 と区別する）
+      expect(error?.code).toBe("42501");
+    }
+    expect(await goalsOf(user)).toEqual([]);
   });
 });
 
@@ -240,23 +479,52 @@ describe("PUT /api/goals/:id", () => {
     expect(await errorOf(res)).toBe(NOT_FOUND);
   });
 
-  it("AC-goals-22: 期間も変えられ、updated_at は作ったときのまま", async () => {
+  it("AC-goals-22: updated_at は作ったときのまま変わらない", async () => {
     const user = await createTestUser();
     const goal = await seedGoal(user);
 
     const res = await callApi(`/api/goals/${goal.id}`, {
       method: "PUT",
       user,
-      body: { start_date: "2027-01-01", end_date: "2027-03-31" },
+      body: { title: "新しい名前" },
     });
 
     const { updated } = await json<{ updated: GoalRow }>(res);
-    expect(updated).toMatchObject({
-      start_date: "2027-01-01",
-      end_date: "2027-03-31",
-    });
     expect(Date.parse(updated.updated_at)).toBe(Date.parse(goal.updated_at));
   });
+
+  it.each([
+    ["期間", { start_date: "2027-01-01", end_date: "2027-03-31" }],
+    ["期間と一緒にほかの項目", { title: "新", end_date: "2027-03-31" }],
+    ["知らない項目", { user_id: "00000000-0000-0000-0000-000000000000" }],
+  ])(
+    "AC-goals-22: %s を送ると入力の検証の 400 で、何も変えない",
+    async (_label, body) => {
+      const user = await createTestUser();
+      const goal = await seedGoal(user);
+
+      const res = await callApi(`/api/goals/${goal.id}`, {
+        method: "PUT",
+        user,
+        body,
+      });
+
+      expect(res.status).toBe(400);
+      expect(await json<{ success: boolean }>(res)).toMatchObject({
+        success: false,
+      });
+      const { goals } = await json<{ goals: GoalRow[] }>(
+        await callApi("/api/goals/current", { user }),
+      );
+      expect(goals).toEqual([
+        expect.objectContaining({
+          title: goal.title,
+          start_date: goal.start_date,
+          end_date: goal.end_date,
+        }),
+      ]);
+    },
+  );
 
   it.each([
     ["重みが 100 を超える", { weight: 101 }],
@@ -348,7 +616,7 @@ describe("ユーザーの分離", () => {
 
   it.each([
     ["GET", "/api/goals/current"],
-    ["POST", "/api/goals"],
+    ["POST", "/api/goals/periods"],
     ["PUT", "/api/goals/1"],
     ["DELETE", "/api/goals/1"],
     ["GET", "/api/goals/history"],

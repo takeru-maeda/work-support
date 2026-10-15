@@ -1,23 +1,29 @@
 import dayjs from "dayjs";
 
+import {
+  GOAL_PERIOD_MESSAGES,
+  goalPeriodOverlapMessage,
+  toCents,
+} from "../../../../shared/src/utils/goalPeriod";
 import { calculateGoalSummaries } from "../../../../shared/src/utils/goalProgress";
 import { AppError } from "../../lib/errors";
 
 import {
-  createGoal,
+  createGoalPeriod,
   createGoalProgressHistory,
   deleteGoal,
   getGoalProgressHistoriesUntil,
   getGoalsByUser,
   getLatestGoals,
+  GoalPeriodOverlapError,
   searchGoals,
   updateGoal,
 } from "./repository";
 
 import type { GoalProgressHistoryMini } from "./repository";
 import type {
-  GoalCreateRequest,
   GoalHistoryQuery,
+  GoalPeriodCreateRequest,
   GoalPreviousWeekProgress,
   GoalUpdateRequest,
 } from "./types";
@@ -38,20 +44,91 @@ export const getLatestGoalsService = async (
   return await getLatestGoals(supabase, userId);
 };
 
+/** 重みの合計の目標値（小数第 2 位まで、100 倍した整数で比べる） */
+const TOTAL_WEIGHT_CENTS = 100 * 100;
+
 /**
- * 目標を新規作成します。
+ * DB を読まずに決まる確認と、現在の期間との重なりを、決まった順に確かめます。
+ *
+ * @param period 作ろうとしている期間と目標
+ * @param latestEndDate 現在の期間の終了日（YYYY-MM-DD）。目標が無ければ undefined
+ * @returns 外れた確認の文（終了日 → 重なり → 目標名 → 重みの順。通れば空）
+ */
+export const checkGoalPeriod = (
+  period: GoalPeriodCreateRequest,
+  latestEndDate: string | undefined,
+): string[] => {
+  const errors: string[] = [];
+  // YYYY-MM-DD は文字列のまま比べても日付の前後と一致する
+  if (period.end_date <= period.start_date) {
+    errors.push(GOAL_PERIOD_MESSAGES.endBeforeStart);
+  }
+  if (latestEndDate !== undefined && period.start_date <= latestEndDate) {
+    errors.push(goalPeriodOverlapMessage(latestEndDate));
+  }
+  if (period.goals.some((goal) => goal.title.trim() === "")) {
+    errors.push(GOAL_PERIOD_MESSAGES.titleRequired);
+  }
+  const cents = period.goals.map((goal) => toCents(goal.weight));
+  const total = cents.reduce((sum, value) => sum + value, 0);
+  if (cents.some((value) => value <= 0) || total !== TOTAL_WEIGHT_CENTS) {
+    errors.push(GOAL_PERIOD_MESSAGES.weightTotal);
+  }
+  return errors;
+};
+
+/** 期間の作成を確かめた結果 */
+export interface GoalPeriodValidation {
+  /** 外れた確認の文（決まった順。通れば空） */
+  errors: string[];
+  /** この期間を作ると「過去の目標」に回り、画面から編集できなくなる今の目標 */
+  lockedGoals: Tables<"goals">[];
+}
+
+/**
+ * 目標の期間を作れるかを、作らずに確かめます（作成と、MCP のプレビューで使う）。
  *
  * @param supabase Supabaseクライアント
- * @param userId 目標を作成するユーザーID
- * @param goal 作成する目標データを指定
- * @returns 作成された目標
+ * @param userId 期間を作るユーザーID
+ * @param period 作ろうとしている期間と目標
+ * @returns 外れた確認の文と、編集できなくなる今の目標
  */
-export const createGoalService = async (
+export const validateGoalPeriod = async (
   supabase: SupabaseClient<Database>,
   userId: string,
-  goal: GoalCreateRequest,
-): Promise<Tables<"goals">> => {
-  return await createGoal(supabase, userId, goal);
+  period: GoalPeriodCreateRequest,
+): Promise<GoalPeriodValidation> => {
+  const lockedGoals: Tables<"goals">[] = await getLatestGoals(supabase, userId);
+  const latestEndDate: string | undefined = lockedGoals[0]?.end_date;
+  return { errors: checkGoalPeriod(period, latestEndDate), lockedGoals };
+};
+
+/**
+ * 目標の期間を、すべての目標とともに作ります。確認に外れたら何も作りません。
+ *
+ * @param supabase Supabaseクライアント
+ * @param userId 期間を作るユーザーID
+ * @param period 作る期間と目標
+ * @returns 作った目標（本文の順）
+ * @throws 確認に外れたら、最初に外れた確認の文の AppError(400)
+ */
+export const createGoalPeriodService = async (
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  period: GoalPeriodCreateRequest,
+): Promise<Tables<"goals">[]> => {
+  const { errors } = await validateGoalPeriod(supabase, userId, period);
+  if (errors.length > 0) throw new AppError(400, errors[0]);
+
+  try {
+    return await createGoalPeriod(supabase, userId, period);
+  } catch (error) {
+    // 確認のあとに、同じユーザーの別の期間が先に作られた（AC-goals-24）
+    if (error instanceof GoalPeriodOverlapError) {
+      throw new AppError(400, goalPeriodOverlapMessage(error.latestEndDate));
+    }
+    throw error;
+  }
 };
 
 /**

@@ -10,7 +10,11 @@ import type { AuthUser } from "@/lib/auth";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { renderWithProviders, signInTestUser } from "@/test/render";
 import { apiUrl, server } from "@/test/server";
-import type { GoalGetResponse } from "@shared/schemas/goals";
+import type {
+  GoalGetResponse,
+  GoalPeriodCreateRequest,
+  GoalPeriodCreateResponse,
+} from "@shared/schemas/goals";
 
 import AddGoalsPage from "./AddGoalsPage";
 
@@ -55,12 +59,12 @@ const readDraft = () => {
 interface ApiOptions {
   /** 現在の目標の終了日。省くと目標なし */
   currentEnd?: string;
-  /** 何件目（1 始まり）の作成で失敗させるか */
-  failAt?: number;
+  /** 期間の作成を失敗させるときの応答 */
+  failWith?: { status: number; body?: Record<string, unknown> };
 }
 
-const mockApi = ({ currentEnd, failAt }: ApiOptions = {}) => {
-  const posts: Record<string, unknown>[] = [];
+const mockApi = ({ currentEnd, failWith }: ApiOptions = {}) => {
+  const posts: GoalPeriodCreateRequest[] = [];
   server.use(
     http.get(apiUrl(API_ENDPOINTS.goalsCurrent), () =>
       HttpResponse.json<GoalGetResponse>({
@@ -82,22 +86,26 @@ const mockApi = ({ currentEnd, failAt }: ApiOptions = {}) => {
           : [],
       }),
     ),
-    http.post(apiUrl(API_ENDPOINTS.goals), async ({ request }) => {
-      const body = (await request.json()) as Record<string, unknown>;
+    http.post(apiUrl(API_ENDPOINTS.goalsPeriods), async ({ request }) => {
+      const body = (await request.json()) as GoalPeriodCreateRequest;
       posts.push(body);
-      if (posts.length === failAt) {
-        return new HttpResponse(null, { status: 500 });
+      if (failWith) {
+        return failWith.body
+          ? HttpResponse.json(failWith.body, { status: failWith.status })
+          : new HttpResponse(null, { status: failWith.status });
       }
-      return HttpResponse.json(
+      return HttpResponse.json<GoalPeriodCreateResponse>(
         {
-          created: {
-            id: 100 + posts.length,
+          created: body.goals.map((goal, index) => ({
+            id: 100 + index,
             user_id: user.id,
+            start_date: body.start_date,
+            end_date: body.end_date,
             progress: 0,
             created_at: "2026-10-13T00:00:00Z",
             updated_at: "2026-10-13T00:00:00Z",
-            ...body,
-          },
+            ...goal,
+          })),
         },
         { status: 201 },
       );
@@ -215,6 +223,27 @@ describe("AddGoalsPage（目標の追加）", () => {
       expect(screen.getAllByPlaceholderText(/^目標\d$/)).toHaveLength(1);
     });
 
+    it("AC-goals-12: 行が上限（20 行）になると「目標を追加」を押せない", async () => {
+      mockApi();
+      seedDraft({
+        goals: Array.from({ length: 19 }, (_, i) => ({
+          id: `g${i}`,
+          name: `目標${i}`,
+          content: "",
+          weight: 5,
+        })),
+      });
+      const ui = userEvent.setup();
+      await renderPage();
+      const addButton = screen.getByRole("button", { name: "目標を追加" });
+      expect(addButton).toBeEnabled();
+
+      await ui.click(addButton);
+
+      expect(screen.getAllByPlaceholderText(/^目標\d+$/)).toHaveLength(20);
+      expect(addButton).toBeDisabled();
+    });
+
     it("AC-goals-12: 重みの合計を出し、100 を超えたら警告を出して保存できない", async () => {
       mockApi();
       seedDraft();
@@ -251,13 +280,12 @@ describe("AddGoalsPage（目標の追加）", () => {
   });
 
   describe("保存", () => {
-    it("AC-goals-13: 確認で「はい」を押すと、目標名のある行だけを 1 行ずつ作り、入力途中の内容を消して /goals に戻る", async () => {
+    it("AC-goals-13: 確認で「はい」を押すと、すべての行を 1 回で送り、入力途中の内容を消して /goals に戻る", async () => {
       const posts = mockApi();
       seedDraft({
         goals: [
           { id: "g1", name: " A ", content: "Aの内容", weight: 60 },
-          { id: "g2", name: "  ", content: "名前なし", weight: 10 },
-          { id: "g3", name: "B", content: "", weight: 30 },
+          { id: "g2", name: "B", content: "", weight: 40 },
         ],
       });
       const ui = userEvent.setup();
@@ -277,22 +305,43 @@ describe("AddGoalsPage（目標の追加）", () => {
       expect(await screen.findByText("目標の一覧")).toBeInTheDocument();
       expect(posts).toEqual([
         {
-          title: " A ",
-          content: "Aの内容",
-          weight: 60,
           start_date: "2027-01-01",
           end_date: "2027-03-31",
-        },
-        {
-          title: "B",
-          content: "",
-          weight: 30,
-          start_date: "2027-01-01",
-          end_date: "2027-03-31",
+          goals: [
+            { title: " A ", content: "Aの内容", weight: 60 },
+            { title: "B", content: "", weight: 40 },
+          ],
         },
       ]);
       expect(showSuccessToast).toHaveBeenCalledWith("目標を保存しました");
       expect(readDraft()).toBeNull();
+    });
+
+    it("AC-goals-13: 目標名が空白だけの行があれば、送らずに「目標名を入力してください。」を出す", async () => {
+      const posts = mockApi();
+      seedDraft({
+        goals: [
+          { id: "g1", name: "A", content: "", weight: 60 },
+          { id: "g2", name: "　 ", content: "名前なし", weight: 40 },
+        ],
+      });
+      const ui = userEvent.setup();
+      await renderPage();
+
+      await ui.click(saveButton());
+      await ui.click(
+        within(await screen.findByRole("alertdialog")).getByRole("button", {
+          name: "はい",
+        }),
+      );
+
+      await waitFor(() =>
+        expect(showErrorToast).toHaveBeenCalledWith(
+          "目標名を入力してください。",
+        ),
+      );
+      expect(posts).toEqual([]);
+      expect(readDraft()).not.toBeNull();
     });
 
     it("AC-goals-13: 「いいえ」なら保存しない", async () => {
@@ -312,11 +361,84 @@ describe("AddGoalsPage（目標の追加）", () => {
       expect(screen.queryByText("目標の一覧")).not.toBeInTheDocument();
     });
 
-    it("AC-goals-13: 途中で失敗すると「目標の保存に失敗しました…」を出し、入力は残る（それより前の目標は作られたまま）", async () => {
-      const posts = mockApi({ failAt: 2 });
+    it.each([
+      [
+        "API が 400 なら、その文",
+        {
+          status: 400,
+          body: {
+            error:
+              "開始日は既存目標の終了日（2027/01/15）より未来の日付を選択してください。",
+            accessLogId: 1,
+          },
+        },
+        "開始日は既存目標の終了日（2027/01/15）より未来の日付を選択してください。",
+      ],
+      [
+        "それ以外の失敗なら「目標の保存に失敗しました…」",
+        { status: 500 },
+        "目標の保存に失敗しました。時間を空けて再度お試しください。",
+      ],
+      [
+        "入力の検証の 400（文が無い）なら「目標の保存に失敗しました…」",
+        { status: 400, body: { success: false, error: { issues: [] } } },
+        "目標の保存に失敗しました。時間を空けて再度お試しください。",
+      ],
+    ])(
+      "AC-goals-13: 保存に失敗したとき、%s を出し、入力は残る",
+      async (_label, failWith, message) => {
+        const posts = mockApi({ failWith });
+        seedDraft();
+        const ui = userEvent.setup();
+        await renderPage();
+
+        await ui.click(saveButton());
+        await ui.click(
+          within(await screen.findByRole("alertdialog")).getByRole("button", {
+            name: "はい",
+          }),
+        );
+
+        await waitFor(() =>
+          expect(showErrorToast).toHaveBeenCalledWith(message),
+        );
+        expect(posts).toHaveLength(1);
+        expect(screen.getByDisplayValue("A")).toBeInTheDocument();
+        expect(screen.queryByText("目標の一覧")).not.toBeInTheDocument();
+        expect(readDraft()).not.toBeNull();
+      },
+    );
+
+    it("AC-goals-13: 別の画面で先に期間が作られて断られたら、現在の目標を取り直し、期間のメッセージを出して保存できなくする", async () => {
+      const overlap =
+        "開始日は既存目標の終了日（2027/03/31）より未来の日付を選択してください。";
+      mockApi({
+        failWith: { status: 400, body: { error: overlap, accessLogId: 1 } },
+      });
       seedDraft();
       const ui = userEvent.setup();
       await renderPage();
+      // 画面を開いたあとに、別の画面で同じ期間が作られた
+      server.use(
+        http.get(apiUrl(API_ENDPOINTS.goalsCurrent), () =>
+          HttpResponse.json<GoalGetResponse>({
+            goals: [
+              {
+                id: 2,
+                user_id: user.id,
+                title: "別の画面で作った目標",
+                start_date: "2027-01-01",
+                end_date: "2027-03-31",
+                progress: 0,
+                weight: 100,
+                content: "",
+                created_at: "2026-10-13T00:00:00Z",
+                updated_at: "2026-10-13T00:00:00Z",
+              },
+            ],
+          }),
+        ),
+      );
 
       await ui.click(saveButton());
       await ui.click(
@@ -325,15 +447,9 @@ describe("AddGoalsPage（目標の追加）", () => {
         }),
       );
 
-      await waitFor(() =>
-        expect(showErrorToast).toHaveBeenCalledWith(
-          "目標の保存に失敗しました。時間を空けて再度お試しください。",
-        ),
-      );
-      expect(posts).toHaveLength(2);
-      expect(screen.getByDisplayValue("A")).toBeInTheDocument();
-      expect(screen.queryByText("目標の一覧")).not.toBeInTheDocument();
-      expect(readDraft()).not.toBeNull();
+      await waitFor(() => expect(showErrorToast).toHaveBeenCalledWith(overlap));
+      expect(await screen.findByText(overlap)).toBeInTheDocument();
+      expect(saveButton()).toBeDisabled();
     });
   });
 

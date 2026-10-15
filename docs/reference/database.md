@@ -302,6 +302,7 @@ erDiagram
 
 ## 関数
 
+- `create_goal_period`
 - `refresh_projects_with_tasks_mv`
 - `save_work_records`
 

@@ -11,8 +11,8 @@ import apiClient from "@/lib/apiClient";
 import { buildUserScopedKey } from "@/lib/utils";
 import { useUserStore } from "@/store/user";
 import {
-  CreateGoalRequestSchema,
-  CreateGoalResponseSchema,
+  CreateGoalPeriodRequestSchema,
+  CreateGoalPeriodResponseSchema,
   GetGoalResponseSchema,
   GoalHistoryQuerySchema,
   GoalHistoryResponseSchema,
@@ -20,33 +20,38 @@ import {
   GoalPreviousWeekQuerySchema,
   UpdateGoalRequestSchema,
   UpdateGoalResponseSchema,
-  type GoalCreateRequest,
-  type GoalCreateResponse,
   type GoalGetResponse,
   type GoalHistoryQuery,
   type GoalHistoryResponse,
+  type GoalPeriodCreateRequest,
+  type GoalPeriodCreateResponse,
   type GoalPreviousWeekProgress,
   type GoalPreviousWeekQuery,
   type GoalUpdateRequest,
   type GoalUpdateResponse,
 } from "@shared/schemas/goals";
 /**
- * 目標を新規作成します。
+ * 目標の期間を、すべての目標とともに作ります（全部作るか、何も作らないか）。
  *
- * @param payload 作成する目標
- * @returns 作成された目標
+ * @param payload 期間と目標
+ * @returns 作られた目標
  */
-export const createGoal = async (payload: GoalCreateRequest): Promise<Goal> => {
-  const requestBody: GoalCreateRequest = CreateGoalRequestSchema.parse(payload);
+export const createGoalPeriod = async (
+  payload: GoalPeriodCreateRequest,
+): Promise<Goal[]> => {
+  const requestBody: GoalPeriodCreateRequest =
+    CreateGoalPeriodRequestSchema.parse(payload);
 
-  const response = await apiClient.post(API_ENDPOINTS.goals, requestBody);
-  const parsed: GoalCreateResponse = CreateGoalResponseSchema.parse(
+  const response = await apiClient.post(
+    API_ENDPOINTS.goalsPeriods,
+    requestBody,
+  );
+  const parsed: GoalPeriodCreateResponse = CreateGoalPeriodResponseSchema.parse(
     response.data,
   );
 
-  const mapped: Goal = mapGoalDtoToGoal(parsed.created);
   void mutate(getCurrentGoalsCacheKey());
-  return mapped;
+  return parsed.created.map(mapGoalDtoToGoal);
 };
 
 /**

@@ -46,6 +46,7 @@ throw new AppError(500, "Critical failure", error, "CRITICAL");
 
 - 利用者への通知は `lib/toast.ts`（`showSuccessToast` / `showErrorToast`）を使う
 - 失敗したときは、利用者に次の行動がわかる日本語のメッセージを出し、詳細は `reportUiError` でサーバーへ送る
+- API が業務の確認で断る 400（`AppError` の日本語の文）は、`lib/apiError.ts` の `getRejectedMessage` で取り出してそのまま出す。画面と API で同じ確認をするときは、文を `packages/shared/src/utils` に 1 つだけ置く（例: `goalPeriod.ts`）
 
 ---
 _パターンと判断を書く_

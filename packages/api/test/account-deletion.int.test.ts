@@ -28,14 +28,12 @@ async function countRows(table: string, userId: string) {
 async function seedEverything(user: TestUser) {
   const calls: [string, "POST" | "PUT", unknown][] = [
     [
-      "/api/goals",
+      "/api/goals/periods",
       "POST",
       {
-        title: "目標",
-        content: "",
         start_date: "2026-10-01",
         end_date: "2026-12-31",
-        weight: 100,
+        goals: [{ title: "目標", content: "", weight: 100 }],
       },
     ],
     ["/api/missions", "PUT", { content: "ミッション" }],

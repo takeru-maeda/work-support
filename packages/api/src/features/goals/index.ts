@@ -6,7 +6,7 @@ import { createSupabaseClient } from "../../lib/supabase";
 import { jwtAuthMiddleware } from "../../middleware/auth";
 
 import {
-  createGoalService,
+  createGoalPeriodService,
   deleteGoalService,
   getLatestGoalsService,
   getPreviousWeekProgressService,
@@ -14,8 +14,8 @@ import {
   updateGoalService,
 } from "./service";
 import {
-  CreateGoalResponseSchema,
-  CreateGoalRequestSchema,
+  CreateGoalPeriodRequestSchema,
+  CreateGoalPeriodResponseSchema,
   GetGoalResponseSchema,
   GoalHistoryQuerySchema,
   GoalHistoryResponseSchema,
@@ -26,9 +26,9 @@ import {
 } from "./types";
 
 import type {
-  GoalCreateRequest,
   GoalHistoryQuery,
   GoalHistoryResponse,
+  GoalPeriodCreateRequest,
   GoalPreviousWeekProgress,
   GoalPreviousWeekQuery,
   GoalUpdateRequest,
@@ -70,36 +70,34 @@ goals.get(
 );
 
 goals.post(
-  "/",
+  "/periods",
   describeRoute({
-    description: "目標を新規作成します",
+    description:
+      "目標の期間を、すべての目標とともに作ります。期間の前後、現在の期間との重なり、目標名、重みの合計（100%）に外れたら、何も作らずに 400 を返します",
     responses: {
       201: {
-        description: "Goal data create successfully",
+        description: "Goal period create successfully",
         content: {
           "application/json": {
-            schema: resolver(CreateGoalResponseSchema),
+            schema: resolver(CreateGoalPeriodResponseSchema),
           },
         },
       },
     },
   }),
-  validator("json", CreateGoalRequestSchema),
+  validator("json", CreateGoalPeriodRequestSchema),
   async (c) => {
     const user: AuthenticatedUser | undefined = c.get("user");
     if (!user) throw new AppError(401, "Unauthorized");
 
-    const goal: GoalCreateRequest = c.req.valid("json");
+    const period: GoalPeriodCreateRequest = c.req.valid("json");
     const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
-    const createdGoal: Tables<"goals"> = await createGoalService(
+    const created: Tables<"goals">[] = await createGoalPeriodService(
       supabase,
       user.id,
-      goal,
+      period,
     );
-    return c.json(
-      CreateGoalResponseSchema.parse({ created: createdGoal }),
-      201,
-    );
+    return c.json(CreateGoalPeriodResponseSchema.parse({ created }), 201);
   },
 );
 

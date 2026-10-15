@@ -33,11 +33,11 @@ API（`packages/api`、Hono on Cloudflare Workers）のエンドポイントの�
 
 | メソッド | パス | 認証 | 説明 | パス / クエリ | 本文の項目 | 応答 |
 | --- | --- | --- | --- | --- | --- | --- |
-| POST | `/api/goals` | JWT | 目標を新規作成します | — | `title`、`start_date`、`end_date`、`weight`、`content` | 201 |
 | DELETE | `/api/goals/:id` | JWT | 目標を削除します | `id` | — | 204 |
-| PUT | `/api/goals/:id` | JWT | 目標を更新します | `id` | `title`、`start_date`、`end_date`、`weight`、`progress`、`content` | 200 |
+| PUT | `/api/goals/:id` | JWT | 目標を更新します | `id` | `title`、`weight`、`progress`、`content` | 200 |
 | GET | `/api/goals/current` | JWT | 最新の目標のリストを取得します | — | — | 200 |
 | GET | `/api/goals/history` | JWT | 過去の目標を検索します | `query`、`startDate`、`endDate`、`minProgress`、`maxProgress`、`sort`、`page`、`pageSize` | — | 200 |
+| POST | `/api/goals/periods` | JWT | 目標の期間を、すべての目標とともに作ります。期間の前後、現在の期間との重なり、目標名、重みの合計（100%）に外れたら、何も作らずに 400 を返します | — | `start_date`、`end_date`、`goals` | 201 |
 | GET | `/api/goals/progress/previous-week` | JWT | 前週末時点の最新進捗率を取得します | `referenceDate` | — | 200 |
 
 ### logs（`packages/api/src/features/logs/`）
