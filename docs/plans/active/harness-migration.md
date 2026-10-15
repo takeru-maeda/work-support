@@ -16,7 +16,7 @@ scope:                 # P2 の lint の一括修正と依存の整理、P4 の�
 ## 現在地
 
 - **フェーズ**: P7 まで完了（P5 で見つけた直しは [バックログ](../backlog.md) に移した。2026-10-15）
-- **次にやること**: P8 は新規開発の最初の 1 件を試運転にして、振り返ったら完了。旧ドキュメント（`docs/legacy/`）の削除は人間の判断でしばらく残す。本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
+- **次にやること**: P8 は新規開発の最初の 1 件（[MCP サーバーの追加](mcp-server.md)）を試運転にして、振り返ったら完了。旧ドキュメント（`docs/legacy/`）の削除は人間の判断でしばらく残す。本番への反映（`docs/plans/active/release-v1.1.md`）は人間の判断で後回し
 - **ブロッカー**: なし（Context7 は `mcp__context7__resolve-library-id` / `mcp__context7__query-docs` で使えることを 2026-10-10 に確認した）
 
 ---
