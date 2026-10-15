@@ -9,3 +9,4 @@ export * from "./schemas/effort";
 export * from "./schemas/workRecords";
 export * from "./types/db";
 export * from "./utils/goalProgress";
+export * from "./utils/workHours";

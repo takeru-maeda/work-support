@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import type { Tables } from "shared";
-
 export type {
   EffortDraft,
   EffortDraftRecord,
@@ -55,12 +53,25 @@ export interface ParsedEffortText {
   errors: EffortTextError[];
 }
 
-export interface ProjectCreationResult {
-  project: Tables<"projects">;
-  created: boolean;
+/** `save_work_records` に渡す 1 要素。ID が無ければ名前で探し、無ければ作る */
+export interface WorkRecordInput {
+  project_id: number | null;
+  project_name: string | null;
+  task_id: number | null;
+  task_name: string | null;
+  estimated_hours: number | null;
+  hours: number;
 }
 
-export interface TaskCreationResult {
-  task: Tables<"tasks">;
-  created: boolean;
+/** `save_work_records` が返す 1 行（時間は DB の列で小数第 2 位に丸めたあとの値） */
+export interface SavedWorkRecord {
+  entry_id: number;
+  project_id: number;
+  project_name: string;
+  task_id: number;
+  task_name: string;
+  hours: number;
+  estimated_hours: number | null;
+  project_created: boolean;
+  task_created: boolean;
 }

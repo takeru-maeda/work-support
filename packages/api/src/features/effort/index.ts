@@ -62,7 +62,13 @@ gasEffort.post(
     if (!user) throw new AppError(401, "Unauthorized");
 
     const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
-    await saveEffortRecords(supabase, user.id, new Date(date), effort);
+    await saveEffortRecords(
+      supabase,
+      user.id,
+      new Date(date),
+      effort,
+      c.get("logger"),
+    );
 
     const response: EffortResponse = {
       message: "Effort data processed and saved successfully",
@@ -97,10 +103,12 @@ appEffort.post(
 
     const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
     const payload: EffortEntriesRequest = c.req.valid("json");
+    const logger: Logger = c.get("logger");
     const result = await saveStructuredEffortEntries(
       supabase,
       user.id,
       payload,
+      logger,
     );
 
     const response: EffortEntriesResponse = EffortEntriesResponseSchema.parse(
@@ -108,7 +116,6 @@ appEffort.post(
     );
 
     const accessLog: Tables<"access_logs"> = c.get("accessLog");
-    const logger: Logger = c.get("logger");
     c.executionCtx.waitUntil(
       sendEffortCompletionEmailIfNeeded(
         supabase,

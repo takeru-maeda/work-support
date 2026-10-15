@@ -1,23 +1,20 @@
+import {
+  isSavableWorkHours,
+  MAX_WORK_HOURS_EXCLUSIVE,
+} from "../../../../shared/src/utils/workHours";
 import { AppError } from "../../lib/errors";
 import { type Logger } from "../../lib/logger";
 import { sendEffortCompletionEmail } from "../../lib/mailer";
 import { fetchUserSettings } from "../user-settings/service";
 
 import {
-  createProject,
-  createTask,
   deleteWorkEntryDraft,
-  findOrCreateTask,
-  findProject,
-  getProjectById,
-  getProjectByName,
-  getTaskById,
-  getTaskByName,
   getWorkEntryDraftByUser,
   insertWorkEntryDraft,
-  insertWorkRecord,
   refreshProjectsWithTasksView,
+  saveWorkRecords,
   updateWorkEntryDraft,
+  WorkRecordTargetNotFoundError,
 } from "./repository";
 
 import type { EffortTextError, ParsedEffort, ParsedEffortText } from "./types";
@@ -28,26 +25,42 @@ import type {
   EffortEntriesRequest,
   EffortEntriesResponse,
   EffortEntry,
+  SavedWorkRecord,
+  WorkRecordInput,
 } from "./types";
 import type { Database, Tables } from "../../../../shared/src/types/db";
 import type { AuthenticatedUser, HonoEnv } from "../../customTypes";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Dayjs } from "dayjs";
 
-interface StructuredEffortResult {
-  record: Tables<"work_records">;
-  project: Tables<"projects">;
-  task: Tables<"tasks">;
+/** 保存した 1 行。応答とメールに使う（名前は DB の関数が返す、決まった案件・タスクの名前） */
+export interface StructuredEffortResult {
+  record: Pick<SavedWorkRecord, "hours" | "estimated_hours"> & { id: number };
+  project: { id: number; name: string };
+  task: { id: number; name: string };
   entry: EffortEntry;
 }
 
-interface StructuredEffortSaveResult {
+export interface StructuredEffortSaveResult {
   savedRecords: StructuredEffortResult[];
   response: EffortEntriesResponse;
   date: Date;
+  /** この送信で新しく作った案件の名前（送信の順。MCP の log_effort が返す） */
+  createdProjects: string[];
+  /** この送信で新しく作ったタスク（送信の順） */
+  createdTasks: { projectName: string; taskName: string }[];
 }
 
 const INDENT = "　";
+
+/** 画面から指定した案件・タスクが見つからないときの文 */
+const NOT_FOUND_MESSAGES: Record<
+  WorkRecordTargetNotFoundError["target"],
+  string
+> = {
+  project: "指定した案件が見つかりませんでした。",
+  task: "指定したタスクが見つかりませんでした。",
+};
 
 /**
  * 工数テキストを解析して記録します。
@@ -56,18 +69,15 @@ const INDENT = "　";
  * @param userId ユーザーID
  * @param workDate 作業日
  * @param effortText 工数入力テキスト
+ * @param logger 候補の一覧の作り直しの失敗を残すロガー
  */
 export async function saveEffortRecords(
   supabase: SupabaseClient<Database>,
   userId: string,
   workDate: Date | Dayjs,
   effortText: string,
+  logger: Logger,
 ): Promise<void> {
-  // キーは利用者の入力そのものなので、Object の組み込みの名前（toString など）と衝突しない Map にする
-  const projectCache = new Map<string, number>();
-  const taskCache = new Map<string, number>();
-  let shouldRefreshProjectsView = false;
-
   // 書き間違いがあれば、DB に触れる前にまとめて返す（読みながら保存すると、前半の行だけが残る）
   const { efforts: parsedEfforts, errors } = parseEffortText(effortText);
   if (errors.length > 0) {
@@ -77,54 +87,38 @@ export async function saveEffortRecords(
     throw new AppError(400, "工数の値が不正です。登録件数が0件でした。");
   }
 
-  for (const effort of parsedEfforts) {
-    // DB の検索と同じく大文字小文字を区別する（区別しないと、同じ送信の中の「abc」が「ABC」に付く）
-    const projectKey: string = effort.project_name;
-    let projectId: number | undefined = projectCache.get(projectKey);
-    if (projectId === undefined) {
-      const projectResult = await findProject(supabase, userId, effort);
-      projectId = projectResult.id;
-      projectCache.set(projectKey, projectId);
-      if (projectResult.created) {
-        shouldRefreshProjectsView = true;
-      }
-    }
+  // 名前で探し、大文字小文字を区別する（DB の関数の検索と同じ）
+  const saved: SavedWorkRecord[] = await saveWorkRecords(
+    supabase,
+    userId,
+    toWorkDate(workDate),
+    parsedEfforts.map((effort) => ({
+      project_id: null,
+      project_name: effort.project_name,
+      task_id: null,
+      task_name: effort.taskName,
+      estimated_hours: effort.estimated_hours,
+      hours: effort.hours,
+    })),
+  );
 
-    const taskKeyCache: string = exactTaskKey(projectId, effort.taskName);
-    let taskId: number | undefined = taskCache.get(taskKeyCache);
-    if (taskId === undefined) {
-      const taskResult = await findOrCreateTask(
-        supabase,
-        projectId,
-        effort.taskName,
-      );
-      taskId = taskResult.id;
-      taskCache.set(taskKeyCache, taskId);
-      if (taskResult.created) {
-        shouldRefreshProjectsView = true;
-      }
-    }
-
-    await insertWorkRecord(supabase, userId, taskId, workDate, effort);
-  }
-
-  if (shouldRefreshProjectsView) {
-    await refreshProjectsWithTasksView(supabase);
-  }
+  await refreshProjectsViewIfCreated(supabase, saved, logger);
 }
 
 /**
- * 構造化工数を保存します。
+ * 構造化工数を保存します。DB に触れない検証をすべて先に済ませ、1 つでも誤りがあれば何も保存しません。
  *
  * @param supabase Supabaseクライアント
  * @param userId ユーザーID
  * @param payload 工数入力データ
+ * @param logger 候補の一覧の作り直しの失敗を残すロガー
  * @returns 保存結果
  */
 export const saveStructuredEffortEntries = async (
   supabase: SupabaseClient<Database>,
   userId: string,
   payload: EffortEntriesRequest,
+  logger: Logger,
 ): Promise<StructuredEffortSaveResult> => {
   const { entries } = payload;
   if (!entries.length) {
@@ -136,76 +130,138 @@ export const saveStructuredEffortEntries = async (
     throw new AppError(400, "日付の形式が不正です。");
   }
 
-  const projectCacheById = new Map<number, Tables<"projects">>();
-  const projectCacheByName = new Map<string, Tables<"projects">>();
-  const taskCacheById = new Map<number, Tables<"tasks">>();
-  const taskCacheByName = new Map<string, Tables<"tasks">>();
-
-  const savedRecords: StructuredEffortResult[] = [];
-  let shouldRefreshProjectsView = false;
-
-  for (const entry of entries) {
-    if (entry.estimated_hours != null && entry.estimated_hours < 0) {
-      throw new AppError(400, "見積工数は0以上を指定してください。");
+  const inputs: WorkRecordInput[] = entries.map(toWorkRecordInput);
+  const saved: SavedWorkRecord[] = await saveWorkRecords(
+    supabase,
+    userId,
+    payload.date,
+    inputs,
+  ).catch((error: unknown) => {
+    if (error instanceof WorkRecordTargetNotFoundError) {
+      throw new AppError(400, NOT_FOUND_MESSAGES[error.target], error);
     }
+    throw error;
+  });
 
-    const projectResult: ResolvedProject = await resolveProject(
-      supabase,
-      userId,
-      entry,
-      projectCacheById,
-      projectCacheByName,
-    );
+  await refreshProjectsViewIfCreated(supabase, saved, logger);
 
-    const taskResult: ResolvedTask = await resolveTask(
-      supabase,
-      projectResult.project,
-      entry,
-      taskCacheById,
-      taskCacheByName,
-    );
-
-    if (projectResult.created || taskResult.created) {
-      shouldRefreshProjectsView = true;
-    }
-
-    const project: Tables<"projects"> = projectResult.project;
-    const task: Tables<"tasks"> = taskResult.task;
-
-    const parsed: ParsedEffort = {
-      project_name: project.name,
-      taskName: task.name,
-      estimated_hours: entry.estimated_hours,
-      hours: entry.hours,
-    };
-
-    const record: Tables<"work_records"> = await insertWorkRecord(
-      supabase,
-      userId,
-      task.id,
-      workDate,
-      parsed,
-    );
-
-    savedRecords.push({ record, project, task, entry });
-  }
+  const savedRecords: StructuredEffortResult[] = saved.map((row, index) => ({
+    record: {
+      id: row.entry_id,
+      hours: row.hours,
+      estimated_hours: row.estimated_hours,
+    },
+    project: { id: row.project_id, name: row.project_name },
+    task: { id: row.task_id, name: row.task_name },
+    entry: entries[index],
+  }));
 
   const response: EffortEntriesResponse = {
-    saved: savedRecords.map(({ record, project, task }) => ({
-      entry_id: record.id,
-      project_id: project.id,
-      task_id: task.id,
-      hours: record.hours,
-      estimated_hours: record.estimated_hours,
+    saved: saved.map((row) => ({
+      entry_id: row.entry_id,
+      project_id: row.project_id,
+      task_id: row.task_id,
+      hours: row.hours,
+      estimated_hours: row.estimated_hours,
     })),
   };
 
-  if (shouldRefreshProjectsView) {
-    await refreshProjectsWithTasksView(supabase);
+  return {
+    savedRecords,
+    response,
+    date: workDate,
+    createdProjects: saved
+      .filter((row) => row.project_created)
+      .map((row) => row.project_name),
+    createdTasks: saved
+      .filter((row) => row.task_created)
+      .map((row) => ({
+        projectName: row.project_name,
+        taskName: row.task_name,
+      })),
+  };
+};
+
+/**
+ * 画面からの 1 要素を検証し、`save_work_records` の入力に直します。
+ * 検査の順番は、旧実装（要素ごとに見積 → 案件 → 実績 → タスク）と同じ。
+ *
+ * @param entry 画面からの 1 要素
+ * @returns DB の関数の入力
+ * @throws 名前が空、時間が負か 100 以上（小数第 2 位に丸めた値）のとき 400
+ */
+const toWorkRecordInput = (entry: EffortEntry): WorkRecordInput => {
+  const estimated: number | null = entry.estimated_hours ?? null;
+  if (estimated !== null && estimated < 0) {
+    throw new AppError(400, "見積工数は0以上を指定してください。");
+  }
+  if (estimated !== null && !isSavableWorkHours(estimated)) {
+    throw new AppError(400, "見積工数は100未満を指定してください。");
   }
 
-  return { savedRecords, response, date: workDate };
+  const projectName: string | null =
+    entry.project_id === null ? (entry.project_name?.trim() ?? "") : null;
+  if (projectName === "") {
+    throw new AppError(400, "新規案件を作成する場合は案件名が必要です。");
+  }
+
+  if (typeof entry.hours !== "number" || Number.isNaN(entry.hours)) {
+    throw new AppError(400, "工数の時間が不正です。");
+  }
+  if (entry.hours < 0) {
+    throw new AppError(400, "工数の時間は0以上を指定してください。");
+  }
+  if (!isSavableWorkHours(entry.hours)) {
+    throw new AppError(400, "工数の時間は100未満を指定してください。");
+  }
+
+  const taskName: string | null =
+    entry.task_id === null ? (entry.task_name?.trim() ?? "") : null;
+  if (taskName === "") {
+    throw new AppError(400, "新規タスクを作成する場合はタスク名が必要です。");
+  }
+
+  return {
+    project_id: entry.project_id,
+    project_name: projectName,
+    task_id: entry.task_id,
+    task_name: taskName,
+    estimated_hours: estimated,
+    hours: entry.hours,
+  };
 };
+
+/**
+ * 案件かタスクを新しく作ったときだけ、候補の一覧を作り直します。保存はコミット済みなので、
+ * 作り直しに失敗しても保存の成功として扱い、失敗は error_logs に残す（500 にすると、送り直しで 2 重になる）。
+ *
+ * @param supabase Supabaseクライアント
+ * @param saved 保存した行
+ * @param logger ロガー
+ */
+const refreshProjectsViewIfCreated = async (
+  supabase: SupabaseClient<Database>,
+  saved: SavedWorkRecord[],
+  logger: Logger,
+): Promise<void> => {
+  if (!saved.some((row) => row.project_created || row.task_created)) return;
+  try {
+    await refreshProjectsWithTasksView(supabase);
+  } catch (error) {
+    await logger.error((error as Error).message, {
+      stackTrace: (error as Error).stack ?? null,
+    });
+  }
+};
+
+/**
+ * 作業日を YYYY-MM-DD にします（旧実装が送っていた toISOString() を、DB の date 型が読む日付と同じ）。
+ *
+ * @param workDate 作業日
+ * @returns YYYY-MM-DD
+ */
+const toWorkDate = (workDate: Date | Dayjs): string =>
+  workDate.toISOString().slice(0, 10);
 
 /**
  * タスクの行の形。タスク名は、後ろが [<見積>]<実績> として読める最初の「：」まで。
@@ -214,7 +270,6 @@ export const saveStructuredEffortEntries = async (
 const TASK_LINE_PATTERN = /^\u30fb(.*?)：\[([^\]]*)\]<([^>]*)>$/;
 /** 見積と実績の形。DB の列（numeric(4,2)）に合わせて小数第 2 位まで */
 const HOURS_PATTERN = /^\d+(\.\d{1,2})?$/;
-const MAX_HOURS_EXCLUSIVE = 100;
 /** 全角の数字・ピリオドと半角の文字コードの差（「０」U+FF10 → 「0」U+0030） */
 const FULLWIDTH_TO_ASCII_OFFSET = 0xfee0;
 
@@ -388,7 +443,10 @@ export const buildEffortCompletionEmail = (
 
   const grouped = new Map<
     number,
-    { project: Tables<"projects">; items: StructuredEffortResult[] }
+    {
+      project: StructuredEffortResult["project"];
+      items: StructuredEffortResult[];
+    }
   >();
   for (const entry of entries) {
     const existing = grouped.get(entry.project.id);
@@ -414,8 +472,8 @@ export const buildEffortCompletionEmail = (
     let projectActualWithEstimate = 0;
 
     for (const item of items) {
-      const estimated: number | null = item.entry.estimated_hours ?? null;
-      const actual: number = item.entry.hours;
+      const estimated: number | null = item.record.estimated_hours ?? null;
+      const actual: number = item.record.hours;
       projectEstimated += estimated ?? 0;
       projectActual += actual;
       if (estimated !== null) {
@@ -439,19 +497,19 @@ export const buildEffortCompletionEmail = (
 
   for (const { project, items } of grouped.values()) {
     const projectHasEstimate = items.some(
-      (item) => item.entry.estimated_hours !== null,
+      (item) => item.record.estimated_hours !== null,
     );
     const projectEstimated: number = items.reduce(
-      (sum, item) => sum + (item.entry.estimated_hours ?? 0),
+      (sum, item) => sum + (item.record.estimated_hours ?? 0),
       0,
     );
     const projectActual: number = items.reduce(
-      (sum, item) => sum + item.entry.hours,
+      (sum, item) => sum + item.record.hours,
       0,
     );
     const projectActualWithEstimate: number = items.reduce(
       (sum, item) =>
-        item.entry.estimated_hours === null ? sum : sum + item.entry.hours,
+        item.record.estimated_hours === null ? sum : sum + item.record.hours,
       0,
     );
     const diff = projectActualWithEstimate - projectEstimated;
@@ -462,7 +520,7 @@ export const buildEffortCompletionEmail = (
   }
 
   const hasAnyEstimate = entries.some(
-    (record) => record.entry.estimated_hours !== null,
+    (record) => record.record.estimated_hours !== null,
   );
   const totalDiff = totalActualWithEstimate - totalEstimated;
   lines.push(
@@ -567,7 +625,7 @@ function parseHours(value: string): number | null | undefined {
   if (!HOURS_PATTERN.test(normalized)) return undefined;
 
   const hours: number = Number(normalized);
-  return hours < MAX_HOURS_EXCLUSIVE ? hours : undefined;
+  return hours < MAX_WORK_HOURS_EXCLUSIVE ? hours : undefined;
 }
 
 /**
@@ -577,162 +635,8 @@ function parseHours(value: string): number | null | undefined {
  * @returns 理由の文
  */
 function invalidHoursReason(label: "見積" | "実績"): string {
-  return `${label}は 0 以上 ${MAX_HOURS_EXCLUSIVE} 未満の、小数第 2 位までの数値にしてください`;
+  return `${label}は 0 以上 ${MAX_WORK_HOURS_EXCLUSIVE} 未満の、小数第 2 位までの数値にしてください`;
 }
-
-interface ResolvedProject {
-  project: Tables<"projects">;
-  created: boolean;
-}
-
-interface ResolvedTask {
-  task: Tables<"tasks">;
-  created: boolean;
-}
-
-/**
- * 案件を解決します。
- */
-const resolveProject = async (
-  supabase: SupabaseClient<Database>,
-  userId: string,
-  entry: EffortEntry,
-  cacheById: Map<number, Tables<"projects">>,
-  cacheByName: Map<string, Tables<"projects">>,
-): Promise<ResolvedProject> => {
-  if (entry.project_id !== null) {
-    const cached: Tables<"projects"> | undefined = cacheById.get(
-      entry.project_id,
-    );
-    if (cached) return { project: cached, created: false };
-
-    const project: Tables<"projects"> | null = await getProjectById(
-      supabase,
-      userId,
-      entry.project_id,
-    );
-    if (!project) {
-      throw new AppError(400, "指定した案件が見つかりませんでした。");
-    }
-    cacheById.set(project.id, project);
-    cacheByName.set(project.name.toLowerCase(), project);
-    return { project, created: false };
-  }
-
-  const name = entry.project_name?.trim();
-  if (!name) {
-    throw new AppError(400, "新規案件を作成する場合は案件名が必要です。");
-  }
-
-  const key = name.toLowerCase();
-  const cached: Tables<"projects"> | undefined = cacheByName.get(key);
-  if (cached) return { project: cached, created: false };
-
-  const existing: Tables<"projects"> | null = await getProjectByName(
-    supabase,
-    userId,
-    name,
-  );
-  if (existing) {
-    cacheById.set(existing.id, existing);
-    cacheByName.set(key, existing);
-    return { project: existing, created: false };
-  }
-
-  const { project: createdProject, created } = await createProject(
-    supabase,
-    userId,
-    name,
-  );
-  cacheById.set(createdProject.id, createdProject);
-  cacheByName.set(key, createdProject);
-  return { project: createdProject, created };
-};
-
-/**
- * タスクを解決します。
- */
-const resolveTask = async (
-  supabase: SupabaseClient<Database>,
-  project: Tables<"projects">,
-  entry: EffortEntry,
-  cacheById: Map<number, Tables<"tasks">>,
-  cacheByName: Map<string, Tables<"tasks">>,
-): Promise<ResolvedTask> => {
-  if (typeof entry.hours !== "number" || Number.isNaN(entry.hours)) {
-    throw new AppError(400, "工数の時間が不正です。");
-  }
-  if (entry.hours < 0) {
-    throw new AppError(400, "工数の時間は0以上を指定してください。");
-  }
-
-  if (entry.task_id !== null) {
-    const cached: Tables<"tasks"> | undefined = cacheById.get(entry.task_id);
-    if (cached) return { task: cached, created: false };
-
-    const task: Tables<"tasks"> | null = await getTaskById(
-      supabase,
-      project.id,
-      entry.task_id,
-    );
-    if (!task) {
-      throw new AppError(400, "指定したタスクが見つかりませんでした。");
-    }
-    if (task.project_id !== project.id) {
-      throw new AppError(400, "タスクが指定した案件に属していません。");
-    }
-    cacheById.set(task.id, task);
-    cacheByName.set(taskKey(project.id, task.name), task);
-    return { task, created: false };
-  }
-
-  const name = entry.task_name?.trim();
-  if (!name) {
-    throw new AppError(400, "新規タスクを作成する場合はタスク名が必要です。");
-  }
-
-  const key = taskKey(project.id, name);
-  const cached: Tables<"tasks"> | undefined = cacheByName.get(key);
-  if (cached) return { task: cached, created: false };
-
-  const existing: Tables<"tasks"> | null = await getTaskByName(
-    supabase,
-    project.id,
-    name,
-  );
-  if (existing) {
-    cacheById.set(existing.id, existing);
-    cacheByName.set(key, existing);
-    return { task: existing, created: false };
-  }
-
-  const { task: createdTask, created } = await createTask(
-    supabase,
-    project.id,
-    name,
-  );
-  cacheById.set(createdTask.id, createdTask);
-  cacheByName.set(key, createdTask);
-  return { task: createdTask, created };
-};
-
-/**
- * GAS の取り込みのタスクのキャッシュのキーを生成します。taskKey と違い、大文字小文字を区別する
- * （DB の検索と同じ。Web の経路の taskKey をそろえるのは effort-entry の改修で扱う）。
- *
- * @param projectId 案件の ID
- * @param name タスク名
- * @returns キャッシュのキー
- */
-const exactTaskKey = (projectId: number, name: string): string =>
-  `${projectId}::${name}`;
-
-/**
- * タスクキャッシュ用キーを生成します（大文字小文字を区別しない。Web の工数登録の経路で使う）。
- */
-const taskKey = (projectId: number, name: string): string => {
-  return `${projectId}::${name.toLowerCase()}`;
-};
 
 /**
  * メール日付をyyyy/MM/dd形式に整形します。

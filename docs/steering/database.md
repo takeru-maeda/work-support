@@ -34,6 +34,9 @@ export const getWorkEntryDraftByUser = async (
 
 - 引数で `supabase` と `userId` を受け取り、ユーザーのデータだけを読む・書く
 - Supabase のエラーは `AppError` に包んで投げる（`error-handling.md`）
+- **1 回の操作で複数の行を書き、途中の失敗で一部だけ残ると困るとき**は、DB の関数にして `supabase.rpc()` で 1 回だけ呼ぶ（PostgREST はリクエストをまたぐトランザクションを持たない。手本: `save_work_records`）。DB に触れない検証は呼ぶ前に済ませる
+  - 関数は `security invoker` と `set search_path = ''`。引数でユーザー ID を受け取るので、baseline の既定の権限を `revoke … from public, anon, authenticated` で外し、`service_role` にだけ `execute` を与える。ブラウザのキーから呼べないことを結合テストで確かめる
+  - 利用者に返す誤りは、決まった SQLSTATE の例外にし、repository は専用のエラーに変えるだけにする（400 と文は service で決める）
 
 ## 主なテーブル
 
@@ -60,7 +63,7 @@ export const getWorkEntryDraftByUser = async (
 
 - 変更は必ず `packages/api/supabase/migrations/` に SQL ファイルとして追加する
 - **クラウドの DB（開発用・本番）へ適用する操作は、人間が行う**。エージェントが直接 DDL / DML を流すのは、ローカルの Supabase（中身はテストのデータだけ）に限る
-- マイグレーションの管理は移行中（ハーネス移行計画の P3 で、本番のスキーマを取り込んで基準にする）
+- 出発点は本番から取り込んだ `20261013000000_baseline.sql`。既存のマイグレーションは書き換えず、新しいファイルを足す
 
 ---
 _テーブルの一覧ではなく、アクセスのパターンと判断を書く_

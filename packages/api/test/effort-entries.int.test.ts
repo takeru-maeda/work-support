@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { adminClient, callApi, createTestUser } from "./helpers";
+import { adminClient, browserClient, callApi, createTestUser } from "./helpers";
 import { sentMails } from "./setup";
 
 import type { TestUser } from "./helpers";
@@ -223,17 +223,23 @@ describe("POST /api/effort/entries", () => {
       ]);
     });
 
-    it("AC-effort-entry-03: 1 回の送信の中では、大文字小文字だけが違う名前を最初の案件にまとめる", async () => {
+    it("AC-effort-entry-03 / 04: 1 回の送信の中でも、大文字小文字だけが違う案件名・タスク名は別のものにする", async () => {
       const user = await createTestUser();
       const saved = await savedOf(
         await submit(user, [
-          entry({ project_name: "ABC", task_name: "設計" }),
-          entry({ project_name: "abc", task_name: "実装" }),
+          entry({ project_name: "ABC", task_name: "Review" }),
+          entry({ project_name: "abc", task_name: "設計" }),
+          entry({ project_name: "ABC", task_name: "review" }),
         ]),
       );
 
-      expect(saved[1].project_id).toBe(saved[0].project_id);
-      expect(await projectsOf(user)).toHaveLength(1);
+      expect(saved[1].project_id).not.toBe(saved[0].project_id);
+      expect(saved[2].project_id).toBe(saved[0].project_id);
+      expect(saved[2].task_id).not.toBe(saved[0].task_id);
+      expect((await projectsOf(user)).map((p) => p.name)).toEqual([
+        "ABC",
+        "abc",
+      ]);
     });
 
     it("AC-effort-entry-03 / INV-1: 他人の同じ名前の案件は使わない", async () => {
@@ -296,6 +302,81 @@ describe("POST /api/effort/entries", () => {
       const records = await workRecordsOf(user);
       expect(records).toHaveLength(3);
       expect(new Set(records.map((r) => r.task_id)).size).toBe(1);
+    });
+
+    it("AC-effort-entry-02 / INV-5: 途中の要素で失敗したら、前の要素の行も、そのために作った案件・タスクも残さない", async () => {
+      const other = await createTestUser();
+      const user = await createTestUser();
+      const [theirs] = await savedOf(await submit(other, [entry()]));
+
+      const res = await submit(user, [
+        entry({ project_name: "新しい案件", task_name: "新しいタスク" }),
+        entry({ project_id: theirs.project_id }),
+      ]);
+
+      expect(res.status).toBe(400);
+      expect(await errorOf(res)).toBe("指定した案件が見つかりませんでした。");
+      expect(await projectsOf(user)).toEqual([]);
+      expect(await workRecordsOf(user)).toEqual([]);
+    });
+
+    it("AC-effort-entry-04: 同じ送信の中で使い回した task_id も、決めた案件のタスクか確かめる", async () => {
+      const user = await createTestUser();
+      const [a] = await savedOf(await submit(user, [entry()]));
+      await savedOf(
+        await submit(user, [entry({ project_name: "案件B", task_name: "別" })]),
+      );
+      const before = await workRecordsOf(user);
+
+      const res = await submit(user, [
+        entry({ project_id: a.project_id, task_id: a.task_id }),
+        entry({ project_name: "案件B", task_id: a.task_id }),
+      ]);
+
+      expect(res.status).toBe(400);
+      expect(await errorOf(res)).toBe("指定したタスクが見つかりませんでした。");
+      expect(await workRecordsOf(user)).toEqual(before);
+    });
+
+    it.each([
+      ["実績が 100", { hours: 100 }, "工数の時間は100未満を指定してください。"],
+      [
+        "実績が 99.995（丸めると 100.00）",
+        { hours: 99.995 },
+        "工数の時間は100未満を指定してください。",
+      ],
+      [
+        "見積が 100",
+        { estimated_hours: 100 },
+        "見積工数は100未満を指定してください。",
+      ],
+      [
+        "見積が 99.995",
+        { estimated_hours: 99.995 },
+        "見積工数は100未満を指定してください。",
+      ],
+    ])(
+      "AC-effort-entry-05: %s なら 400 で、ほかの要素も保存しない",
+      async (_label, overrides, message) => {
+        const user = await createTestUser();
+
+        const res = await submit(user, [entry(), entry(overrides)]);
+
+        expect(res.status).toBe(400);
+        expect(await errorOf(res)).toBe(message);
+        expect(await projectsOf(user)).toEqual([]);
+        expect(await workRecordsOf(user)).toEqual([]);
+      },
+    );
+
+    it("AC-effort-entry-05: 99.994 は 99.99 として保存できる", async () => {
+      const user = await createTestUser();
+
+      const [saved] = await savedOf(
+        await submit(user, [entry({ hours: 99.994, estimated_hours: 99.994 })]),
+      );
+
+      expect(saved).toMatchObject({ hours: 99.99, estimated_hours: 99.99 });
     });
 
     it("AC-effort-entry-07 / INV-2: 新しく作った案件とタスクは、応答の直後の候補に出る", async () => {
@@ -375,6 +456,17 @@ describe("POST /api/effort/entries", () => {
           ].join("\n"),
         },
       ]);
+    });
+
+    it("AC-effort-entry-10: 時間と合計は、保存した（小数第 2 位に丸めた）値で出す", async () => {
+      const user = await createTestUser();
+      await savedOf(
+        await submit(user, [entry({ estimated_hours: 99.994, hours: 99.994 })]),
+      );
+
+      const { body } = sentMails[0] as { body: string };
+      expect(body).toContain("見積：99.99h   実績：99.99h（±0h）");
+      expect(body).not.toContain("99.994");
     });
 
     it("AC-effort-entry-10: 差分が 0 なら（±0h）。見積が 1 つも無ければ差分を付けず、メモが空なら【メモ】を付けない", async () => {
@@ -459,5 +551,79 @@ describe("GET /api/projects", () => {
 
   it("AC-effort-entry-11: トークンが無ければ 401", async () => {
     expect((await callApi("/api/projects")).status).toBe(401);
+  });
+});
+
+describe("DB の関数 save_work_records（INV-5）", () => {
+  const args = (user: TestUser, entries: Record<string, unknown>[]) => ({
+    p_user_id: user.id,
+    p_work_date: DATE,
+    p_entries: entries,
+  });
+  const byName = (project_name: string, task_name: string) => ({
+    project_id: null,
+    project_name,
+    task_id: null,
+    task_name,
+    estimated_hours: null,
+    hours: 1,
+  });
+
+  it("2 つ目の要素で失敗したら、1 つ目の行も、1 つ目のために作った案件・タスクも残らない", async () => {
+    const other = await createTestUser();
+    const user = await createTestUser();
+    const [theirs] = await savedOf(await submit(other, [entry()]));
+
+    const { error } = await adminClient().rpc(
+      "save_work_records",
+      args(user, [
+        byName("新しい案件", "新しいタスク"),
+        { ...byName("x", "y"), project_id: theirs.project_id },
+      ]),
+    );
+
+    expect(error?.message).toBe("指定した案件が見つかりませんでした。");
+    expect(await projectsOf(user)).toEqual([]);
+    expect(await workRecordsOf(user)).toEqual([]);
+  });
+
+  it("入力の順に、保存した行と、案件・タスクを新しく作ったかを返す", async () => {
+    const user = await createTestUser();
+    await savedOf(await submit(user, [entry()]));
+
+    const { data, error } = await adminClient().rpc(
+      "save_work_records",
+      args(user, [byName("案件A", "設計"), byName("案件B", "設計")]),
+    );
+
+    expect(error).toBeNull();
+    expect(data).toEqual([
+      expect.objectContaining({
+        project_name: "案件A",
+        task_name: "設計",
+        project_created: false,
+        task_created: false,
+      }),
+      expect.objectContaining({
+        project_name: "案件B",
+        task_name: "設計",
+        project_created: true,
+        task_created: true,
+      }),
+    ]);
+  });
+
+  it("anon と、ログインしたユーザーのキーからは呼べない（引数のユーザー ID で他人の工数を作れないように）", async () => {
+    const user = await createTestUser();
+
+    for (const client of [browserClient(), browserClient(user)]) {
+      const { error } = await client.rpc(
+        "save_work_records",
+        args(user, [byName("案件A", "設計")]),
+      );
+      // 42501: 実行の権限が無い（関数が無いときの PGRST202 と区別する）
+      expect(error?.code).toBe("42501");
+    }
+    expect(await workRecordsOf(user)).toEqual([]);
   });
 });

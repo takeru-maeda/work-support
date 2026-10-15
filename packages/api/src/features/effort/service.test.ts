@@ -2,9 +2,14 @@ import { describe, expect, it, vi } from "vitest";
 
 import { AppError } from "../../lib/errors";
 
-import { parseEffortText, saveEffortRecords } from "./service";
+import {
+  parseEffortText,
+  saveEffortRecords,
+  saveStructuredEffortEntries,
+} from "./service";
 
 import type { Database } from "../../../../shared/src/types/db";
+import type { Logger } from "../../lib/logger";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
@@ -13,6 +18,15 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  */
 const HOURS_REASON =
   "は 0 以上 100 未満の、小数第 2 位までの数値にしてください";
+
+/** 呼ばれた error を確かめられるロガーの偽物 */
+const fakeLogger = () =>
+  ({
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(async () => {}),
+    critical: vi.fn(),
+  }) as unknown as Logger & { error: ReturnType<typeof vi.fn> };
 
 /** 1 行の誤りだけを読む（テキストは「■案件A」の下にタスクの行を 1 つ置いたもの） */
 const errorsOfTaskLine = (line: string) =>
@@ -251,6 +265,7 @@ describe("saveEffortRecords", () => {
       "user-id",
       new Date("2026-10-13"),
       text,
+      fakeLogger(),
     ).catch((e: unknown) => e);
 
     expect(error).toBeInstanceOf(AppError);
@@ -269,11 +284,143 @@ describe("saveEffortRecords", () => {
       "user-id",
       new Date("2026-10-13"),
       "■案件A",
+      fakeLogger(),
     ).catch((e: unknown) => e);
 
     expect((error as AppError).message).toBe(
       "工数の値が不正です。登録件数が0件でした。",
     );
     expect(touched).not.toHaveBeenCalled();
+  });
+});
+
+describe("保存と候補の一覧の作り直し（effort-entry v1.1.3）", () => {
+  const savedRow = (overrides: Record<string, unknown> = {}) => ({
+    entry_id: 1,
+    project_id: 10,
+    project_name: "案件A",
+    task_id: 20,
+    task_name: "設計",
+    hours: 1,
+    estimated_hours: null,
+    project_created: true,
+    task_created: true,
+    ...overrides,
+  });
+
+  /** save_work_records は成功し、候補の一覧の作り直しだけが失敗するクライアントの偽物 */
+  const fakeClient = (rows: unknown[]) => {
+    const rpc = vi.fn(async (name: string) =>
+      name === "save_work_records"
+        ? { data: rows, error: null }
+        : { data: null, error: { message: "refresh failed", code: "XX000" } },
+    );
+    return { client: { rpc } as unknown as SupabaseClient<Database>, rpc };
+  };
+
+  it("AC-effort-ingest-gas-04 / INV-5: 読めたすべての行を、1 回の save_work_records で保存する", async () => {
+    const { client, rpc } = fakeClient([savedRow(), savedRow()]);
+
+    await saveEffortRecords(
+      client,
+      "user-id",
+      new Date("2026-10-13T00:00:00Z"),
+      "■案件A\n・設計：[2]<1>\n・実装：[]<0.5>",
+      fakeLogger(),
+    );
+
+    const saveCalls = rpc.mock.calls.filter(
+      ([name]) => name === "save_work_records",
+    );
+    expect(saveCalls).toEqual([
+      [
+        "save_work_records",
+        {
+          p_user_id: "user-id",
+          p_work_date: "2026-10-13",
+          p_entries: [
+            expect.objectContaining({
+              project_name: "案件A",
+              task_name: "設計",
+              estimated_hours: 2,
+              hours: 1,
+            }),
+            expect.objectContaining({
+              project_name: "案件A",
+              task_name: "実装",
+              estimated_hours: null,
+              hours: 0.5,
+            }),
+          ],
+        },
+      ],
+    ]);
+  });
+
+  it("AC-effort-entry-07: 候補の一覧の作り直しに失敗しても保存の成功として返し、error_logs に残す", async () => {
+    const { client } = fakeClient([savedRow()]);
+    const logger = fakeLogger();
+
+    const result = await saveStructuredEffortEntries(
+      client,
+      "user-id",
+      {
+        date: "2026-10-13",
+        entries: [
+          {
+            project_id: null,
+            project_name: "案件A",
+            task_id: null,
+            task_name: "設計",
+            estimated_hours: null,
+            hours: 1,
+          },
+        ],
+        memo: null,
+      },
+      logger,
+    );
+
+    expect(result.response.saved).toHaveLength(1);
+    expect(result.createdProjects).toEqual(["案件A"]);
+    expect(result.createdTasks).toEqual([
+      { projectName: "案件A", taskName: "設計" },
+    ]);
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining("refresh failed"),
+      expect.anything(),
+    );
+  });
+
+  it("AC-effort-ingest-gas-05: GAS の取り込みでも、作り直しの失敗は保存の成功として扱い、error_logs に残す", async () => {
+    const { client } = fakeClient([savedRow()]);
+    const logger = fakeLogger();
+
+    await expect(
+      saveEffortRecords(
+        client,
+        "user-id",
+        new Date("2026-10-13T00:00:00Z"),
+        "■案件A\n・設計：[2]<1>",
+        logger,
+      ),
+    ).resolves.toBeUndefined();
+    expect(logger.error).toHaveBeenCalled();
+  });
+
+  it("新しく作った案件・タスクが無ければ、候補の一覧を作り直さない", async () => {
+    const { client, rpc } = fakeClient([
+      savedRow({ project_created: false, task_created: false }),
+    ]);
+
+    await saveEffortRecords(
+      client,
+      "user-id",
+      new Date("2026-10-13T00:00:00Z"),
+      "■案件A\n・設計：[2]<1>",
+      fakeLogger(),
+    );
+
+    expect(rpc.mock.calls.map(([name]) => name)).toEqual(["save_work_records"]);
   });
 });

@@ -2,16 +2,15 @@
 title: GAS / Google Form からの工数の取り込み
 feature: effort-ingest-gas
 status: current
-updated: 2026-10-15
+updated: 2026-10-16
 code:
   - packages/api/src/features/effort/index.ts :: gasEffort
   - packages/api/src/middleware/auth.ts :: apiKeyAuthMiddleware
   - packages/api/src/features/effort/service.ts :: saveEffortRecords
   - packages/api/src/features/effort/service.ts :: parseEffortText
   - packages/api/src/features/effort/service.ts :: parseHours
-  - packages/api/src/features/effort/repository.ts :: findProject
-  - packages/api/src/features/effort/repository.ts :: findOrCreateTask
-  - packages/api/src/features/effort/repository.ts :: insertWorkRecord
+  - packages/api/src/features/effort/repository.ts :: saveWorkRecords
+  - packages/api/supabase/migrations/20261016000000_save_work_records.sql :: save_work_records
   - packages/api/src/features/effort/types.ts :: EffortRequestSchema
 related: [effort-entry, effort-list, platform]
 symptoms:
@@ -29,7 +28,7 @@ symptoms:
 - Google Form のテキストエリアに決まった書式で書いた工数を、Google Apps Script（GAS）が API に送り、案件・タスク・工数の記録として保存する。Web の工数登録画面を開かずに、毎日の工数を送れる
 - 認証は、アプリ全体で 1 つの API キーと、フォームが集めたメールアドレス。JWT ではない
 - ⚠️ 改修の前に [§設計不変条件](#設計不変条件) を読む。書式の解析と、同じパスの下にある Web 用の JWT のルートとの関係を壊すと、取り込みが黙って失敗するか、他人として登録できてしまう
-- ⚠️ 書式や数値に誤りのある行が 1 つでもあれば、**1 行も保存せずに 400**（v1.1.2 から。それまでは黙って読み飛ばしていた）。ただし、読み終えたあとの保存の途中で DB が失敗すると、それまでの行は**保存されたまま**（[§エラー時の挙動](#エラー時の挙動)、[§既知の落とし穴](#既知の落とし穴)）
+- ⚠️ 書式や数値に誤りのある行が 1 つでもあれば、**1 行も保存せずに 400**（v1.1.2 から。それまでは黙って読み飛ばしていた）。保存は effort-entry と同じ DB の関数 `save_work_records` の 1 回の呼び出しで、途中で DB が失敗しても何も残らない（v1.1.3 から。INV-6）
 
 ## 目的と利用者
 
@@ -56,8 +55,8 @@ symptoms:
 - **AC-effort-ingest-gas-01**: `Authorization: Bearer <API キー>` が環境変数 `API_KEY` と一致し、本文の `email` が登録済みのユーザーのメールアドレス（大文字小文字は区別しない）なら、そのユーザーの工数として保存し、`201 { "message": "Effort data processed and saved successfully" }` を返す
 - **AC-effort-ingest-gas-02**: `Authorization` が無い、`Bearer ` で始まらない、API キーが違う、のどれかなら 401 `Unauthorized`。ユーザーのアクセストークン（JWT）でも 401
 - **AC-effort-ingest-gas-03**: 本文が `{ date: "YYYY-MM-DD", email: <メールアドレス>, effort: <文字列> }` の形でないときは 400。メッセージは `<項目>: <検証のメッセージ>` を ` | ` でつないだもの（例: `date: ...`）。`email` に当たるユーザーがいないときは 400 `User not found`
-- **AC-effort-ingest-gas-04**: 読めたタスクの行 1 つにつき、`work_records` に 1 行を `date` の日付で保存する。同じ内容の行が 2 つあれば 2 行になる。同じ日付で何度送っても、そのたびに追加する（上書きしない）
-- **AC-effort-ingest-gas-05**: 案件は、そのユーザーの案件のうち名前が一致するものを使い、無ければ作る。タスクは、その案件のタスクのうち名前が一致するものを使い、無ければ作る。名前の比較は大文字小文字を区別する（1 回の送信の中でも。`ABC` と `abc` は別の案件、同じ案件の下の `Review` と `review` は別のタスク）。新しく作ったときは、案件とタスクの一覧のマテリアライズドビュー（`projects_with_tasks_mv`）を更新してから応答するので、応答の直後の `GET /api/projects` に新しい案件とタスクが出る
+- **AC-effort-ingest-gas-04**: 読めたタスクの行 1 つにつき、`work_records` に 1 行を `date` の日付で保存する。読めたすべての行を 1 つのトランザクションで保存し、途中で失敗したら何も残さない。同じ内容の行が 2 つあれば 2 行になる。同じ日付で何度送っても、そのたびに追加する（上書きしない）
+- **AC-effort-ingest-gas-05**: 案件は、そのユーザーの案件のうち名前が一致するものを使い、無ければ作る。タスクは、その案件のタスクのうち名前が一致するものを使い、無ければ作る。名前の比較は大文字小文字を区別する（1 回の送信の中でも。`ABC` と `abc` は別の案件、同じ案件の下の `Review` と `review` は別のタスク）。新しく作ったときは、案件とタスクの一覧のマテリアライズドビュー（`projects_with_tasks_mv`）を更新してから応答するので、応答の直後の `GET /api/projects` に新しい案件とタスクが出る（更新に失敗したときは出ず、次の更新で出る。保存は成功として扱う）
 - **AC-effort-ingest-gas-06**: 見積と実績は、前後の空白を除き、全角の数字と全角のピリオド（`０`〜`９`、`．`）を半角に直したうえで、空か、`/^\d+(\.\d{1,2})?$/` に合う 100 未満の値（例: `2`、`1.5`、`0.25`、`99.99`、`２．５`）。見積が空なら見積なし（NULL）、実績が空なら 0 として保存する。それ以外（`1,5`、`1.5h`、`abc`、`-1`、`.5`、`100`、`99.995`、`1.2.3`）はその行の誤り（AC-07）。小数を第 2 位までに限るのは、DB の列（`numeric(4,2)`）が `99.995` を 100.00 に丸めて桁あふれの 500 になるため
 - **AC-effort-ingest-gas-07**: 空の行は読み飛ばす。それ以外で次のどれかに当たる行があれば、**1 行も保存せずに**（DB に触れずに）400 を返す。メッセージは「工数のテキストに読めない行があります。」+ 半角空白 + 誤りのある行ごとの「`<行番号>行目: <理由>`」を ` / ` でつないだもの（行番号はテキストの 1 始まりの行。件数の上限は無い）。理由は 1 行に 1 つで、次の順に最初に当たったもの
   1. `■` でも `・` でも始まらない →「案件の行（■）でもタスクの行（・）でもありません」
@@ -97,6 +96,7 @@ symptoms:
 - **INV-3**: 保存する工数と案件には、`email` から決めたユーザーの ID を付け、案件はそのユーザーの中だけで探す。タスクは、そのユーザーの案件の ID の中だけで探す（service role で接続しているので RLS に守られない）。破ると、他人の案件に工数が付く
 - **INV-4**: 書式（`■` の案件の行、`・<タスク名>：[<見積>]<実績>` のタスクの行）は、利用者の Google Form の入力と GAS が前提にしている。変えるときは、利用者への案内（Google Form の説明文）と GAS の更新を合わせて行い、本番に反映する前に済ませる。黙って変えると、それまでの書き方の送信がすべて 400 になり、1 行も登録されない（GAS が開発者にメールを送るだけで、利用者には届かない）
 - **INV-5**: テキストは、保存を始める前に全部を読み、誤りが 1 つでもあれば DB に触れずに 400 を返す（読みながら保存しない）。破ると、書き間違いのある送信で前半の行だけが保存され、直して送り直すと 2 重になる
+- **INV-6**: 読めたすべての行を、DB の関数 `save_work_records` の 1 回の呼び出しで保存する（effort-entry の INV-5 と同じ関数）。破ると、途中の DB の失敗で一部だけ残る
 
 ## エラー時の挙動
 
@@ -106,8 +106,8 @@ symptoms:
 - ユーザーの検索で Auth の管理 API が失敗したとき: 500 `Failed to look up user`（原因は `error_logs` に残る）。見つからないときは 400 `User not found`
 - 本文が JSON として読めないとき: 500 `Internal Server Error`
 - `Content-Type` が `application/json` でないとき: ユーザーの検索まで通ったあとで、検証ライブラリの既定の形の 400（`{ data, error: [...], success: false }`）。GAS のサンプルは `application/json` を付けている
-- 読み終えたあとの、途中の行の保存で DB のエラーが起きたとき（通信の失敗など。数値の範囲は読む段階で止める）: 500 `Failed to save work record: <DB のメッセージ>`。**それまでの行は保存されたまま**残り、それまでに作った案件・タスクがあってもマテリアライズドビューは更新されない（次にビューが更新されるまで、`GET /api/projects` と Web の候補の一覧に出ない）
-- 全行を保存したあとのマテリアライズドビューの更新に失敗したとき: 500。**全行は保存済み**なのに GAS はエラーのメールを送る
+- 保存の DB の関数が失敗したとき（通信の失敗など。数値の範囲は読む段階で止める）: 500 `Failed to save work records: <DB のメッセージ>`。何も残らない（v1.1.3 から）
+- 全行を保存したあとのマテリアライズドビューの更新に失敗したとき: 201 のまま、失敗を `error_logs` に残す（v1.1.3 から。それまでは 500 で、保存済みなのに GAS がエラーのメールを送っていた）
 - どちらの 500 でも、利用者が同じ内容を送り直すと、保存済みの行は 2 重になる
 
 ## 既知の落とし穴
@@ -115,8 +115,7 @@ symptoms:
 - **書き間違いのエラーは利用者に届かない**（AC-07）。400 のときに GAS が開発者にメールを送るだけで、送った本人には何も表示されない（GAS の側の仕様）。Google Form の説明文に書式を明記しておく（INV-4）
 - **全角の括弧や半角の `：` は直さない**（AC-07 の 4）。全角にするのは数字とピリオドだけ（2026-10-15 の人間の判断）
 - **400 のメッセージに件数の上限が無い**（AC-07）。長いメモを貼ると、メッセージ（とエラーのメールと `error_logs`）が長くなる
-- **Web の工数登録とは大文字小文字の扱いが違う**: GAS の取り込みは 1 回の送信の中でも区別するが、Web の工数登録（`/api/effort/entries`）はまだまとめる（effort-entry の P6 の直しでそろえる）
-- **送り直すと 2 重に登録される**（AC-04、エラー時の挙動）。同じ送信を見分ける仕組みが無い。途中の失敗で一部だけ残る点は、1 回の送信をまとめて保存する形に直す予定（P6）
+- **送り直すと 2 重に登録される**（AC-04、エラー時の挙動）。同じ送信を見分ける仕組みが無い（途中の失敗で一部だけ残ることは v1.1.3 で無くなった）
 - ユーザーの検索は、Auth の全ユーザーを 100 件ずつめくる。ユーザーが増えると遅くなる
 
 ## ポストモーテム
@@ -136,11 +135,11 @@ symptoms:
 | AC-effort-ingest-gas-07 | `packages/api/test/gas-effort.int.test.ts`、`packages/api/src/features/effort/service.test.ts`（誤りの行の種類と理由、行番号、メッセージ） | 結合、単体 |
 | AC-effort-ingest-gas-03（Auth の障害の 500 と、見つからないときの 400） | `packages/api/src/middleware/auth.test.ts`（`createSupabaseClient` を差し替える） | 単体 |
 | INV-5 | `packages/api/src/features/effort/service.test.ts`（呼ばれたら失敗する Supabase のクライアントで、DB に触れないこと）、`gas-effort.int.test.ts`（正しい行も保存されないこと） | 単体、結合 |
+| INV-6、AC-05 の作り直しの失敗 | `packages/api/src/features/effort/service.test.ts`（1 回の `save_work_records`、作り直しの失敗で `error_logs`）。関数の全部か何もないかは `packages/api/test/effort-entries.int.test.ts` の DB の関数の describe | 単体、結合 |
 | AC-effort-ingest-gas-08 | `packages/api/test/gas-effort.int.test.ts` | 結合 |
 | INV-1、INV-2、INV-3 | `packages/api/test/gas-effort.int.test.ts` | 結合 |
 | 本物の Google Form と GAS からの送信 | 手動（`docs/testing/manual-checklist.md` の M-005） | 手動 |
 
-保存の途中の DB の失敗で一部が残ることは、「全部保存か全部保存しないか」の改修でテストを書く。
 
 ## 変更履歴
 
@@ -148,3 +147,4 @@ symptoms:
 | --- | --- | --- | --- |
 | v1.0.7 | 2026-10-14 | 移行時点の基準（仕様書を旧ドキュメントとコードから作成） | [v1.0.7-baseline](changes/v1.0.7-baseline.md) |
 | v1.1.2 | 2026-10-15 | 書式と数値の誤りを 400 にして何も保存しない。全角の数字を受け付ける。1 回の送信の中でも大文字小文字を区別する。Auth の障害を 500 にする | [v1.1.2-strict-format](changes/v1.1.2-strict-format.md) |
+| v1.1.3 | 2026-10-16 | 保存を effort-entry と同じ DB の関数 1 回にし、途中の失敗で何も残らないようにした。候補の作り直しの失敗を保存の成功として扱う | [effort-entry の v1.1.3-atomic-save](../effort-entry/changes/v1.1.3-atomic-save.md) |

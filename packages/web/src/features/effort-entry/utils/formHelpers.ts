@@ -4,6 +4,7 @@ import type {
   EffortFormData,
 } from "@/features/effort-entry/types";
 import type { EffortEntry as EffortEntryDto } from "@shared/schemas/effort";
+import { isSavableWorkHours } from "@shared/utils/workHours";
 
 /**
  * フォーム用の空エントリを生成します。
@@ -88,6 +89,9 @@ export const mapDraftEntryToFormEntry = (
   actualHours: entry.hours ?? 0,
 });
 
+/** 実績・見積が保存できる範囲の外のときに、その欄に出す文 */
+const HOURS_RANGE_ERROR = "0 以上 100 未満";
+
 /**
  * エントリのバリデーション結果を返します。
  *
@@ -106,6 +110,14 @@ export const validateEffortEntry = (
   }
   if (entry.actualHours === null) {
     errors.actualHours = "必須入力";
+  } else if (!isSavableWorkHours(entry.actualHours)) {
+    errors.actualHours = HOURS_RANGE_ERROR;
+  }
+  if (
+    entry.estimatedHours !== null &&
+    !isSavableWorkHours(entry.estimatedHours)
+  ) {
+    errors.estimatedHours = HOURS_RANGE_ERROR;
   }
   return Object.keys(errors).length > 0 ? errors : null;
 };

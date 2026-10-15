@@ -411,12 +411,9 @@ describe("EffortForm（工数登録）", () => {
       expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     });
 
-    it("AC-effort-entry-17: 案件とタスクの名前が無い行も「必須入力」。負の値はここでは止めない", async () => {
+    it("AC-effort-entry-17: 案件とタスクの名前が無い行も「必須入力」", async () => {
       mockApi({
-        entries: [
-          dto({ project_name: "", task_name: "" }),
-          dto({ project_name: "案件B", hours: -1 }),
-        ],
+        entries: [dto({ project_name: "", task_name: "" })],
       });
       const ui = userEvent.setup();
       await renderForm();
@@ -424,6 +421,27 @@ describe("EffortForm（工数登録）", () => {
       await ui.click(submitButton());
 
       expect(screen.getAllByText("必須入力")).toHaveLength(2);
+    });
+
+    it("AC-effort-entry-17: 実績・見積が負か、小数第 2 位に丸めて 100 以上なら、その欄に出して止める", async () => {
+      mockApi({
+        entries: [
+          dto({ project_name: "案件A", hours: -1 }),
+          dto({ project_name: "案件B", estimated_hours: 100 }),
+          dto({ project_name: "案件C", hours: 99.995 }),
+          dto({ project_name: "案件D", estimated_hours: 99.994, hours: 0 }),
+        ],
+      });
+      const ui = userEvent.setup();
+      await renderForm();
+
+      await ui.click(submitButton());
+
+      expect(screen.getAllByText("0 以上 100 未満")).toHaveLength(3);
+      expect(showErrorToast).toHaveBeenCalledWith(
+        "入力内容を確認してください。",
+      );
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     });
 
     it("AC-effort-entry-17 / 18: 検証が通れば確認を出し、「送信する」で送る。成功したらフォームを空に戻し、候補を取り直す", async () => {
