@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@hono/standard-validator": "^0.1.5",
+    "@modelcontextprotocol/server": "2.3.0",
     "@supabase/supabase-js": "catalog:",
     "dayjs": "catalog:",
     "hono": "^4.9.9",
