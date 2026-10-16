@@ -8,6 +8,8 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-16
+
 ### Added
 - MCP サーバー（`/mcp`）を追加。Claude Code、Claude Desktop、Cursor、Notion AI などから、週報の取得、工数の検索・登録、案件の一覧、目標の取得・進捗の更新・新しい期間の作成（警告を見せてから 2 回目で作る）、ミッションの取得・更新ができる。初回はブラウザの連携の画面（`/oauth/consent`）で許可する。ログインの画面は `?redirect=` でこのサイトの中の画面に戻れるようになった。アプリに渡したトークンでは、`/mcp` 以外の API とプロフィール画像の保存先は使えない（api、web、DB のポリシー、[改修の記録](docs/specs/mcp/changes/v1.2.0-mcp-server.md)。**クラウドの Supabase で OAuth サーバーを有効にしてから出す**）
 - API の認証が、公開鍵方式（ES256 / RS256）で署名された Supabase のアクセストークンにも対応（今の方式のトークンはそのまま使える。将来 Supabase の署名の鍵を切り替えても API が止まらない）（api、[改修の記録](docs/specs/platform/changes/v1.1.0-auth-asymmetric-jwt.md)）
