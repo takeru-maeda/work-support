@@ -1,10 +1,11 @@
-import type { JSX } from "react";
-
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
-import { hero } from "../landingContent";
 import { ROUTES } from "@/config/routes";
+
+import { hero } from "../landingContent";
+
+import type { JSX } from "react";
 
 interface HeroSectionProps {
   onScrollToFeatures: () => void;

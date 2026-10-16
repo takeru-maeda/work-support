@@ -1,24 +1,28 @@
 import { Hono } from "hono";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { describeRoute, resolver, validator } from "hono-openapi";
 
-import { AuthenticatedUser, HonoEnv } from "../../custom-types";
-import { jwtAuthMiddleware } from "../../middleware/auth";
+import { AppError } from "../../lib/errors";
 import { createSupabaseClient } from "../../lib/supabase";
-import {
-  UpdateUserSettingsRequest,
-  UpdateUserSettingsRequestSchema,
-  UserSettings,
-  UserSettingsResponse,
-  UserSettingsResponseSchema,
-} from "./types";
+import { jwtAuthMiddleware } from "../../middleware/auth";
+
 import {
   createUserSettingsService,
   fetchUserSettings,
   updateUserSettingsService,
 } from "./service";
-import { AppError } from "../../lib/errors";
+import {
+  UpdateUserSettingsRequestSchema,
+  UserSettingsResponseSchema,
+} from "./types";
+
+import type {
+  UpdateUserSettingsRequest,
+  UserSettings,
+  UserSettingsResponse,
+} from "./types";
 import type { Database, Tables } from "../../../../shared/src/types/db";
+import type { AuthenticatedUser, HonoEnv } from "../../customTypes";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const userSettings = new Hono<HonoEnv>();
 

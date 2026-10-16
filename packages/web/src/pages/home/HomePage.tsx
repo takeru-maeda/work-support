@@ -1,8 +1,8 @@
-import { ROUTES } from "@/config/routes";
 import { MAIN_NAVIGATION } from "@/config/navigation";
+import { ROUTES } from "@/config/routes";
 import type { AuthUser } from "@/lib/auth";
-import { useUserStore } from "@/store/user";
 import { HomeFeatureCard } from "@/pages/home/components/HomeFeatureCard";
+import { useUserStore } from "@/store/user";
 
 export default function HomePage() {
   const user: AuthUser | null = useUserStore((state) => state.user);

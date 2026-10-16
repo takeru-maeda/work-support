@@ -1,7 +1,7 @@
 export {
-  Project,
-  ProjectWithTasks,
-  ProjectsResponse,
+  type Project,
+  type ProjectWithTasks,
+  type ProjectsResponse,
   ProjectsResponseSchema,
-  Task,
+  type Task,
 } from "../../../../shared/src/schemas/projects";

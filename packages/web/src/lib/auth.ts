@@ -1,11 +1,11 @@
+import { ROUTES } from "@/config/routes";
+import { supabase } from "@/lib/supabase";
+
 import type {
   Session,
   User as SupabaseUser,
   UserMetadata,
 } from "@supabase/supabase-js";
-
-import { ROUTES } from "@/config/routes";
-import { supabase } from "@/lib/supabase";
 
 export interface AuthUser {
   id: string;

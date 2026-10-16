@@ -1,6 +1,7 @@
-import type { JSX, ReactNode } from "react";
-import type { LucideIcon } from "lucide-react";
 import CardContainer from "@/components/shared/CardContainer";
+
+import type { LucideIcon } from "lucide-react";
+import type { JSX, ReactNode } from "react";
 
 interface SettingsCardProps {
   icon: LucideIcon;

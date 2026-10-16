@@ -1,37 +1,41 @@
 import { Hono } from "hono";
-import { SupabaseClient } from "@supabase/supabase-js";
-
-import { AuthenticatedUser, HonoEnv } from "../../custom-types";
-import { jwtAuthMiddleware } from "../../middleware/auth";
-import { createSupabaseClient } from "../../lib/supabase";
-import {
-  CreateGoalResponseSchema,
-  CreateGoalRequestSchema,
-  GetGoalResponseSchema,
-  GoalCreateRequest,
-  GoalHistoryQuery,
-  GoalHistoryQuerySchema,
-  GoalHistoryResponse,
-  GoalHistoryResponseSchema,
-  GoalPreviousWeekProgress,
-  GoalPreviousWeekProgressSchema,
-  GoalPreviousWeekQuery,
-  GoalPreviousWeekQuerySchema,
-  GoalUpdateRequest,
-  UpdateGoalResponseSchema,
-  UpdateGoalRequestSchema,
-} from "./types";
-import { AppError } from "../../lib/errors";
-import { Database, Tables } from "../../../../shared/src/types/db";
 import { describeRoute, resolver, validator } from "hono-openapi";
+
+import { AppError } from "../../lib/errors";
+import { createSupabaseClient } from "../../lib/supabase";
+import { jwtAuthMiddleware } from "../../middleware/auth";
+
 import {
-  createGoalService,
+  createGoalPeriodService,
   deleteGoalService,
   getLatestGoalsService,
   getPreviousWeekProgressService,
   searchGoalsService,
   updateGoalService,
 } from "./service";
+import {
+  CreateGoalPeriodRequestSchema,
+  CreateGoalPeriodResponseSchema,
+  GetGoalResponseSchema,
+  GoalHistoryQuerySchema,
+  GoalHistoryResponseSchema,
+  GoalPreviousWeekProgressSchema,
+  GoalPreviousWeekQuerySchema,
+  UpdateGoalResponseSchema,
+  UpdateGoalRequestSchema,
+} from "./types";
+
+import type {
+  GoalHistoryQuery,
+  GoalHistoryResponse,
+  GoalPeriodCreateRequest,
+  GoalPreviousWeekProgress,
+  GoalPreviousWeekQuery,
+  GoalUpdateRequest,
+} from "./types";
+import type { Database, Tables } from "../../../../shared/src/types/db";
+import type { AuthenticatedUser, HonoEnv } from "../../customTypes";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const goals = new Hono<HonoEnv>();
 
@@ -66,36 +70,34 @@ goals.get(
 );
 
 goals.post(
-  "/",
+  "/periods",
   describeRoute({
-    description: "目標を新規作成します",
+    description:
+      "目標の期間を、すべての目標とともに作ります。期間の前後、現在の期間との重なり、目標名、重みの合計（100%）に外れたら、何も作らずに 400 を返します",
     responses: {
       201: {
-        description: "Goal data create successfully",
+        description: "Goal period create successfully",
         content: {
           "application/json": {
-            schema: resolver(CreateGoalResponseSchema),
+            schema: resolver(CreateGoalPeriodResponseSchema),
           },
         },
       },
     },
   }),
-  validator("json", CreateGoalRequestSchema),
+  validator("json", CreateGoalPeriodRequestSchema),
   async (c) => {
     const user: AuthenticatedUser | undefined = c.get("user");
     if (!user) throw new AppError(401, "Unauthorized");
 
-    const goal: GoalCreateRequest = c.req.valid("json");
+    const period: GoalPeriodCreateRequest = c.req.valid("json");
     const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
-    const createdGoal: Tables<"goals"> = await createGoalService(
+    const created: Tables<"goals">[] = await createGoalPeriodService(
       supabase,
       user.id,
-      goal,
+      period,
     );
-    return c.json(
-      CreateGoalResponseSchema.parse({ created: createdGoal }),
-      201,
-    );
+    return c.json(CreateGoalPeriodResponseSchema.parse({ created }), 201);
   },
 );
 

@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { Plus } from "lucide-react";
 import { format } from "date-fns";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 
 import { FormActions } from "@/components/form/FormActions";
 import { PageLayout } from "@/components/layout/PageLayout";
@@ -21,6 +21,7 @@ export default function AddGoalsPage() {
     setPeriodEnd,
     goals,
     addGoal,
+    canAddGoal,
     removeGoal,
     updateGoal,
     handleSave,
@@ -97,7 +98,7 @@ export default function AddGoalsPage() {
           size="sm"
           onClick={addGoal}
           className="w-full gap-2 bg-transparent"
-          disabled={isSaving}
+          disabled={isSaving || !canAddGoal}
         >
           <Plus className="h-4 w-4" />
           目標を追加

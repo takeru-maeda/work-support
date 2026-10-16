@@ -1,10 +1,10 @@
 import { User } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
-import CardContainer from "@/components/shared/CardContainer";
 import { FormActions } from "@/components/form/FormActions";
-import { Button } from "@/components/ui/button";
 import { SectionHeader } from "@/components/sections/SectionHeader";
+import CardContainer from "@/components/shared/CardContainer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface ProfileNameSectionProps {
   name: string;

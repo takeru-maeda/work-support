@@ -1,9 +1,9 @@
 import { useCallback, type ChangeEvent } from "react";
 
+import { reportUiError } from "@/api/logs";
+import type { AuthUser } from "@/lib/auth";
 import { uploadAvatarImage, deleteAvatarImage } from "@/lib/storage";
 import { showErrorToast } from "@/lib/toast";
-import { reportUiError } from "@/services/logs";
-import type { AuthUser } from "@/lib/auth";
 import type { UserProfile } from "@/types/userProfile";
 
 interface UseAvatarUploadOptions {

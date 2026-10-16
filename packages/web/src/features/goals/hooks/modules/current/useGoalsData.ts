@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { useCurrentGoals } from "@/services/goals";
-import { showErrorToast } from "@/lib/toast";
-import { reportUiError } from "@/services/logs";
+import { reportUiError } from "@/api/logs";
+import { useCurrentGoals } from "@/features/goals/api/goals";
 import type { Goal } from "@/features/goals/types";
+import { showErrorToast } from "@/lib/toast";
 
 interface GoalsDataResult {
   goals: Goal[];
@@ -20,7 +20,7 @@ export const useGoalsData = (): GoalsDataResult => {
     isLoading,
     mutate: mutateGoals,
   } = useCurrentGoals();
-  const goals: Goal[] = currentGoals ?? [];
+  const goals: Goal[] = useMemo(() => currentGoals ?? [], [currentGoals]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {

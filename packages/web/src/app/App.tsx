@@ -1,23 +1,26 @@
-import type { JSX } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 
 import { ThemeProvider } from "@/app/providers/ThemeProvider";
-import { AuthenticatedLayout } from "@/components/layout/AuthenticatedLayout";
 import { ROUTES } from "@/config/routes";
-import LandingPage from "@/pages/landing/LandingPage";
-import EffortsPage from "@/pages/efforts/EffortsPage";
-import EffortsNewPage from "@/pages/efforts/EffortsNewPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 import SignupPage from "@/pages/auth/SignupPage";
+import EffortsNewPage from "@/pages/efforts/EffortsNewPage";
+import EffortsPage from "@/pages/efforts/EffortsPage";
 import AddGoalsPage from "@/pages/goals/AddGoalsPage";
 import GoalsPage from "@/pages/goals/GoalsPage";
 import HomePage from "@/pages/home/HomePage";
+import LandingPage from "@/pages/landing/LandingPage";
+import ConsentPage from "@/pages/oauth/ConsentPage";
 import ProfilePage from "@/pages/profile/ProfilePage";
 import WeeklyReportPage from "@/pages/reports/WeeklyReportPage";
 import SettingsPage from "@/pages/settings/SettingsPage";
 import { useThemeStore, type Theme } from "@/store/theme";
+
+import { AuthenticatedLayout } from "./AuthenticatedLayout";
+
+import type { JSX } from "react";
 
 const App = (): JSX.Element => {
   const theme: Theme = useThemeStore((s) => s.theme);
@@ -48,6 +51,8 @@ const App = (): JSX.Element => {
               path={ROUTES.resetPassword}
               element={<ResetPasswordPage />}
             />
+            {/* AuthGuard の外。未ログインなら画面の中でログインへ移す（AC-mcp-14） */}
+            <Route path={ROUTES.oauthConsent} element={<ConsentPage />} />
             <Route
               path="*"
               element={<Navigate to={ROUTES.landing} replace />}

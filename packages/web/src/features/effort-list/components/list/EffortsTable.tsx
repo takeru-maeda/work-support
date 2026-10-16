@@ -1,3 +1,6 @@
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -11,9 +14,8 @@ import type {
   EffortSortColumn,
   EffortSortDirection,
 } from "@/features/effort-list/types";
-import { Button } from "@/components/ui/button";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 import type { JSX } from "react";
 
 interface EffortsTableProps {

@@ -1,16 +1,16 @@
-import type { ReactNode } from "react";
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { reportUiError } from "@/api/logs";
+import { ensureUserSettings } from "@/api/userSettings";
+import { PageSkeleton } from "@/components/skeleton/PageSkeleton";
 import { ROUTES } from "@/config/routes";
 import { getCurrentUser, type AuthUser } from "@/lib/auth";
 import { useUserStore } from "@/store/user";
-import { PageSkeleton } from "@/components/skeleton/PageSkeleton";
-import { ensureUserSettings } from "@/services/userSettings";
 import { useUserSettingsStore } from "@/store/userSettings";
-import { reportUiError } from "@/services/logs";
 import type { UserSettings } from "@shared/schemas/userSettings";
+
+import type { ReactNode } from "react";
 
 interface AuthGuardProps {
   children: ReactNode;

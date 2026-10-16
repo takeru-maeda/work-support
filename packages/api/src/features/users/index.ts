@@ -1,13 +1,15 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
-import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { AuthenticatedUser, HonoEnv } from "../../custom-types";
-import { jwtAuthMiddleware } from "../../middleware/auth";
-import { createSupabaseClient } from "../../lib/supabase";
-import type { Database } from "../../../../shared/src/types/db";
 import { AppError } from "../../lib/errors";
+import { createSupabaseClient } from "../../lib/supabase";
+import { jwtAuthMiddleware } from "../../middleware/auth";
+
 import { deleteCurrentUserAccount } from "./service";
+
+import type { Database } from "../../../../shared/src/types/db";
+import type { AuthenticatedUser, HonoEnv } from "../../customTypes";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const users = new Hono<HonoEnv>();
 

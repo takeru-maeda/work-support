@@ -1,5 +1,5 @@
+import { formatWorkHours } from "@/lib/formatHours";
 import { cn } from "@/lib/utils";
-import { formatWorkHours } from "../../utils/formatHours";
 
 interface DifferenceLabelProps {
   difference: number | null;

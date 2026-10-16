@@ -1,15 +1,19 @@
 import { createMiddleware } from "hono/factory";
-import { createSupabaseClient } from "../lib/supabase";
-import { EffortRequest, EffortRequestSchema } from "../features/effort/types";
-import z from "zod";
-import { AuthError, SupabaseClient, User } from "@supabase/supabase-js";
-import { AuthenticatedUser, HonoEnv } from "../custom-types";
+
+import { EffortRequestSchema } from "../features/effort/types";
 import { AppError } from "../lib/errors";
-import { Database } from "../../../shared/src/types/db";
-import { jwtVerify, type JWTPayload } from "jose";
+import { verifySupabaseAccessToken } from "../lib/jwt";
+import { createSupabaseClient } from "../lib/supabase";
+
+import type { Database } from "../../../shared/src/types/db";
+import type { AuthenticatedUser, HonoEnv } from "../customTypes";
+import type { EffortRequest } from "../features/effort/types";
+import type { AuthError, SupabaseClient, User } from "@supabase/supabase-js";
+import type { JWTPayload } from "jose";
+import type z from "zod";
 
 /**
- * JWT 認証を検証します。
+ * JWT 認証を検証します（共有シークレットの HS256 と、JWKS で検証する ES256 / RS256 の両方）。
  *
  * @param c Honoコンテキスト
  * @param next 次のミドルウェア
@@ -28,22 +32,32 @@ export const jwtAuthMiddleware = createMiddleware(async (c, next) => {
   }
 
   const token: string = authHeader.split(" ")[1];
-  const secretKey: Uint8Array = new TextEncoder().encode(
-    c.env.SUPABASE_JWT_SECRET,
-  );
 
   let payload: JWTPayload;
   try {
-    const verified = await jwtVerify(token, secretKey);
-    payload = verified.payload;
+    payload = await verifySupabaseAccessToken(token, c.env);
   } catch (error) {
     throw new AppError(401, "Unauthorized", error as Error);
   }
+
+  // MCP のクライアントに出した OAuth のトークンは /mcp だけで受け付ける（AC-platform-20）。
+  // アプリに渡したトークンで、アカウントの削除のような画面だけの操作を呼べないようにする
+  if (isOAuthClientToken(payload)) throw new AppError(401, "Unauthorized");
 
   const user: AuthenticatedUser = buildAuthenticatedUserFromPayload(payload);
   c.set("user", user);
   await next();
 });
+
+/**
+ * Supabase の OAuth 2.1 サーバーがクライアント（MCP のアプリ）に出したトークンかを返します。
+ * そのトークンには `client_id` の claim が入り、web のログインのトークンには入らない。
+ *
+ * @param payload 検証済みの JWT のペイロード
+ * @returns OAuth のクライアントのトークンなら true
+ */
+export const isOAuthClientToken = (payload: JWTPayload): boolean =>
+  typeof payload.client_id === "string" && payload.client_id !== "";
 
 /**
  * APIキー認証を検証します。
@@ -80,7 +94,9 @@ export const apiKeyAuthMiddleware = createMiddleware(async (c, next) => {
   if (!email) throw new AppError(400, "Email is required");
 
   const { user, error } = await findUserByEmail(email, c.env);
-  if (error || !user) throw new AppError(400, "User not found", error);
+  // Auth の障害は送り手の誤りではないので 500 にする（400 だと GAS のメールで原因を取り違える）
+  if (error) throw new AppError(500, "Failed to look up user", error);
+  if (!user) throw new AppError(400, "User not found");
 
   c.set("user", user);
   await next();
@@ -125,8 +141,12 @@ const findUserByEmail = async (
 
 /**
  * JWT ペイロードから認証ユーザーを構築します。
+ *
+ * @param payload 検証済みの JWT のペイロード
+ * @returns ユーザー ID とメールアドレス
+ * @throws `sub` が無ければ AppError(401)
  */
-const buildAuthenticatedUserFromPayload = (
+export const buildAuthenticatedUserFromPayload = (
   payload: JWTPayload,
 ): AuthenticatedUser => {
   const userId: string | undefined = payload.sub;

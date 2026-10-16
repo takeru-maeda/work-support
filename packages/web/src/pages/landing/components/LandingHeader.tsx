@@ -1,9 +1,9 @@
-import type { JSX } from "react";
-
 import { Link } from "react-router-dom";
 
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { Button } from "@/components/ui/button";
+
+import type { JSX } from "react";
 
 interface LandingHeaderProps {
   logoHref: string;

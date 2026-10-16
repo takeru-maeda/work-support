@@ -1,19 +1,22 @@
+import { swaggerUI } from "@hono/swagger-ui";
 import { Hono } from "hono";
-import { HonoEnv } from "./custom-types";
+import { cors } from "hono/cors";
+import { logger } from "hono/logger";
+import { openAPIRouteHandler } from "hono-openapi";
+
 import effort from "./features/effort";
-import missions from "./features/missions";
 import goals from "./features/goals";
+import logs from "./features/logs";
+import mcp from "./features/mcp";
+import missions from "./features/missions";
 import projects from "./features/projects";
 import reports from "./features/reports";
 import userSettings from "./features/user-settings";
 import users from "./features/users";
-import { accessLogMiddleware } from "./middleware/logger";
-import { logger } from "hono/logger";
-import { cors } from "hono/cors";
 import { globalErrorHandler } from "./lib/errorHandler";
-import { openAPIRouteHandler } from "hono-openapi";
-import { swaggerUI } from "@hono/swagger-ui";
-import logs from "./features/logs";
+import { accessLogMiddleware } from "./middleware/logger";
+
+import type { HonoEnv } from "./customTypes";
 
 const app = new Hono<HonoEnv>();
 
@@ -56,6 +59,8 @@ app.route("/api/reports", reports);
 app.route("/api/user-settings", userSettings);
 app.route("/api/users", users);
 app.route("/api/logs", logs);
+// MCP サーバー（/mcp）と、その保護されたリソースの情報（/.well-known/oauth-protected-resource）
+app.route("/", mcp);
 
 app.get(
   "/openapi",

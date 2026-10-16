@@ -1,14 +1,14 @@
-import CardContainer from "@/components/shared/CardContainer";
-import { TableFooter } from "@/components/table-footer/TableFooter";
-import { EmptyState } from "@/components/empty-state/EmptyState";
 import { Search } from "lucide-react";
 
-import { PastGoalsDataTable } from "@/features/goals/components/past/PastGoalsDataTable";
-import { PastGoalsFilter } from "@/features/goals/components/past/PastGoalsFilter";
-import { PastGoalContentDialog } from "@/features/goals/components/past/PastGoalContentDialog";
-import PastGoalSectionHeader from "@/features/goals/components/past/PastGoalSectionHeader";
-import { usePastGoals } from "@/features/goals/hooks/usePastGoals";
+import { EmptyState } from "@/components/empty-state/EmptyState";
+import CardContainer from "@/components/shared/CardContainer";
 import TableAndFooterSkeleton from "@/components/skeleton/TableAndFooterSkeleton";
+import { TableFooter } from "@/components/table-footer/TableFooter";
+import { PastGoalContentDialog } from "@/features/goals/components/past/PastGoalContentDialog";
+import { PastGoalsDataTable } from "@/features/goals/components/past/PastGoalsDataTable";
+import PastGoalSectionHeader from "@/features/goals/components/past/PastGoalSectionHeader";
+import { PastGoalsFilter } from "@/features/goals/components/past/PastGoalsFilter";
+import { usePastGoals } from "@/features/goals/hooks/usePastGoals";
 
 export function PastGoalsTable() {
   const {

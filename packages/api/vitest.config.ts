@@ -1,14 +1,14 @@
-import { defineConfig } from 'vitest/config';
-import { config } from 'dotenv'; // Import config from dotenv
-import path from 'path';
+import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
 
-export default defineConfig({
-  test: {
-    globals: true,
-    environment: 'node',
-    testTimeout: 10000, // Increase test timeout to 10 seconds
-    env: {
-      ...config({ path: path.resolve(__dirname, '.dev.vars') }).parsed, // Load .dev.vars explicitly
+import shared from "./vitest.shared";
+
+// 単体テスト（DB を使わない）。DB を使う結合テスト（*.int.test.ts）は vitest.int.config.ts で回す
+export default mergeConfig(
+  shared,
+  defineConfig({
+    test: {
+      testTimeout: 10000,
+      exclude: [...configDefaults.exclude, "**/*.int.test.ts"],
     },
-  },
-});
+  }),
+);

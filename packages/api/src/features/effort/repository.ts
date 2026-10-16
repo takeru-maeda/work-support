@@ -1,328 +1,73 @@
-import type { Json } from "../../../../shared/src/types/db";
-import {
-  TablesInsert,
-  Database,
-  Tables,
-} from "../../../../shared/src/types/db";
 import { AppError } from "../../lib/errors";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { ParsedEffort } from "./types";
-import { Dayjs } from "dayjs";
+
 import type {
   EffortDraft,
   EffortDraftRecord,
   EffortEntry,
-  ProjectCreationResult,
-  TaskCreationResult,
+  SavedWorkRecord,
+  WorkRecordInput,
 } from "./types";
+import type {
+  TablesInsert,
+  Database,
+  Tables,
+} from "../../../../shared/src/types/db";
+import type { Json } from "../../../../shared/src/types/db";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-/**
- * 案件を検索または作成します。
- *
- * @param supabase Supabaseクライアント
- * @param userId ユーザーID
- * @param effort 工数入力データ
- * @returns 案件ID
- */
-export async function findProject(
-  supabase: SupabaseClient<Database>,
-  userId: string,
-  effort: ParsedEffort,
-): Promise<{ id: number; created: boolean }> {
-  const { data: pj, error } = await supabase
-    .from("projects")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("name", effort.project_name)
-    .maybeSingle();
+/** `save_work_records` が「見つからない」に使う SQLSTATE（マイグレーション 20261016000000 と合わせる） */
+const NOT_FOUND_TARGETS: Readonly<Record<string, "project" | "task">> = {
+  WS001: "project",
+  WS002: "task",
+};
 
-  if (error) {
-    throw new AppError(500, `Failed to fetch project: ${error.message}`, error);
+/** `save_work_records` で、ID で指定した案件かタスクが（そのユーザーの・決めた案件の中に）見つからなかった */
+export class WorkRecordTargetNotFoundError extends Error {
+  constructor(readonly target: "project" | "task") {
+    super(`${target} not found`);
+    this.name = "WorkRecordTargetNotFoundError";
   }
-
-  if (!pj) {
-    const { data: newPj, error: insertError } = await supabase
-      .from("projects")
-      .insert({
-        user_id: userId,
-        name: effort.project_name,
-      })
-      .select("id")
-      .single();
-
-    if (insertError) {
-      const message = `Failed to create project: ${insertError.message}`;
-      throw new AppError(500, message, insertError);
-    }
-    return { id: newPj.id, created: true };
-  }
-
-  return { id: pj.id, created: false };
 }
 
 /**
- * タスクを検索または作成します。
- *
- * @param supabase Supabaseクライアント
- * @param projectId 案件ID
- * @param taskName タスク名
- * @returns タスクID
- */
-export async function findOrCreateTask(
-  supabase: SupabaseClient<Database>,
-  projectId: number,
-  taskName: string,
-): Promise<{ id: number; created: boolean }> {
-  let { data: task, error } = await supabase
-    .from("tasks")
-    .select("id")
-    .eq("project_id", projectId)
-    .eq("name", taskName)
-    .maybeSingle();
-
-  if (error) {
-    throw new AppError(500, `Failed to fetch task: ${error.message}`, error);
-  }
-
-  if (!task) {
-    const { data: newTask, error: insertError } = await supabase
-      .from("tasks")
-      .insert({
-        project_id: projectId,
-        name: taskName,
-      })
-      .select("id")
-      .single();
-
-    if (insertError) {
-      const message = `Failed to create task: ${insertError.message}`;
-      throw new AppError(500, message, insertError);
-    }
-    return { id: newTask.id, created: true };
-  }
-
-  return { id: task.id, created: false };
-}
-
-/**
- * 工数記録を保存します。
+ * 1 回の送信の工数を、DB の関数 `save_work_records` で 1 つのトランザクションに保存します。
+ * どの要素で失敗しても、行も、作った案件・タスクも残りません。
  *
  * @param supabase Supabaseクライアント
  * @param userId ユーザーID
- * @param taskId タスクID
- * @param workDate 作業日
- * @param effort 工数入力データ
- * @returns 保存した工数記録
+ * @param workDate 作業日（YYYY-MM-DD）
+ * @param entries 保存する要素（名前の空白の除去と時間の範囲の検査は済ませておく）
+ * @returns 入力の順に、保存した行と、案件・タスクを新しく作ったか
+ * @throws 指定した案件・タスクが見つからなければ WorkRecordTargetNotFoundError、それ以外の DB の誤りは AppError(500)
  */
-export async function insertWorkRecord(
+export const saveWorkRecords = async (
   supabase: SupabaseClient<Database>,
   userId: string,
-  taskId: number,
-  workDate: Date | Dayjs,
-  effort: ParsedEffort,
-): Promise<Tables<"work_records">> {
-  const workRecord: TablesInsert<"work_records"> = {
-    user_id: userId,
-    task_id: taskId,
-    work_date: workDate.toISOString(),
-    hours: effort.hours || 0,
-    estimated_hours: effort.estimated_hours,
-  };
-
-  const { data, error } = await supabase
-    .from("work_records")
-    .insert(workRecord)
-    .select("*")
-    .single();
-
-  if (error || !data) {
-    const message = `Failed to save work record: ${error?.message}`;
-    throw new AppError(500, message, error);
-  }
-
-  return data;
-}
-
-/**
- * 案件をIDで取得します。
- *
- * @param supabase Supabaseクライアント
- * @param userId ユーザーID
- * @param projectId 案件ID
- * @returns 案件
- */
-export const getProjectById = async (
-  supabase: SupabaseClient<Database>,
-  userId: string,
-  projectId: number,
-): Promise<Tables<"projects"> | null> => {
-  const { data, error } = await supabase
-    .from("projects")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("id", projectId)
-    .maybeSingle();
+  workDate: string,
+  entries: WorkRecordInput[],
+): Promise<SavedWorkRecord[]> => {
+  const { data, error } = await supabase.rpc("save_work_records", {
+    p_user_id: userId,
+    p_work_date: workDate,
+    p_entries: entries as unknown as Json,
+  });
 
   if (error) {
-    const message = `Failed to fetch project: ${error.message}`;
+    const target = NOT_FOUND_TARGETS[error.code];
+    if (target) throw new WorkRecordTargetNotFoundError(target);
+    const message = `Failed to save work records: ${error.message}`;
     throw new AppError(500, message, error);
   }
 
-  return data;
-};
-
-/**
- * タスクをIDで取得します。
- *
- * @param supabase Supabaseクライアント
- * @param projectId 案件ID
- * @param taskId タスクID
- * @returns タスク
- */
-export const getTaskById = async (
-  supabase: SupabaseClient<Database>,
-  projectId: number,
-  taskId: number,
-): Promise<Tables<"tasks"> | null> => {
-  const { data, error } = await supabase
-    .from("tasks")
-    .select("*")
-    .eq("project_id", projectId)
-    .eq("id", taskId)
-    .maybeSingle();
-
-  if (error) {
-    const message = `Failed to fetch task: ${error.message}`;
-    throw new AppError(500, message, error);
+  // 関数は入力の 1 要素につき 1 行を入力の順に返す。service は位置で入力と組み合わせるので、件数が合わなければ止める
+  const saved = data as unknown as SavedWorkRecord[];
+  if (!Array.isArray(saved) || saved.length !== entries.length) {
+    throw new AppError(
+      500,
+      `save_work_records returned ${Array.isArray(saved) ? saved.length : "non-array"} rows for ${entries.length} entries`,
+    );
   }
-
-  return data;
-};
-
-/**
- * 案件を作成します。
- *
- * @param supabase Supabaseクライアント
- * @param userId ユーザーID
- * @param name 案件名
- * @returns 作成した案件
- */
-export const createProject = async (
-  supabase: SupabaseClient<Database>,
-  userId: string,
-  name: string,
-): Promise<ProjectCreationResult> => {
-  const { data, error } = await supabase
-    .from("projects")
-    .insert({ user_id: userId, name })
-    .select("*")
-    .single();
-
-  if (error || !data) {
-    if (error?.message.includes("duplicate")) {
-      const existing: Tables<"projects"> | null = await getProjectByName(
-        supabase,
-        userId,
-        name,
-      );
-      if (existing) return { project: existing, created: false };
-    }
-    const message = `Failed to create project: ${error?.message}`;
-    throw new AppError(500, message, error);
-  }
-
-  return { project: data, created: true };
-};
-
-/**
- * 案件を名称で取得します。
- *
- * @param supabase Supabaseクライアント
- * @param userId ユーザーID
- * @param name 案件名
- * @returns 案件
- */
-export const getProjectByName = async (
-  supabase: SupabaseClient<Database>,
-  userId: string,
-  name: string,
-): Promise<Tables<"projects"> | null> => {
-  const { data, error } = await supabase
-    .from("projects")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("name", name)
-    .maybeSingle();
-
-  if (error) {
-    const message = `Failed to fetch project: ${error.message}`;
-    throw new AppError(500, message, error);
-  }
-
-  return data;
-};
-
-/**
- * タスクを作成します。
- *
- * @param supabase Supabaseクライアント
- * @param projectId 案件ID
- * @param name タスク名
- * @returns 作成したタスク
- */
-export const createTask = async (
-  supabase: SupabaseClient<Database>,
-  projectId: number,
-  name: string,
-): Promise<TaskCreationResult> => {
-  const { data, error } = await supabase
-    .from("tasks")
-    .insert({ project_id: projectId, name })
-    .select("*")
-    .single();
-
-  if (error || !data) {
-    if (error?.message.includes("duplicate")) {
-      const existing: Tables<"tasks"> | null = await getTaskByName(
-        supabase,
-        projectId,
-        name,
-      );
-      if (existing) return { task: existing, created: false };
-    }
-    const message = `Failed to create task: ${error?.message}`;
-    throw new AppError(500, message, error);
-  }
-
-  return { task: data, created: true };
-};
-
-/**
- * タスクを名称で取得します。
- *
- * @param supabase Supabaseクライアント
- * @param projectId 案件ID
- * @param name タスク名
- * @returns タスク
- */
-export const getTaskByName = async (
-  supabase: SupabaseClient<Database>,
-  projectId: number,
-  name: string,
-): Promise<Tables<"tasks"> | null> => {
-  const { data, error } = await supabase
-    .from("tasks")
-    .select("*")
-    .eq("project_id", projectId)
-    .eq("name", name)
-    .maybeSingle();
-
-  if (error) {
-    const message = `Failed to fetch task: ${error.message}`;
-    throw new AppError(500, message, error);
-  }
-
-  return data;
+  return saved;
 };
 
 /**

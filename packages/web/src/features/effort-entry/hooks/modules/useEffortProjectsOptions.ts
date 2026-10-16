@@ -1,11 +1,12 @@
 import { useEffect } from "react";
-import type { KeyedMutator } from "swr";
 
-import { showErrorToast } from "@/lib/toast";
-import { reportUiError } from "@/services/logs";
-import { useProjectsWithTasks } from "@/services/projects";
+import { reportUiError } from "@/api/logs";
+import { useProjectsWithTasks } from "@/api/projects";
 import type { EffortProjectOption } from "@/features/effort-entry/types";
+import { showErrorToast } from "@/lib/toast";
 import type { ProjectWithTasks } from "@shared/schemas/projects";
+
+import type { KeyedMutator } from "swr";
 
 interface EffortProjectsOptionsResult {
   projectOptions: EffortProjectOption[];

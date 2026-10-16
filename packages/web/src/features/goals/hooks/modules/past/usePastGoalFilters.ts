@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { getPastGoalsFilterStorageKey } from "@/features/goals/storageKeys";
 import type { SortField, SortDirection, Goal } from "@/features/goals/types";
@@ -129,7 +129,7 @@ export const usePastGoalFilters = (currentGoals: Goal[]): PastGoalFilters => {
     } finally {
       setFiltersInitialized(true);
     }
-  }, [filtersInitialized]);
+  }, [filtersInitialized, storageKey]);
 
   const appliedFilters = useMemo(() => {
     const startDate: string | undefined = filterStartDate

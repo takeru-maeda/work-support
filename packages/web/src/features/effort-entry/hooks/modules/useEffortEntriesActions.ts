@@ -1,5 +1,6 @@
-import { useCallback, useState } from "react";
 import { arrayMove } from "@dnd-kit/sortable";
+import { useCallback, useState } from "react";
+
 import type {
   EffortEntry,
   EffortEntryError,
@@ -8,7 +9,7 @@ import type {
 import {
   createEmptyEntry,
   validateEffortEntry,
-} from "@/features/effort-entry/utils/form-helpers";
+} from "@/features/effort-entry/utils/formHelpers";
 import { getProjectGroupKey } from "@/features/effort-entry/utils/projectGrouping";
 
 interface UseEffortEntriesActionsParams {

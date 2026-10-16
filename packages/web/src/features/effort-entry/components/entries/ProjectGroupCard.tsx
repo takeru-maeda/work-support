@@ -1,4 +1,3 @@
-import type { JSX } from "react";
 import { GripVertical, Plus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -8,9 +7,12 @@ import type {
   EffortProjectOption,
   EffortSelectionValue,
 } from "@/features/effort-entry/types";
+import { projectErrorMessage } from "@/features/effort-entry/utils/projectErrors";
+
 import { ProjectCombobox } from "./ProjectCombobox";
 import { TaskRow } from "./TaskRow";
-import { projectErrorMessage } from "@/features/effort-entry/utils/projectErrors";
+
+import type { JSX } from "react";
 
 export interface ProjectGroupCardProps {
   entries: EffortEntry[];

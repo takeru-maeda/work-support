@@ -1,14 +1,17 @@
 import { Edit2 } from "lucide-react";
-import { updateMission, useMission } from "@/services/missions";
 import { useEffect, useState } from "react";
-import { showErrorToast, showSuccessToast } from "@/lib/toast";
+
+import { reportUiError } from "@/api/logs";
 import { FormActions } from "@/components/form/FormActions";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import CardContainer from "@/components/shared/CardContainer";
-import { reportUiError } from "@/services/logs";
-import MissionSectionHeader from "./MissionSectionHeader";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { updateMission, useMission } from "@/features/reports/api/missions";
+import { showErrorToast, showSuccessToast } from "@/lib/toast";
+
+import MissionSectionHeader from "./MissionSectionHeader";
+
 import type { Mission } from "../../types";
 
 interface MissionEditorProps {

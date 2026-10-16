@@ -1,20 +1,20 @@
-import { useEffect, useMemo } from "react";
 import { format } from "date-fns";
+import { useEffect, useMemo } from "react";
 
-import { showErrorToast } from "@/lib/toast";
-import { reportUiError } from "@/services/logs";
+import { reportUiError } from "@/api/logs";
+import { useEffortListData } from "@/features/effort-list/hooks/modules/useEffortListData";
 import {
   useEffortListFilters,
   ALL_OPTION,
   type EffortListFiltersState,
 } from "@/features/effort-list/hooks/modules/useEffortListFilters";
-import { useEffortListData } from "@/features/effort-list/hooks/modules/useEffortListData";
 import { useEffortListProjects } from "@/features/effort-list/hooks/modules/useEffortListProjects";
 import type {
   EffortListEntry,
   EffortSortColumn,
   EffortSortDirection,
 } from "@/features/effort-list/types";
+import { showErrorToast } from "@/lib/toast";
 import type {
   WorkRecordListQuery,
   WorkRecordSort,
@@ -85,23 +85,22 @@ export function useEffortList() {
       ? Number(filters.tempFilterProject)
       : undefined;
 
-  const { projectOptions, taskOptions, isLoading: isProjectLoading } =
-    useEffortListProjects(parsedProjectId);
+  const {
+    projectOptions,
+    taskOptions,
+    isLoading: isProjectLoading,
+  } = useEffortListProjects(parsedProjectId);
 
   const totalPages: number = data?.meta.totalPages ?? 1;
   const totalCount: number = data?.meta.total ?? entries.length;
 
+  const { currentPage, filtersInitialized, setCurrentPage } = filters;
   useEffect(() => {
-    if (!filters.filtersInitialized) return;
-    if (filters.currentPage > totalPages) {
-      filters.setCurrentPage(Math.max(totalPages, 1));
+    if (!filtersInitialized) return;
+    if (currentPage > totalPages) {
+      setCurrentPage(Math.max(totalPages, 1));
     }
-  }, [
-    filters.currentPage,
-    filters.filtersInitialized,
-    filters.setCurrentPage,
-    totalPages,
-  ]);
+  }, [currentPage, filtersInitialized, setCurrentPage, totalPages]);
 
   const handleItemsPerPageChange = (value: number) => {
     filters.setItemsPerPage(value);

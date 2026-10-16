@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import type { Dispatch, SetStateAction } from "react";
 
+import { reportUiError } from "@/api/logs";
 import {
   updateProfile,
   type AuthUser,
@@ -8,9 +8,10 @@ import {
   type UserUpdateResult,
 } from "@/lib/auth";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { reportUiError } from "@/services/logs";
 import { useUserStore } from "@/store/user";
 import type { UserProfile } from "@/types/userProfile";
+
+import type { Dispatch, SetStateAction } from "react";
 
 interface PersistOptions {
   onSuccess?: (nextUser: AuthUser) => void;

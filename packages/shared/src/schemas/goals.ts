@@ -26,36 +26,48 @@ export const GetGoalResponseSchema = z.object({
 });
 
 /**
- * 目標作成リクエストのスキーマです。
- *
- * POST /api/goals
+ * 期間をまとめて作るときの、1 件の目標のスキーマです。
+ * 目標名が空でないことと重みの合計は、DB を読む確認と同じ順で返すため、API の service で確かめます。
  */
-export const CreateGoalRequestSchema = z.object({
-  title: z.string().min(1),
-  start_date: z.iso.date(),
-  end_date: z.iso.date(),
-  weight: z.number().min(0).max(100),
+export const GoalPeriodGoalSchema = z.object({
+  title: z.string(),
   content: z.string(),
+  weight: z.number().gt(0).max(100),
 });
 
 /**
- * 目標作成レスポンスのスキーマです。
- *
- * POST /api/goals
+ * 1 つの期間に作れる目標の数の上限です（1 回の送信で大量の行を作らせないため。画面の行の数もこれで止める）。
  */
-export const CreateGoalResponseSchema = z.object({
-  created: GoalSchema,
+export const MAX_GOALS_PER_PERIOD = 20;
+
+/**
+ * 目標の期間を作るリクエストのスキーマです。
+ *
+ * POST /api/goals/periods
+ */
+export const CreateGoalPeriodRequestSchema = z.object({
+  start_date: z.iso.date(),
+  end_date: z.iso.date(),
+  goals: GoalPeriodGoalSchema.array().min(1).max(MAX_GOALS_PER_PERIOD),
+});
+
+/**
+ * 目標の期間を作るレスポンスのスキーマです（作った目標を本文の順に返します）。
+ *
+ * POST /api/goals/periods
+ */
+export const CreateGoalPeriodResponseSchema = z.object({
+  created: GoalSchema.array(),
 });
 
 /**
  * 目標更新リクエストのスキーマです。
+ * 期間は変えられません（変えると今の目標が黙って過去に回るため）。知らない項目は拒みます。
  *
  * PUT /api/goals/:id
  */
-export const UpdateGoalRequestSchema = z.object({
+export const UpdateGoalRequestSchema = z.strictObject({
   title: z.string().min(1).optional(),
-  start_date: z.iso.date().optional(),
-  end_date: z.iso.date().optional(),
   weight: z.number().min(0).max(100).optional(),
   progress: z.number().min(0).max(100).optional(),
   content: z.string().optional(),
@@ -184,9 +196,15 @@ export const GoalPreviousWeekProgressSchema = z.object({
 
 export type GoalGetResponse = z.infer<typeof GetGoalResponseSchema>;
 
-export type GoalCreateRequest = z.infer<typeof CreateGoalRequestSchema>;
+export type GoalPeriodGoal = z.infer<typeof GoalPeriodGoalSchema>;
 
-export type GoalCreateResponse = z.infer<typeof CreateGoalResponseSchema>;
+export type GoalPeriodCreateRequest = z.infer<
+  typeof CreateGoalPeriodRequestSchema
+>;
+
+export type GoalPeriodCreateResponse = z.infer<
+  typeof CreateGoalPeriodResponseSchema
+>;
 
 export type GoalUpdateRequest = z.infer<typeof UpdateGoalRequestSchema>;
 

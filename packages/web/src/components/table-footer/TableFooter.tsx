@@ -1,7 +1,9 @@
 import { cn } from "@/lib/utils";
-import type { JSX } from "react";
-import TablePagination from "./TablePagination";
+
 import PageSizeSelect from "./PageSizeSelect";
+import TablePagination from "./TablePagination";
+
+import type { JSX } from "react";
 
 interface TableFooterProps {
   itemCount: number;

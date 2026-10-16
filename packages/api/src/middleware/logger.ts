@@ -1,16 +1,18 @@
 import { createMiddleware } from "hono/factory";
-import {
+
+import { AppError } from "../lib/errors";
+import { createLogger } from "../lib/logger";
+import { createSupabaseClient } from "../lib/supabase";
+
+import type {
   Database,
   Tables,
   TablesInsert,
   TablesUpdate,
 } from "../../../shared/src/types/db";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { createSupabaseClient } from "../lib/supabase";
-import { Context } from "hono";
-import { HonoEnv } from "../custom-types";
-import { AppError } from "../lib/errors";
-import { createLogger } from "../lib/logger";
+import type { HonoEnv } from "../customTypes";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Context } from "hono";
 
 /**
  * アクセスログを記録します。

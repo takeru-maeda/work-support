@@ -1,5 +1,6 @@
-import type { UserSettings } from "@shared/schemas/userSettings";
 import { createWithEqualityFn } from "zustand/traditional";
+
+import type { UserSettings } from "@shared/schemas/userSettings";
 
 interface UserSettingsState {
   settings: UserSettings | null;

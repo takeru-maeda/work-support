@@ -1,9 +1,9 @@
-import { Tables } from "shared";
+import type { Tables } from "shared";
 
 export {
-  WeeklyReportQuery,
+  type WeeklyReportQuery,
   WeeklyReportQuerySchema,
-  WeeklyReportResponse,
+  type WeeklyReportResponse,
   WeeklyReportResponseSchema,
 } from "../../../../shared/src/schemas/reports";
 export {

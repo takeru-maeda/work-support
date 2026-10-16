@@ -1,27 +1,10 @@
 import { Hono } from "hono";
+import { describeRoute, resolver, validator } from "hono-openapi";
 
-import { apiKeyAuthMiddleware, jwtAuthMiddleware } from "../../middleware/auth";
-import {
-  EffortDraft,
-  EffortDraftRecord,
-  EffortDraftResponse,
-  EffortDraftResponseSchema,
-  EffortDraftSchema,
-  EffortDraftUpsertResponse,
-  EffortDraftUpsertResponseSchema,
-  EffortEntriesRequest,
-  EffortEntriesRequestSchema,
-  EffortEntriesResponse,
-  EffortEntriesResponseSchema,
-  EffortRequestSchema,
-  EffortResponse,
-  EffortResponseSchema,
-} from "./types";
-import { AuthenticatedUser, HonoEnv } from "../../custom-types";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { createSupabaseClient } from "../../lib/supabase";
 import { AppError } from "../../lib/errors";
-import { Database, Tables } from "../../../../shared/src/types/db";
+import { createSupabaseClient } from "../../lib/supabase";
+import { apiKeyAuthMiddleware, jwtAuthMiddleware } from "../../middleware/auth";
+
 import {
   deleteEffortDraftService,
   getEffortDraftService,
@@ -30,8 +13,29 @@ import {
   sendEffortCompletionEmailIfNeeded,
   upsertEffortDraftService,
 } from "./service";
-import { describeRoute, resolver, validator } from "hono-openapi";
-import { Logger } from "../../lib/logger";
+import {
+  EffortDraftResponseSchema,
+  EffortDraftSchema,
+  EffortDraftUpsertResponseSchema,
+  EffortEntriesRequestSchema,
+  EffortEntriesResponseSchema,
+  EffortRequestSchema,
+  EffortResponseSchema,
+} from "./types";
+
+import type {
+  EffortDraft,
+  EffortDraftRecord,
+  EffortDraftResponse,
+  EffortDraftUpsertResponse,
+  EffortEntriesRequest,
+  EffortEntriesResponse,
+  EffortResponse,
+} from "./types";
+import type { Database, Tables } from "../../../../shared/src/types/db";
+import type { AuthenticatedUser, HonoEnv } from "../../customTypes";
+import type { Logger } from "../../lib/logger";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const gasEffort = new Hono<HonoEnv>();
 
@@ -58,7 +62,13 @@ gasEffort.post(
     if (!user) throw new AppError(401, "Unauthorized");
 
     const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
-    await saveEffortRecords(supabase, user.id, new Date(date), effort);
+    await saveEffortRecords(
+      supabase,
+      user.id,
+      new Date(date),
+      effort,
+      c.get("logger"),
+    );
 
     const response: EffortResponse = {
       message: "Effort data processed and saved successfully",
@@ -93,10 +103,12 @@ appEffort.post(
 
     const supabase: SupabaseClient<Database> = createSupabaseClient(c.env);
     const payload: EffortEntriesRequest = c.req.valid("json");
+    const logger: Logger = c.get("logger");
     const result = await saveStructuredEffortEntries(
       supabase,
       user.id,
       payload,
+      logger,
     );
 
     const response: EffortEntriesResponse = EffortEntriesResponseSchema.parse(
@@ -104,7 +116,6 @@ appEffort.post(
     );
 
     const accessLog: Tables<"access_logs"> = c.get("accessLog");
-    const logger: Logger = c.get("logger");
     c.executionCtx.waitUntil(
       sendEffortCompletionEmailIfNeeded(
         supabase,

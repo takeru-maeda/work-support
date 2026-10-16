@@ -1,6 +1,6 @@
-import type { JSX } from "react";
-
 import { pains, painSectionTitle, type PainItem } from "../landingContent";
+
+import type { JSX } from "react";
 
 export const PainSection = (): JSX.Element => (
   <section className="py-20 sm:py-28 px-4 relative overflow-hidden">

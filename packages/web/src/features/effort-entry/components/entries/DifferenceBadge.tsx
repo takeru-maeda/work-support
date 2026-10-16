@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { formatWorkHours } from "@/features/effort-entry/utils/formatHours";
+import { formatWorkHours } from "@/lib/formatHours";
 
 interface DifferenceBadgeProps {
   difference: number | null;

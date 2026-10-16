@@ -1,5 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
 import { format } from "date-fns";
+import { useCallback, useEffect, useState } from "react";
+
+import {
+  GOAL_PERIOD_MESSAGES,
+  goalPeriodOverlapMessage,
+} from "@shared/utils/goalPeriod";
 
 interface UseAddGoalPeriodValidationOptions {
   latestGoalEndDate?: Date;
@@ -27,13 +32,12 @@ export const useAddGoalPeriodValidation = ({
         return null;
       }
       if (end <= start) {
-        return "終了日は開始日より未来の日付を選択してください。";
+        return GOAL_PERIOD_MESSAGES.endBeforeStart;
       }
       if (latestGoalEndDate && start <= latestGoalEndDate) {
-        return `開始日は既存目標の終了日（${format(
-          latestGoalEndDate,
-          "yyyy/MM/dd",
-        )}）より未来の日付を選択してください。`;
+        return goalPeriodOverlapMessage(
+          format(latestGoalEndDate, "yyyy-MM-dd"),
+        );
       }
       return null;
     },

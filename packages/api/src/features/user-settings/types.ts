@@ -1,7 +1,7 @@
 export {
-  UpdateUserSettingsRequest,
+  type UpdateUserSettingsRequest,
   UpdateUserSettingsRequestSchema,
-  UserSettings,
-  UserSettingsResponse,
+  type UserSettings,
+  type UserSettingsResponse,
   UserSettingsResponseSchema,
 } from "../../../../shared/src/schemas/userSettings";

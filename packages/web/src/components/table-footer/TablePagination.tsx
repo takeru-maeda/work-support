@@ -1,3 +1,8 @@
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+
+import { Button } from "../ui/button";
 import {
   Pagination,
   PaginationContent,
@@ -5,9 +10,6 @@ import {
   PaginationItem,
   PaginationLink,
 } from "../ui/pagination";
-import { Button } from "../ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface TablePaginationProps {
   currentPage: number;

@@ -1,5 +1,7 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
+
 import type { Database } from "../../../shared/src/types/db";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL: string = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY: string = import.meta.env.VITE_SUPABASE_ANON_KEY;

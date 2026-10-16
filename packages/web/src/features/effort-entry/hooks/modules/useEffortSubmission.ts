@@ -1,9 +1,10 @@
 import { useCallback, useState } from "react";
-import type { KeyedMutator } from "swr";
 
-import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { reportUiError } from "@/services/logs";
-import { removeEffortDraft, submitEffortEntries } from "@/services/effort";
+import { reportUiError } from "@/api/logs";
+import {
+  removeEffortDraft,
+  submitEffortEntries,
+} from "@/features/effort-entry/api/effort";
 import type {
   EffortEntryError,
   EffortFormData,
@@ -12,13 +13,16 @@ import {
   formatDateOnly,
   mapFormEntryToRequest,
   validateEffortEntry,
-} from "@/features/effort-entry/utils/form-helpers";
+} from "@/features/effort-entry/utils/formHelpers";
+import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import type {
   EffortEntry as EffortEntryDto,
   EffortEntriesRequest,
   EffortDraftResponse,
 } from "@shared/schemas/effort";
 import type { ProjectWithTasks } from "@shared/schemas/projects";
+
+import type { KeyedMutator } from "swr";
 
 interface UseEffortSubmissionParams {
   formData: EffortFormData;
@@ -145,6 +149,9 @@ export function useEffortSubmission({
     } finally {
       setIsSubmitting(false);
     }
+    // TODO(P6): cancelSync は useEffortDraftSync で毎回作り直される関数なので、依存に足すと送信の関数も毎回変わる。
+    // 下書き同期は過去に不具合があった箇所（effort-draft の仕様書）なので、テストを書いてから改修の記録を通して直す
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     clearPersistedDraft,
     formData.date,

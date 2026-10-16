@@ -1,8 +1,8 @@
-import type { FormEvent } from "react";
-
 import { Button } from "@/components/ui/button";
 import { AuthErrorAlert } from "@/features/auth/components/AuthErrorAlert";
 import { PasswordInput } from "@/features/auth/components/PasswordInput";
+
+import type { FormEvent } from "react";
 
 interface ResetPasswordNewPasswordFormProps {
   newPassword: string;

@@ -69,6 +69,9 @@ export const useEffortSummaryMetrics = (
       ...project,
       difference: project.actualWithEstimate - project.estimated,
     }));
+    // TODO(P6): projectOptions の変化（読み込み完了）で案件名が更新されない可能性がある。
+    // 依存に足すと表示が変わるため、テストを書いてから改修の記録を通して直す（docs/plans/active/harness-migration.md）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entries]);
 
   const totalEstimated: number = useMemo(

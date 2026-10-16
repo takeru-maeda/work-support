@@ -1,5 +1,6 @@
-import { SectionHeader } from "@/components/sections/SectionHeader";
 import { Target } from "lucide-react";
+
+import { SectionHeader } from "@/components/sections/SectionHeader";
 
 const MissionSectionHeader = () => {
   return (

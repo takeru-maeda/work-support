@@ -429,7 +429,20 @@ export type Database = {
       };
     };
     Functions: {
+      create_goal_period: {
+        Args: {
+          p_end_date: string;
+          p_goals: Json;
+          p_start_date: string;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
       refresh_projects_with_tasks_mv: { Args: never; Returns: undefined };
+      save_work_records: {
+        Args: { p_entries: Json; p_user_id: string; p_work_date: string };
+        Returns: Json;
+      };
     };
     Enums: {
       log_level: "DEBUG" | "INFO" | "WARNING" | "ERROR" | "CRITICAL";

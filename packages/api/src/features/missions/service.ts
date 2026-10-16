@@ -1,6 +1,7 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Database, Tables } from "../../../../shared/src/types/db";
 import { getMission, upsertMission } from "./repository";
+
+import type { Database, Tables } from "../../../../shared/src/types/db";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * ミッションを取得します。

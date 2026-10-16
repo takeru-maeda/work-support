@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import type React from "react";
-import type { KeyedMutator } from "swr";
 
-import { buildUserScopedKey } from "@/lib/utils";
-import { showErrorToast } from "@/lib/toast";
-import { reportUiError } from "@/services/logs";
-import { saveEffortDraft, useEffortDraft } from "@/services/effort";
+import { reportUiError } from "@/api/logs";
+import {
+  saveEffortDraft,
+  useEffortDraft,
+} from "@/features/effort-entry/api/effort";
 import type {
   EffortEntry,
   EffortFormData,
@@ -16,8 +15,13 @@ import {
   formatDateOnly,
   mapDraftEntryToFormEntry,
   mapFormEntryToRequest,
-} from "@/features/effort-entry/utils/form-helpers";
+} from "@/features/effort-entry/utils/formHelpers";
+import { showErrorToast } from "@/lib/toast";
+import { buildUserScopedKey } from "@/lib/utils";
 import type { EffortDraft, EffortDraftResponse } from "@shared/schemas/effort";
+
+import type React from "react";
+import type { KeyedMutator } from "swr";
 
 const LOCAL_STORAGE_BASE_KEY = "effort:entry:form";
 const DRAFT_SYNC_DELAY_MS = 800;

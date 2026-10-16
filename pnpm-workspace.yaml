@@ -1,2 +1,11 @@
 packages:
-  - 'packages/*'
+  - "packages/*"
+
+# パッケージ間でそろえるバージョン。各 package.json からは "catalog:" で参照する
+catalog:
+  typescript: ^5.9.3
+  vitest: ^3.2.4
+  zod: 4.6.5
+  dayjs: ^1.11.18
+  "@supabase/supabase-js": ^2.58.0
+  "@types/node": ^24.7.0

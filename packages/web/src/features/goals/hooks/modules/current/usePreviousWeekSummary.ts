@@ -1,14 +1,14 @@
-import { useEffect, useMemo } from "react";
 import dayjs from "dayjs";
+import { useEffect, useMemo } from "react";
 
-import { usePreviousWeekProgress } from "@/services/goals";
+import { reportUiError } from "@/api/logs";
+import { usePreviousWeekProgress } from "@/features/goals/api/goals";
+import type { Goal } from "@/features/goals/types";
 import { showErrorToast } from "@/lib/toast";
-import { reportUiError } from "@/services/logs";
 import {
   calculateGoalSummaries,
   type GoalProgressSummary,
 } from "@shared/utils/goalProgress";
-import type { Goal } from "@/features/goals/types";
 
 interface PreviousWeekSummaryResult {
   previousSummary: GoalProgressSummary | null;

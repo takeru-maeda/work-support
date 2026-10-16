@@ -1,19 +1,19 @@
-import type { JSX } from "react";
+import { ROUTES } from "@/config/routes";
 
-import { LandingHeader } from "./components/LandingHeader";
-import { HeroSection } from "./components/HeroSection";
-import { PainSection } from "./components/PainSection";
-import { SolutionSection } from "./components/SolutionSection";
-import { FeaturesSection } from "./components/FeaturesSection";
-import { HowItWorksSection } from "./components/HowItWorksSection";
-import { UseCaseSection } from "./components/UseCaseSection";
 import { DifferentiatorsSection } from "./components/DifferentiatorsSection";
 import { FAQSection } from "./components/FAQSection";
+import { FeaturesSection } from "./components/FeaturesSection";
 import { FinalCTASection } from "./components/FinalCTASection";
+import { HeroSection } from "./components/HeroSection";
+import { HowItWorksSection } from "./components/HowItWorksSection";
 import { LandingFooter } from "./components/LandingFooter";
+import { LandingHeader } from "./components/LandingHeader";
+import { PainSection } from "./components/PainSection";
+import { SolutionSection } from "./components/SolutionSection";
+import { UseCaseSection } from "./components/UseCaseSection";
 import { useScrollToFeatures } from "./hooks/useScrollToFeatures";
 
-import { ROUTES } from "@/config/routes";
+import type { JSX } from "react";
 
 export default function LandingPage(): JSX.Element {
   const scrollToFeatures = useScrollToFeatures();

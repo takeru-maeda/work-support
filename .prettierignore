@@ -1,0 +1,18 @@
+# 整形の対象はコードと設定だけ。文書（Markdown）は書いた人の改行を残す
+*.md
+docs/
+.claude/*
+!.claude/hooks/
+!.claude/settings.json
+
+# 生成物と lock
+pnpm-lock.yaml
+skills-lock.json
+packages/shared/src/types/db.ts
+**/dist/
+**/.wrangler/
+dev/
+**/supabase/.temp/
+# Playwright の実行結果（packages/e2e/.gitignore と同じ）
+packages/e2e/test-results/
+packages/e2e/playwright-report/

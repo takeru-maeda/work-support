@@ -1,5 +1,6 @@
 import { PageLayout } from "@/components/layout/PageLayout";
 import { EffortForm } from "@/features/effort-entry/components/EffortForm";
+
 import type { JSX } from "react";
 
 export default function EffortsNewPage(): JSX.Element {

@@ -1,7 +1,7 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { AppError } from "../../lib/errors";
 
 import type { Database, Tables } from "../../../../shared/src/types/db";
-import { AppError } from "../../lib/errors";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type ProjectsViewRow = Omit<Tables<"projects_with_tasks_mv">, "user_id">;
 
@@ -30,5 +30,37 @@ export const fetchProjectsWithTasks = async (
     throw new AppError(500, message, error);
   }
 
+  return data ?? [];
+};
+
+/** 元の表から読んだ案件と、その中のタスクの名前 */
+export interface ProjectNamesRow {
+  name: string;
+  tasks: { name: string }[];
+}
+
+/**
+ * 案件とタスクの名前を、元の表（projects、tasks）から読みます。
+ * 作り直しに失敗したマテリアライズドビューに、新しい案件が出ないことがあるため。
+ *
+ * @param supabase Supabaseクライアント
+ * @param userId ユーザーID
+ * @returns 作った順の案件と、作った順のタスク
+ */
+export const fetchProjectNames = async (
+  supabase: SupabaseClient<Database>,
+  userId: string,
+): Promise<ProjectNamesRow[]> => {
+  const { data, error } = await supabase
+    .from("projects")
+    .select("name, tasks(name)")
+    .eq("user_id", userId)
+    .order("id", { ascending: true })
+    .order("id", { referencedTable: "tasks", ascending: true });
+
+  if (error) {
+    const message = `Failed to fetch project names: ${error.message}`;
+    throw new AppError(500, message, error);
+  }
   return data ?? [];
 };

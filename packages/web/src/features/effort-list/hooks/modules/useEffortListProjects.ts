@@ -1,12 +1,12 @@
 import { useEffect, useMemo } from "react";
 
+import { reportUiError } from "@/api/logs";
+import { useProjectsWithTasks } from "@/api/projects";
 import { showErrorToast } from "@/lib/toast";
-import { reportUiError } from "@/services/logs";
-import { useProjectsWithTasks } from "@/services/projects";
-import type { EffortProjectOption } from "@/features/effort-entry/types";
+import type { ProjectWithTasks } from "@shared/schemas/projects";
 
 export interface EffortListProjectsResult {
-  projectOptions: EffortProjectOption[];
+  projectOptions: ProjectWithTasks[];
   taskOptions: { id: number; name: string }[];
   isLoading: boolean;
   mutateProjects: ReturnType<typeof useProjectsWithTasks>["mutate"];
@@ -29,7 +29,7 @@ export function useEffortListProjects(
     void reportUiError(error, { message: "Failed to fetch projects" });
   }, [error]);
 
-  const projectOptions: EffortProjectOption[] = useMemo(() => {
+  const projectOptions: ProjectWithTasks[] = useMemo(() => {
     if (!data) return [];
     return data.map((project) => ({
       id: project.id,
@@ -57,7 +57,7 @@ export function useEffortListProjects(
       }
       return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
     }
-    const project: EffortProjectOption | undefined = projectOptions.find(
+    const project: ProjectWithTasks | undefined = projectOptions.find(
       (p) => p.id === selectedProjectId,
     );
     if (!project) return [];

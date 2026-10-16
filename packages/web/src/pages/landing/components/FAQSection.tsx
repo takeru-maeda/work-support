@@ -1,7 +1,8 @@
 "use client";
 
-import type { JSX } from "react";
 import { useState } from "react";
+
+import { cn } from "@/lib/utils";
 
 import {
   faqs,
@@ -9,7 +10,8 @@ import {
   faqIcon,
   type FAQItem,
 } from "../landingContent";
-import { cn } from "@/lib/utils";
+
+import type { JSX } from "react";
 
 const ChevronIcon = faqIcon;
 

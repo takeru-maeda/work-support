@@ -35,6 +35,7 @@ export interface EffortEntryError {
   project?: string;
   task?: string;
   actualHours?: string;
+  estimatedHours?: string;
 }
 
 export type EffortProjectOption = ProjectWithTasks;

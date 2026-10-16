@@ -1,19 +1,19 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import dayjs from "dayjs";
 
-import {
-  Database,
-  Tables,
-  TablesInsert,
-  TablesUpdate,
-} from "../../../../shared/src/types/db";
-import {
-  GoalCreateRequest,
+import { AppError } from "../../lib/errors";
+
+import type {
   GoalHistoryQuery,
+  GoalPeriodCreateRequest,
   GoalHistorySortOption,
   GoalUpdateRequest,
 } from "./types";
-import { AppError } from "../../lib/errors";
+import type {
+  Database,
+  Tables,
+  TablesUpdate,
+} from "../../../../shared/src/types/db";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * 最新期間の目標を取得します。
@@ -44,38 +44,56 @@ export const getLatestGoals = async (
   return data;
 };
 
+/** 作ろうとした期間が、現在の期間と重なっていた（同時に別の期間が作られたときなど） */
+export class GoalPeriodOverlapError extends Error {
+  /** @param latestEndDate 現在の期間の終了日（YYYY-MM-DD） */
+  constructor(readonly latestEndDate: string) {
+    super(`goal period overlaps the current period ending ${latestEndDate}`);
+    this.name = "GoalPeriodOverlapError";
+  }
+}
+
+/** DB の関数 `create_goal_period` が、重なりを知らせるときの SQLSTATE */
+const GOAL_PERIOD_OVERLAP_CODE = "WG001";
+
 /**
- * 目標を新規作成します。
+ * 目標の期間を、DB の関数 `create_goal_period` ですべての目標とともに 1 つのトランザクションで作ります。
+ * 進捗率は 0 で作り、履歴は残しません。
  *
  * @param supabase Supabaseクライアント
  * @param userId 目標を作成するユーザーID
- * @param goal 作成する目標データ
- * @returns 作成された目標
+ * @param period 作る期間と目標（期間の前後、目標名、重みの合計は確かめておく）
+ * @returns 作った目標（入力の順）
+ * @throws 現在の期間と重なっていれば GoalPeriodOverlapError、それ以外の DB の誤りは AppError(500)
  */
-export const createGoal = async (
+export const createGoalPeriod = async (
   supabase: SupabaseClient<Database>,
   userId: string,
-  goal: GoalCreateRequest,
-): Promise<Tables<"goals">> => {
-  const body: TablesInsert<"goals"> = {
-    title: goal.title,
-    start_date: goal.start_date,
-    end_date: goal.end_date,
-    weight: goal.weight,
-    progress: 0, // 新規作成時は必ず0%
-    content: goal.content,
-    user_id: userId,
-  };
-  const { data, error } = await supabase
-    .from("goals")
-    .insert(body)
-    .select("*")
-    .single();
+  period: GoalPeriodCreateRequest,
+): Promise<Tables<"goals">[]> => {
+  const { data, error } = await supabase.rpc("create_goal_period", {
+    p_user_id: userId,
+    p_start_date: period.start_date,
+    p_end_date: period.end_date,
+    p_goals: period.goals,
+  });
 
   if (error) {
-    throw new AppError(500, `Failed to create goal: ${error.message}`, error);
+    if (error.code === GOAL_PERIOD_OVERLAP_CODE && error.details) {
+      throw new GoalPeriodOverlapError(error.details);
+    }
+    const message = `Failed to create goal period: ${error.message}`;
+    throw new AppError(500, message, error);
   }
-  return data;
+
+  const created = data as unknown as Tables<"goals">[];
+  if (!Array.isArray(created) || created.length !== period.goals.length) {
+    throw new AppError(
+      500,
+      `create_goal_period returned ${Array.isArray(created) ? created.length : "non-array"} rows for ${period.goals.length} goals`,
+    );
+  }
+  return created;
 };
 
 /**
@@ -95,8 +113,6 @@ export const updateGoal = async (
 ): Promise<Tables<"goals">> => {
   const body: TablesUpdate<"goals"> = {};
   if (goal.title !== undefined) body.title = goal.title;
-  if (goal.start_date !== undefined) body.start_date = goal.start_date;
-  if (goal.end_date !== undefined) body.end_date = goal.end_date;
   if (goal.weight !== undefined) body.weight = goal.weight;
   if (goal.progress !== undefined) body.progress = goal.progress;
   if (goal.content !== undefined) body.content = goal.content;

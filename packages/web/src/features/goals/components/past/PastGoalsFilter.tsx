@@ -1,8 +1,9 @@
-import { Input } from "@/components/ui/input";
-import { GoalPeriodPicker } from "@/features/goals/components/shared/GoalPeriodPicker";
-import type { JSX } from "react";
 import { FilterAccordion } from "@/components/filter/FilterAccordion";
 import { FilterActionButtons } from "@/components/filter/FilterActionButtons";
+import { Input } from "@/components/ui/input";
+import { GoalPeriodPicker } from "@/features/goals/components/shared/GoalPeriodPicker";
+
+import type { JSX } from "react";
 
 interface PastGoalsFilterProps {
   titleValue: string;

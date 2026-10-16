@@ -1,22 +1,22 @@
-import { useCallback, useMemo } from "react";
 import dayjs from "dayjs";
+import { useCallback, useMemo } from "react";
 
-import { reportUiError } from "@/services/logs";
-import { useCurrentGoals } from "@/services/goals";
-import { showErrorToast } from "@/lib/toast";
+import { reportUiError } from "@/api/logs";
+import { useCurrentGoals } from "@/features/goals/api/goals";
 import { usePastGoalFilters } from "@/features/goals/hooks/modules/past/usePastGoalFilters";
 import { usePastGoalHistory } from "@/features/goals/hooks/modules/past/usePastGoalHistory";
 import { usePastGoalsSelection } from "@/features/goals/hooks/modules/past/usePastGoalsSelection";
-import type {
-  GoalHistoryQuery,
-  GoalHistorySortOption,
-} from "@shared/schemas/goals";
 import type {
   Goal,
   PastGoal,
   SortField,
   SortDirection,
 } from "@/features/goals/types";
+import { showErrorToast } from "@/lib/toast";
+import type {
+  GoalHistoryQuery,
+  GoalHistorySortOption,
+} from "@shared/schemas/goals";
 
 export interface UsePastGoalsResult {
   goals: PastGoal[];
@@ -50,7 +50,10 @@ export interface UsePastGoalsResult {
 
 export const usePastGoals = (): UsePastGoalsResult => {
   const { data: currentGoalsData } = useCurrentGoals();
-  const currentGoals: Goal[] = currentGoalsData ?? [];
+  const currentGoals: Goal[] = useMemo(
+    () => currentGoalsData ?? [],
+    [currentGoalsData],
+  );
 
   const filters = usePastGoalFilters(currentGoals);
   const { goalHistory, isLoading } = usePastGoalHistory({

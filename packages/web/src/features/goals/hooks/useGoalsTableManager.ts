@@ -1,33 +1,21 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { reportUiError } from "@/api/logs";
 import { ROUTES } from "@/config/routes";
-import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { reportUiError } from "@/services/logs";
-import { updateGoal } from "@/services/goals";
-import {
-  useGoalsData,
-} from "@/features/goals/hooks/modules/current/useGoalsData";
-import {
-  useGoalsEditingState,
-} from "@/features/goals/hooks/modules/current/useGoalsEditingState";
-import {
-  useGoalContentDialog,
-} from "@/features/goals/hooks/modules/current/useGoalContentDialog";
-import {
-  useGoalDeletion,
-} from "@/features/goals/hooks/modules/current/useGoalDeletion";
-import {
-  useGoalProgressMetrics,
-} from "@/features/goals/hooks/modules/current/useGoalProgressMetrics";
-import {
-  usePreviousWeekSummary,
-} from "@/features/goals/hooks/modules/current/usePreviousWeekSummary";
+import { updateGoal } from "@/features/goals/api/goals";
+import { useGoalContentDialog } from "@/features/goals/hooks/modules/current/useGoalContentDialog";
+import { useGoalDeletion } from "@/features/goals/hooks/modules/current/useGoalDeletion";
+import { useGoalProgressMetrics } from "@/features/goals/hooks/modules/current/useGoalProgressMetrics";
+import { useGoalsData } from "@/features/goals/hooks/modules/current/useGoalsData";
+import { useGoalsEditingState } from "@/features/goals/hooks/modules/current/useGoalsEditingState";
+import { usePreviousWeekSummary } from "@/features/goals/hooks/modules/current/usePreviousWeekSummary";
 import type {
   Goal,
   GoalSortField,
   SortDirection,
 } from "@/features/goals/types";
+import { showErrorToast, showSuccessToast } from "@/lib/toast";
 
 interface UseGoalsTableManagerResult {
   period: { start?: Date; end?: Date };
@@ -134,7 +122,9 @@ export function useGoalsTableManager(): UseGoalsTableManagerResult {
       );
       await reportUiError(error, {
         message: "Failed to update goals",
-        clientContext: { goalIds: editingState.changedGoals.map((goal) => goal.id) },
+        clientContext: {
+          goalIds: editingState.changedGoals.map((goal) => goal.id),
+        },
       });
     } finally {
       setIsSaving(false);

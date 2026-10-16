@@ -1,7 +1,8 @@
 import { Home, Clock, List, Target, FileText } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 
 import { ROUTES } from "@/config/routes";
+
+import type { LucideIcon } from "lucide-react";
 
 /**
  * ナビゲーション項目の型定義

@@ -1,13 +1,13 @@
 import { useCallback, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { supabase } from "@/lib/supabase";
-import { useResetPasswordState } from "@/features/auth/hooks/modules/reset/useResetPasswordState";
-import { useRecoverySession } from "@/features/auth/hooks/modules/reset/useRecoverySession";
 import {
   useEmailSubmission,
   usePasswordSubmission,
 } from "@/features/auth/hooks/modules/reset/usePasswordResetSubmission";
+import { useRecoverySession } from "@/features/auth/hooks/modules/reset/useRecoverySession";
+import { useResetPasswordState } from "@/features/auth/hooks/modules/reset/useResetPasswordState";
+import { supabase } from "@/lib/supabase";
 
 export type ResetPasswordStep = "email" | "password";
 
@@ -78,19 +78,28 @@ export function useResetPasswordManager(): UseResetPasswordManagerResult {
     setNewPassword("");
     setConfirmPassword("");
     await supabase.auth.signOut();
-  }, []);
+  }, [setConfirmPassword, setError, setInfo, setNewPassword, setStep]);
 
-  const onEmailChange = useCallback((value: string) => {
-    setEmail(value);
-  }, []);
+  const onEmailChange = useCallback(
+    (value: string) => {
+      setEmail(value);
+    },
+    [setEmail],
+  );
 
-  const onNewPasswordChange = useCallback((value: string) => {
-    setNewPassword(value);
-  }, []);
+  const onNewPasswordChange = useCallback(
+    (value: string) => {
+      setNewPassword(value);
+    },
+    [setNewPassword],
+  );
 
-  const onConfirmPasswordChange = useCallback((value: string) => {
-    setConfirmPassword(value);
-  }, []);
+  const onConfirmPasswordChange = useCallback(
+    (value: string) => {
+      setConfirmPassword(value);
+    },
+    [setConfirmPassword],
+  );
 
   return {
     step,

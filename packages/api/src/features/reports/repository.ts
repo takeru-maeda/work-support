@@ -1,12 +1,13 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Database, Tables } from "../../../../shared/src/types/db";
 import { AppError } from "../../lib/errors";
-import {
+
+import type {
   Effort,
   WorkRecordListQuery,
   WorkRecordSort,
   WorkRecordWithRelations,
 } from "./types";
+import type { Database, Tables } from "../../../../shared/src/types/db";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * 週報向けの工数記録を取得します。
@@ -212,4 +213,67 @@ export const getWorkRecordList = async (
     items: (data ?? []) as WorkRecordWithRelations[],
     total: count ?? 0,
   };
+};
+
+/** 名前で絞った工数の 1 行 */
+export interface WorkRecordByNameRow {
+  id: number;
+  work_date: string;
+  hours: number;
+  estimated_hours: number | null;
+  tasks: { name: string; projects: { name: string } };
+}
+
+/** 一度に読む行数（PostgREST の max_rows を超えない数） */
+const PAGE_SIZE = 1000;
+
+/**
+ * 期間の工数の行を、案件名・タスク名の完全一致（大文字小文字を区別する）で絞って、すべて読みます。
+ * 候補の一覧のマテリアライズドビューではなく、元の表（projects、tasks）を見る。
+ *
+ * @param supabase Supabaseクライアント
+ * @param userId ユーザーID
+ * @param filter 期間（両端を含む YYYY-MM-DD）と、案件名・タスク名
+ * @returns 日付、ID の昇順の行
+ */
+export const getWorkRecordsByName = async (
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  filter: {
+    startDate: string;
+    endDate: string;
+    projectName?: string;
+    taskName?: string;
+  },
+): Promise<WorkRecordByNameRow[]> => {
+  const rows: WorkRecordByNameRow[] = [];
+  // 次のページは、実際に返った行数だけ進める（max_rows が PAGE_SIZE より小さいときに行を飛ばさないため）
+  for (let from = 0; ; ) {
+    let builder = supabase
+      .from("work_records")
+      .select(
+        "id, work_date, hours, estimated_hours, tasks!inner(name, projects!inner(name))",
+      )
+      .eq("user_id", userId)
+      .gte("work_date", filter.startDate)
+      .lte("work_date", filter.endDate);
+    if (filter.projectName !== undefined) {
+      builder = builder.eq("tasks.projects.name", filter.projectName);
+    }
+    if (filter.taskName !== undefined) {
+      builder = builder.eq("tasks.name", filter.taskName);
+    }
+    const { data, error } = await builder
+      .order("work_date", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
+
+    if (error) {
+      const message = `Failed to search work records: ${error.message}`;
+      throw new AppError(500, message, error);
+    }
+    if (!data || data.length === 0) return rows;
+    rows.push(...(data as unknown as WorkRecordByNameRow[]));
+    from += data.length;
+  }
 };

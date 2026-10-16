@@ -1,14 +1,17 @@
 import { Hono } from "hono";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { describeRoute, resolver } from "hono-openapi";
 
-import { AuthenticatedUser, HonoEnv } from "../../custom-types";
-import { jwtAuthMiddleware } from "../../middleware/auth";
-import { createSupabaseClient } from "../../lib/supabase";
-import { getProjectsWithTasks } from "./service";
-import { ProjectsResponse, ProjectsResponseSchema } from "./types";
 import { AppError } from "../../lib/errors";
+import { createSupabaseClient } from "../../lib/supabase";
+import { jwtAuthMiddleware } from "../../middleware/auth";
+
+import { getProjectsWithTasks } from "./service";
+import { ProjectsResponseSchema } from "./types";
+
+import type { ProjectsResponse } from "./types";
 import type { Database } from "../../../../shared/src/types/db";
+import type { AuthenticatedUser, HonoEnv } from "../../customTypes";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const projects = new Hono<HonoEnv>();
 
